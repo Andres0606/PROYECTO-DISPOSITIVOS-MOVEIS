@@ -1,6 +1,7 @@
 // ATOM — Button
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
-import { cores, espacamentos, raios, tipografia } from '../../theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { cores, espacamentos, gradientes, raios, tipografia } from '../../theme';
 
 export function Button({
   titulo,
@@ -8,14 +9,16 @@ export function Button({
   variante = 'primario', // 'primario' | 'secundario' | 'link'
   carregando = false,
   desabilitado = false,
+  icone = null,
 }) {
   const inativo = carregando || desabilitado;
-  const corTexto = variante === 'primario' ? cores.superficie : cores.primaria;
+  const corCarregando = variante === 'primario' ? cores.superficie : cores.texto;
 
   return (
     <Pressable
       onPress={aoPressionar}
       disabled={inativo}
+      hitSlop={variante === 'link' ? 8 : 0}
       style={({ pressed }) => [
         estilos.base,
         estilos[variante],
@@ -23,10 +26,23 @@ export function Button({
         inativo && estilos.inativo,
       ]}
     >
+      {variante === 'primario' && (
+        <LinearGradient
+          colors={gradientes.botao.cores}
+          locations={gradientes.botao.locais}
+          start={{ x: 0.49, y: 0 }}
+          end={{ x: 0.51, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
       {carregando ? (
-        <ActivityIndicator color={corTexto} />
+        <ActivityIndicator color={corCarregando} />
       ) : (
-        <Text style={[estilos.texto, { color: corTexto }]}>{titulo}</Text>
+        <>
+          {icone}
+          <Text style={[estilos.texto, estilosTexto[variante]]}>{titulo}</Text>
+        </>
       )}
     </Pressable>
   );
@@ -34,20 +50,51 @@ export function Button({
 
 const estilos = StyleSheet.create({
   base: {
-    minHeight: 48,
+    minHeight: 40,
     paddingHorizontal: espacamentos.md,
-    borderRadius: raios.md,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: espacamentos.sm,
   },
-  primario: { backgroundColor: cores.primaria },
+  primario: {
+    minHeight: 41,
+    borderRadius: raios.md,
+    overflow: 'hidden',
+  },
   secundario: {
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.primaria,
+    borderRadius: raios.sm,
+    backgroundColor: cores.superficieSecundaria,
   },
-  link: { backgroundColor: 'transparent' },
+  link: {
+    minHeight: 0,
+    paddingHorizontal: 0,
+    paddingVertical: espacamentos.xs,
+    alignSelf: 'flex-start',
+    backgroundColor: 'transparent',
+  },
   pressionado: { opacity: 0.8 },
   inativo: { opacity: 0.5 },
-  texto: { fontSize: tipografia.corpo, fontWeight: '600' },
+});
+
+const estilosTexto = StyleSheet.create({
+  primario: {
+    color: cores.superficie,
+    fontSize: tipografia.botao,
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  secundario: {
+    color: cores.texto,
+    fontSize: tipografia.corpo,
+    fontWeight: '500',
+  },
+  link: {
+    color: cores.textoSecundario,
+    fontSize: tipografia.legenda,
+    fontWeight: '400',
+    lineHeight: 18,
+  },
 });

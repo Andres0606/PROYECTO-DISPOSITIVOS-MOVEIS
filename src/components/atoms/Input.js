@@ -23,11 +23,12 @@ export function Input({ erro = false, ...resto }) {
 
 const estilos = StyleSheet.create({
   input: {
-    minHeight: 48,
+    minHeight: 40,
     paddingHorizontal: espacamentos.md,
+    paddingVertical: espacamentos.sm,
     borderWidth: 1,
     borderColor: cores.borda,
-    borderRadius: raios.md,
+    borderRadius: raios.sm,
     backgroundColor: cores.superficie,
     color: cores.texto,
     fontSize: tipografia.corpo,

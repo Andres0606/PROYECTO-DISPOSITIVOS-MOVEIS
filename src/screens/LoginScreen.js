@@ -1,10 +1,11 @@
 // SCREEN — Login
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { CenteredTemplate } from '../components/templates/CenteredTemplate';
 import { LoginForm } from '../components/organisms/LoginForm';
+import { Logo } from '../components/atoms/Logo';
 import { fazerLogin } from '../services/auth';
-import { cores, espacamentos, tipografia } from '../theme';
+import { espacamentos } from '../theme';
 
 export function LoginScreen({ navigation }) {
   const [carregando, setCarregando] = useState(false);
@@ -22,16 +23,20 @@ export function LoginScreen({ navigation }) {
     }
   }
 
+  // Provisório: a tela de recuperação e o login social ainda não existem.
+  function emBreve() {
+    Alert.alert('Em breve', 'Esta função estará disponível em uma próxima etapa.');
+  }
+
   return (
     <CenteredTemplate>
-      <Text style={estilos.titulo}>InterChapecó</Text>
-      <Text style={estilos.subtitulo}>
-        Seu guia de intercâmbio em Chapecó
-      </Text>
+      <Logo style={estilos.logo} />
 
       <LoginForm
         aoEnviar={entrar}
         aoIrParaCadastro={() => navigation.navigate('Cadastro')}
+        aoEsquecerSenha={emBreve}
+        aoEntrarComRedeSocial={emBreve}
         carregando={carregando}
         erroGeral={erro}
       />
@@ -40,17 +45,8 @@ export function LoginScreen({ navigation }) {
 }
 
 const estilos = StyleSheet.create({
-  titulo: {
-    fontSize: tipografia.titulo,
-    fontWeight: '700',
-    color: cores.primaria,
-    textAlign: 'center',
-  },
-  subtitulo: {
-    marginTop: espacamentos.xs,
-    marginBottom: espacamentos.xl,
-    fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
-    textAlign: 'center',
+  logo: {
+    alignSelf: 'center',
+    marginBottom: espacamentos.xl + espacamentos.xs,
   },
 });

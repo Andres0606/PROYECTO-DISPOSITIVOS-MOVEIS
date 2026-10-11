@@ -14,10 +14,11 @@ export function FormField({ rotulo, erro = '', ...resto }) {
 }
 
 const estilos = StyleSheet.create({
-  container: { marginBottom: espacamentos.md },
+  container: { marginBottom: espacamentos.sm },
   rotulo: {
     marginBottom: espacamentos.xs,
-    fontSize: tipografia.legenda,
+    fontSize: tipografia.corpo,
+    lineHeight: 21,
     fontWeight: '600',
     color: cores.texto,
   },

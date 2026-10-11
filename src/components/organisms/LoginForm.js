@@ -1,14 +1,18 @@
 // ORGANISM — LoginForm
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../atoms/Button';
 import { FormField } from '../molecules/FormField';
+import { Divider } from '../molecules/Divider';
 import { campoObrigatorio, emailValido } from '../../utils/validacao';
 import { cores, espacamentos, tipografia } from '../../theme';
 
 export function LoginForm({
   aoEnviar,
   aoIrParaCadastro,
+  aoEsquecerSenha = () => {},
+  aoEntrarComRedeSocial = () => {},
   carregando = false,
   erroGeral = '',
 }) {
@@ -32,7 +36,7 @@ export function LoginForm({
     <View>
       <FormField
         rotulo="E-mail"
-        placeholder="seu@email.com"
+        placeholder="email@dominio.com"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -42,7 +46,7 @@ export function LoginForm({
       />
       <FormField
         rotulo="Senha"
-        placeholder="Sua senha"
+        placeholder="•••••••"
         value={senha}
         onChangeText={setSenha}
         secureTextEntry
@@ -52,10 +56,40 @@ export function LoginForm({
 
       {!!erroGeral && <Text style={estilos.erroGeral}>{erroGeral}</Text>}
 
-      <Button titulo="Entrar" aoPressionar={enviar} carregando={carregando} />
+      <View style={estilos.espaco} />
+      <Button titulo="Continuar" aoPressionar={enviar} carregando={carregando} />
+
+      <View style={estilos.espacoPequeno} />
+      <Button
+        titulo="Esqueceu sua senha? Recuperar senha."
+        variante="link"
+        aoPressionar={aoEsquecerSenha}
+        desabilitado={carregando}
+      />
+
+      <View style={estilos.espacoPequeno} />
+      <Button
+        titulo="Continuar com Google"
+        variante="secundario"
+        icone={<Ionicons name="logo-google" size={20} color={cores.texto} />}
+        aoPressionar={() => aoEntrarComRedeSocial('Google')}
+        desabilitado={carregando}
+      />
       <View style={estilos.espaco} />
       <Button
-        titulo="Criar uma conta"
+        titulo="Continuar com Apple"
+        variante="secundario"
+        icone={<Ionicons name="logo-apple" size={20} color={cores.texto} />}
+        aoPressionar={() => aoEntrarComRedeSocial('Apple')}
+        desabilitado={carregando}
+      />
+
+      <View style={estilos.divisor}>
+        <Divider texto="ou" />
+      </View>
+
+      <Button
+        titulo="Não tem uma conta? Cadastre-se."
         variante="link"
         aoPressionar={aoIrParaCadastro}
         desabilitado={carregando}
@@ -66,10 +100,12 @@ export function LoginForm({
 
 const estilos = StyleSheet.create({
   erroGeral: {
-    marginBottom: espacamentos.md,
+    marginBottom: espacamentos.sm,
     fontSize: tipografia.legenda,
     color: cores.perigo,
     textAlign: 'center',
   },
   espaco: { height: espacamentos.sm },
+  espacoPequeno: { height: espacamentos.xs },
+  divisor: { marginVertical: espacamentos.sm },
 });
