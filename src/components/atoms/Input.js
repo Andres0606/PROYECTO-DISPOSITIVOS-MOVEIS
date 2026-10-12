@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 import { cores, espacamentos, raios, tipografia } from '../../theme';
 
-export function Input({ erro = false, ...resto }) {
+export function Input({ erro = false, variante = 'padrao', ...resto }) {
+  // variante: 'padrao' | 'cartao' (campo dentro do cartão de vidro)
   const [focado, setFocado] = useState(false);
 
   return (
@@ -13,6 +14,7 @@ export function Input({ erro = false, ...resto }) {
       onBlur={() => setFocado(false)}
       style={[
         estilos.input,
+        variante === 'cartao' && estilos.cartao,
         focado && estilos.focado,
         erro && estilos.erro,
       ]}
@@ -32,6 +34,14 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.superficie,
     color: cores.texto,
     fontSize: tipografia.corpo,
+  },
+  cartao: {
+    minHeight: 48,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderColor: cores.bordaCartao,
+    borderRadius: raios.md,
+    backgroundColor: cores.campoCartao,
   },
   focado: { borderColor: cores.bordaFoco },
   erro: { borderColor: cores.perigo },

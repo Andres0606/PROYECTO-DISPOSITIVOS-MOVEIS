@@ -23,6 +23,7 @@ const circulos = [
 
 // Posições por tela (frame 375x812 do Figma). Os de baixo são ancorados
 // no rodapé para funcionar em qualquer altura de aparelho.
+// Uma entrada pode trazer width/height para trocar o tamanho padrão.
 const posicoes = {
   login: {
     'topo-esq': { left: -117, top: -51 },
@@ -39,6 +40,14 @@ const posicoes = {
     'base-dir': { right: -85, bottom: -50 },
     'base-dir-2': { right: -65, bottom: -30 },
     'base-esq': { left: -30, bottom: -10 },
+  },
+  recuperar: {
+    'topo-esq': { left: -80, top: -80 },
+    'topo-esq-2': { left: -63, top: -65, width: 180, height: 180 },
+    'topo-dir': { right: -45, top: 50 },
+    'base-dir': { right: -85, bottom: -48 },
+    'base-dir-2': { right: -65, bottom: -28 },
+    'base-esq': { left: -30, bottom: -8 },
   },
 };
 

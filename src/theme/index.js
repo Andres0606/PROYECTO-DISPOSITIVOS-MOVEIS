@@ -17,6 +17,12 @@ export const cores = {
   divisor: '#E6E6E6',
   decoracao: '#A69F95',
   decoracaoClara: '#E9E9E9',
+  // Cartão de vidro (Recuperar senha)
+  vidro: 'rgba(255, 255, 255, 0.82)',
+  vidroBorda: 'rgba(177, 177, 177, 0.7)',
+  divisorCartao: 'rgba(255, 149, 0, 0.2)',
+  campoCartao: '#FFF7F0',
+  bordaCartao: 'rgba(0, 0, 0, 0.5)',
 };
 
 export const espacamentos = {
@@ -31,11 +37,13 @@ export const raios = {
   sm: 8,
   md: 14,
   lg: 17,
+  xl: 24,
   pill: 999,
 };
 
 export const tipografia = {
   titulo: 24,
+  tituloCartao: 20,
   subtitulo: 16,
   corpo: 14,
   legenda: 12,

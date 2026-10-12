@@ -23,7 +23,7 @@ export function LoginScreen({ navigation }) {
     }
   }
 
-  // Provisório: a tela de recuperação e o login social ainda não existem.
+  // Provisório: o login social ainda não existe.
   function emBreve() {
     Alert.alert('Em breve', 'Esta função estará disponível em uma próxima etapa.');
   }
@@ -35,7 +35,7 @@ export function LoginScreen({ navigation }) {
       <LoginForm
         aoEnviar={entrar}
         aoIrParaCadastro={() => navigation.navigate('Cadastro')}
-        aoEsquecerSenha={emBreve}
+        aoEsquecerSenha={() => navigation.navigate('RecuperarSenha')}
         aoEntrarComRedeSocial={emBreve}
         carregando={carregando}
         erroGeral={erro}

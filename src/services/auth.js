@@ -44,3 +44,10 @@ export async function fazerCadastro({ nome, pais, email, universidade }) {
     usuario: { nome, email, pais, universidade },
   };
 }
+
+export async function recuperarSenha(email) {
+  await esperar(600);
+
+  // Estático: sempre "envia". O backend real devolverá sucesso ou erro.
+  return { enviado: true, email };
+}
