@@ -17,6 +17,9 @@ export const cores = {
   divisor: '#E6E6E6',
   decoracao: '#A69F95',
   decoracaoClara: '#E9E9E9',
+  // Chips (Início)
+  chipBorda: '#CAC4D0',
+  chipTexto: '#1D1B20',
   // Cartão de vidro (Recuperar senha)
   vidro: 'rgba(255, 255, 255, 0.82)',
   vidroBorda: 'rgba(177, 177, 177, 0.7)',
