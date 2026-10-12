@@ -1,5 +1,5 @@
 // SERVICE — Autenticação
-// ETAPA 3: lógica estática apenas para testar a navegação.
+// ETAPA FRONT: lógica estática apenas para testar a navegação.
 // Depois, o corpo destas funções será trocado por chamadas HTTP reais
 // (api.js) e o token será guardado com storage.js (SecureStore).
 
@@ -7,6 +7,8 @@ const USUARIO_TESTE = {
   nome: 'Estudante Teste',
   email: 'aluno@interchapeco.com',
   senha: '123456',
+  pais: 'Colômbia',
+  universidade: 'Unochapecó',
 };
 
 function esperar(ms) {
@@ -25,15 +27,20 @@ export async function fazerLogin(email, senha) {
 
   return {
     token: 'token-fixo-de-teste',
-    usuario: { nome: USUARIO_TESTE.nome, email: USUARIO_TESTE.email },
+    usuario: {
+      nome: USUARIO_TESTE.nome,
+      email: USUARIO_TESTE.email,
+      pais: USUARIO_TESTE.pais,
+      universidade: USUARIO_TESTE.universidade,
+    },
   };
 }
 
-export async function fazerCadastro({ nome, email }) {
+export async function fazerCadastro({ nome, pais, email, universidade }) {
   await esperar(600);
 
   return {
     token: 'token-fixo-de-teste',
-    usuario: { nome, email },
+    usuario: { nome, email, pais, universidade },
   };
 }

@@ -1,10 +1,12 @@
 // SCREEN — Cadastro
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { CenteredTemplate } from '../components/templates/CenteredTemplate';
 import { RegisterForm } from '../components/organisms/RegisterForm';
+import { Logo } from '../components/atoms/Logo';
+import { BotaoVoltar } from '../components/atoms/BotaoVoltar';
 import { fazerCadastro } from '../services/auth';
-import { cores, espacamentos, tipografia } from '../theme';
+import { espacamentos } from '../theme';
 
 export function RegisterScreen({ navigation }) {
   const [carregando, setCarregando] = useState(false);
@@ -23,15 +25,17 @@ export function RegisterScreen({ navigation }) {
   }
 
   return (
-    <CenteredTemplate>
-      <Text style={estilos.titulo}>Criar conta</Text>
-      <Text style={estilos.subtitulo}>
-        Preencha seus dados para começar
-      </Text>
+    <CenteredTemplate variante="cadastro">
+      <View style={estilos.cabecalho}>
+        <BotaoVoltar
+          aoPressionar={() => navigation.goBack()}
+          style={estilos.voltar}
+        />
+        <Logo />
+      </View>
 
       <RegisterForm
         aoEnviar={cadastrar}
-        aoVoltarParaLogin={() => navigation.navigate('Login')}
         carregando={carregando}
         erroGeral={erro}
       />
@@ -40,17 +44,16 @@ export function RegisterScreen({ navigation }) {
 }
 
 const estilos = StyleSheet.create({
-  titulo: {
-    fontSize: tipografia.titulo,
-    fontWeight: '700',
-    color: cores.primaria,
-    textAlign: 'center',
+  // Ocupa a largura toda da tela (anula o padding do template) para que o
+  // chevron, posicionado em x=13 como no Figma, fique dentro da área tocável.
+  cabecalho: {
+    marginHorizontal: -espacamentos.lg,
+    marginBottom: espacamentos.xl + espacamentos.xs,
+    alignItems: 'center',
   },
-  subtitulo: {
-    marginTop: espacamentos.xs,
-    marginBottom: espacamentos.xl,
-    fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
-    textAlign: 'center',
+  voltar: {
+    position: 'absolute',
+    left: 13,
+    top: 20,
   },
 });

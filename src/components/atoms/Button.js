@@ -10,6 +10,7 @@ export function Button({
   carregando = false,
   desabilitado = false,
   icone = null,
+  grande = false, // só para 'primario': altura de 53 (Cadastro, Recuperar senha)
 }) {
   const inativo = carregando || desabilitado;
   const corCarregando = variante === 'primario' ? cores.superficie : cores.texto;
@@ -22,6 +23,7 @@ export function Button({
       style={({ pressed }) => [
         estilos.base,
         estilos[variante],
+        variante === 'primario' && grande && estilos.grande,
         pressed && estilos.pressionado,
         inativo && estilos.inativo,
       ]}
@@ -62,6 +64,7 @@ const estilos = StyleSheet.create({
     borderRadius: raios.md,
     overflow: 'hidden',
   },
+  grande: { minHeight: 53 },
   secundario: {
     borderRadius: raios.sm,
     backgroundColor: cores.superficieSecundaria,

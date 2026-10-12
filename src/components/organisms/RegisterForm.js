@@ -12,92 +12,124 @@ import { cores, espacamentos, tipografia } from '../../theme';
 
 export function RegisterForm({
   aoEnviar,
-  aoVoltarParaLogin,
   carregando = false,
   erroGeral = '',
 }) {
   const [nome, setNome] = useState('');
+  const [pais, setPais] = useState('');
   const [email, setEmail] = useState('');
+  const [universidade, setUniversidade] = useState('');
   const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
   const [erros, setErros] = useState({});
 
   function validar() {
     const novosErros = {};
     if (!campoObrigatorio(nome)) novosErros.nome = 'Informe seu nome.';
+    if (!campoObrigatorio(pais)) novosErros.pais = 'Informe seu país de origem.';
     if (!emailValido(email)) novosErros.email = 'Informe um e-mail válido.';
+    if (!campoObrigatorio(universidade))
+      novosErros.universidade = 'Informe sua universidade.';
     if (!senhaValida(senha))
       novosErros.senha = 'A senha deve ter pelo menos 6 caracteres.';
-    if (confirmarSenha !== senha)
-      novosErros.confirmarSenha = 'As senhas não conferem.';
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   }
 
   function enviar() {
     if (validar()) {
-      aoEnviar({ nome: nome.trim(), email: email.trim(), senha });
+      aoEnviar({
+        nome: nome.trim(),
+        pais: pais.trim(),
+        email: email.trim(),
+        universidade: universidade.trim(),
+        senha,
+      });
     }
   }
 
   return (
     <View>
       <FormField
-        rotulo="Nome"
-        placeholder="Seu nome completo"
+        rotulo="Nome completo"
+        placeholder="Laura Gomez"
         value={nome}
         onChangeText={setNome}
+        autoCapitalize="words"
         erro={erros.nome}
+        margemInferior={espacamentos.md}
+      />
+      <FormField
+        rotulo="País de origem"
+        placeholder="Colômbia"
+        value={pais}
+        onChangeText={setPais}
+        autoCapitalize="words"
+        erro={erros.pais}
+        margemInferior={espacamentos.md}
       />
       <FormField
         rotulo="E-mail"
-        placeholder="seu@email.com"
+        placeholder="laura@email.com"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
         erro={erros.email}
+        margemInferior={espacamentos.md}
+      />
+      <FormField
+        rotulo="Universidade em Chapecó"
+        placeholder="Unochapecó"
+        value={universidade}
+        onChangeText={setUniversidade}
+        autoCapitalize="words"
+        erro={erros.universidade}
+        margemInferior={espacamentos.md}
       />
       <FormField
         rotulo="Senha"
-        placeholder="Mínimo de 6 caracteres"
+        placeholder="•••••••"
         value={senha}
         onChangeText={setSenha}
         secureTextEntry
         autoCapitalize="none"
         erro={erros.senha}
-      />
-      <FormField
-        rotulo="Confirmar senha"
-        placeholder="Repita a senha"
-        value={confirmarSenha}
-        onChangeText={setConfirmarSenha}
-        secureTextEntry
-        autoCapitalize="none"
-        erro={erros.confirmarSenha}
+        margemInferior={espacamentos.md}
       />
 
       {!!erroGeral && <Text style={estilos.erroGeral}>{erroGeral}</Text>}
 
-      <Button titulo="Cadastrar" aoPressionar={enviar} carregando={carregando} />
       <View style={estilos.espaco} />
       <Button
-        titulo="Já tenho uma conta"
-        variante="link"
-        aoPressionar={aoVoltarParaLogin}
-        desabilitado={carregando}
+        titulo="Criar conta"
+        aoPressionar={enviar}
+        carregando={carregando}
+        grande
       />
+
+      <Text style={estilos.termos}>
+        Ao clicar em Criar conta, você aceita nossos Termos de Serviço e nossa
+        Política de Privacidade.
+      </Text>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
   erroGeral: {
-    marginBottom: espacamentos.md,
+    marginBottom: espacamentos.sm,
     fontSize: tipografia.legenda,
     color: cores.perigo,
     textAlign: 'center',
   },
   espaco: { height: espacamentos.sm },
+  termos: {
+    marginTop: espacamentos.sm,
+    marginHorizontal: -espacamentos.sm,
+    fontSize: tipografia.legenda,
+    lineHeight: 18,
+    color: cores.textoSecundario,
+    textAlign: 'center',
+  },
 });

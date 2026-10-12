@@ -1,5 +1,5 @@
 // TEMPLATE — CenteredTemplate (fundo em degradê com círculos decorativos,
-// conteúdo centralizado horizontalmente; usado em Login/Cadastro)
+// conteúdo centralizado horizontalmente; usado nas telas de acesso)
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,18 +11,40 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { cores, espacamentos, gradientes } from '../../theme';
 
-// Posições e opacidades retiradas do frame Login do Figma (375x812).
-// Os de baixo são ancorados no rodapé para funcionar em qualquer altura.
+// Tamanho, cor e opacidade dos círculos (iguais nos frames de acesso do Figma).
 const circulos = [
-  { id: 'topo-esq', largura: 220, altura: 220, posicao: { left: -117, top: -51 }, clara: false, opacidade: 0.35 },
-  { id: 'topo-esq-2', largura: 114, altura: 127, posicao: { left: -41, top: 6 }, clara: true, opacidade: 0.25 },
-  { id: 'topo-dir', largura: 120, altura: 120, posicao: { right: -41, top: 59 }, clara: false, opacidade: 0.3 },
-  { id: 'base-dir', largura: 240, altura: 240, posicao: { right: -70, bottom: -57 }, clara: false, opacidade: 0.4 },
-  { id: 'base-dir-2', largura: 180, altura: 180, posicao: { right: -50, bottom: -37 }, clara: true, opacidade: 0.25 },
-  { id: 'base-esq', largura: 140, altura: 140, posicao: { left: -45, bottom: -17 }, clara: false, opacidade: 0.3 },
+  { id: 'topo-esq', largura: 220, altura: 220, clara: false, opacidade: 0.35 },
+  { id: 'topo-esq-2', largura: 114, altura: 127, clara: true, opacidade: 0.25 },
+  { id: 'topo-dir', largura: 120, altura: 120, clara: false, opacidade: 0.3 },
+  { id: 'base-dir', largura: 240, altura: 240, clara: false, opacidade: 0.4 },
+  { id: 'base-dir-2', largura: 180, altura: 180, clara: true, opacidade: 0.25 },
+  { id: 'base-esq', largura: 140, altura: 140, clara: false, opacidade: 0.3 },
 ];
 
-export function CenteredTemplate({ children }) {
+// Posições por tela (frame 375x812 do Figma). Os de baixo são ancorados
+// no rodapé para funcionar em qualquer altura de aparelho.
+const posicoes = {
+  login: {
+    'topo-esq': { left: -117, top: -51 },
+    'topo-esq-2': { left: -41, top: 6 },
+    'topo-dir': { right: -41, top: 59 },
+    'base-dir': { right: -70, bottom: -57 },
+    'base-dir-2': { right: -50, bottom: -37 },
+    'base-esq': { left: -45, bottom: -17 },
+  },
+  cadastro: {
+    'topo-esq': { left: -100, top: -77 },
+    'topo-esq-2': { left: -24, top: -20 },
+    'topo-dir': { right: -37, top: 50 },
+    'base-dir': { right: -85, bottom: -50 },
+    'base-dir-2': { right: -65, bottom: -30 },
+    'base-esq': { left: -30, bottom: -10 },
+  },
+};
+
+export function CenteredTemplate({ children, variante = 'login' }) {
+  const posicaoDaTela = posicoes[variante] ?? posicoes.login;
+
   return (
     <View style={estilos.tela}>
       <LinearGradient
@@ -45,7 +67,7 @@ export function CenteredTemplate({ children }) {
                 backgroundColor: c.clara ? cores.decoracaoClara : cores.decoracao,
                 opacity: c.opacidade,
               },
-              c.posicao,
+              posicaoDaTela[c.id],
             ]}
           />
         ))}
