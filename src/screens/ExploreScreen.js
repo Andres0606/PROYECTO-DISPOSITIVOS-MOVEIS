@@ -10,7 +10,7 @@ import { filtrarLocais } from '../utils/locais';
 import { CATEGORIA_TODOS } from '../constants/locais';
 import { cores, espacamentos, tipografia } from '../theme';
 
-export function ExploreScreen() {
+export function ExploreScreen({ navigation }) {
   const [locais, setLocais] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -43,6 +43,10 @@ export function ExploreScreen() {
   // TODO: abrir a tela Filtros quando ela existir.
   function abrirFiltros() {}
 
+  function abrirLocal(local) {
+    navigation.navigate('DetalheLocal', { localId: local.id });
+  }
+
   return (
     <ScreenTemplate titulo="Explorar Chapecó">
       <View style={estilos.filtros}>
@@ -72,9 +76,8 @@ export function ExploreScreen() {
         </View>
       )}
 
-      {/* TODO: ligar aoAbrirLocal à tela Detalhes do local. */}
       {!carregando && !erro && visao === 'lista' && (
-        <ListaLocais locais={locaisFiltrados} />
+        <ListaLocais locais={locaisFiltrados} aoAbrirLocal={abrirLocal} />
       )}
 
       {!carregando && !erro && visao === 'mapa' && (

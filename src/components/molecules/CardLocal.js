@@ -1,7 +1,7 @@
 // MOLECULE — CardLocal (foto + nome + categoria · distância)
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../atoms/Card';
+import { FotoLocal } from '../atoms/FotoLocal';
 import { cores, tipografia } from '../../theme';
 
 export function CardLocal({ nome, detalhe, imagem, aoPressionar }) {
@@ -12,13 +12,7 @@ export function CardLocal({ nome, detalhe, imagem, aoPressionar }) {
       style={({ pressed }) => pressed && estilos.pressionado}
     >
       <Card style={estilos.card}>
-        {imagem ? (
-          <Image source={imagem} style={estilos.foto} resizeMode="cover" />
-        ) : (
-          <View style={[estilos.foto, estilos.semFoto]}>
-            <Ionicons name="image-outline" size={28} color={cores.decoracao} />
-          </View>
-        )}
+        <FotoLocal imagem={imagem} style={estilos.foto} />
 
         <View style={estilos.textos}>
           <Text style={estilos.nome} numberOfLines={2}>
@@ -45,11 +39,6 @@ const estilos = StyleSheet.create({
     width: 120,
     height: 94,
     borderRadius: 4,
-  },
-  semFoto: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: cores.decoracaoClara,
   },
   textos: { flex: 1 },
   nome: {

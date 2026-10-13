@@ -3,9 +3,9 @@ import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
-import { ExploreScreen } from '../screens/ExploreScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
+import { ExploreStack } from './ExploreStack';
 import { cores, tipografia } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -53,7 +53,7 @@ export function MainTabs({ route }) {
       />
       <Tab.Screen
         name="Explorar"
-        component={ExploreScreen}
+        component={ExploreStack}
         options={opcoesAba('Explorar', 'Explorar')}
       />
       <Tab.Screen

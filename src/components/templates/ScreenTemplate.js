@@ -1,13 +1,16 @@
 // TEMPLATE — ScreenTemplate (tela interna padrão: fundo em degradê,
-// título centralizado, divisor e conteúdo rolável).
+// cabeçalho e conteúdo rolável).
+// - Sem aoVoltar: título centralizado de aba + divisor.
+// - Com aoVoltar: cabeçalho interno (chevron + título + divisor).
 // Só a borda superior é protegida: a barra de abas já cuida da inferior.
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Divider } from '../molecules/Divider';
+import { CabecalhoInterno } from '../molecules/CabecalhoInterno';
 import { cores, espacamentos, gradientes, tipografia } from '../../theme';
 
-export function ScreenTemplate({ titulo, children }) {
+export function ScreenTemplate({ titulo, aoVoltar, children }) {
   return (
     <LinearGradient
       colors={gradientes.fundo.cores}
@@ -22,8 +25,14 @@ export function ScreenTemplate({ titulo, children }) {
         >
           {!!titulo && (
             <View style={estilos.cabecalho}>
-              <Text style={estilos.titulo}>{titulo}</Text>
-              <Divider />
+              {aoVoltar ? (
+                <CabecalhoInterno titulo={titulo} aoVoltar={aoVoltar} />
+              ) : (
+                <>
+                  <Text style={estilos.titulo}>{titulo}</Text>
+                  <Divider />
+                </>
+              )}
             </View>
           )}
           {children}

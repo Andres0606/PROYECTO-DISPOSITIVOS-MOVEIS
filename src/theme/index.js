@@ -13,6 +13,7 @@ export const cores = {
   texto: '#000000',
   textoSecundario: '#828282',
   borda: '#E0E0E0',
+  bordaForte: '#B1B1B1',
   bordaFoco: '#605C57',
   divisor: '#E6E6E6',
   decoracao: '#A69F95',
