@@ -20,6 +20,12 @@ export const cores = {
   // Chips (Início)
   chipBorda: '#CAC4D0',
   chipTexto: '#1D1B20',
+  // Busca, segmentado e pills (Explorar)
+  campoBusca: '#F5F5F5',
+  segmentoBorda: '#79747E',
+  segmentoSelecionado: '#D6D1CB',
+  pillBorda: 'rgba(0, 0, 0, 0.43)',
+  pillSelecionado: 'rgba(0, 0, 0, 0.9)',
   // Cartão de vidro (Recuperar senha)
   vidro: 'rgba(255, 255, 255, 0.82)',
   vidroBorda: 'rgba(177, 177, 177, 0.7)',

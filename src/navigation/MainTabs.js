@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeScreen } from '../screens/HomeScreen';
+import { ExploreScreen } from '../screens/ExploreScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
 import { cores, tipografia } from '../theme';
@@ -52,8 +53,7 @@ export function MainTabs({ route }) {
       />
       <Tab.Screen
         name="Explorar"
-        component={PlaceholderScreen}
-        initialParams={{ titulo: 'Explorar Chapecó' }}
+        component={ExploreScreen}
         options={opcoesAba('Explorar', 'Explorar')}
       />
       <Tab.Screen
