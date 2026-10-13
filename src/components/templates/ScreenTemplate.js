@@ -1,10 +1,11 @@
 // TEMPLATE — ScreenTemplate (tela interna padrão: fundo em degradê,
-// título centralizado, divisor e conteúdo rolável)
+// título centralizado, divisor e conteúdo rolável).
+// Só a borda superior é protegida: a barra de abas já cuida da inferior.
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Divider } from '../molecules/Divider';
-import { espacamentos, gradientes, tipografia, cores } from '../../theme';
+import { cores, espacamentos, gradientes, tipografia } from '../../theme';
 
 export function ScreenTemplate({ titulo, children }) {
   return (
@@ -13,7 +14,7 @@ export function ScreenTemplate({ titulo, children }) {
       locations={gradientes.fundo.locais}
       style={estilos.tela}
     >
-      <SafeAreaView style={estilos.area}>
+      <SafeAreaView style={estilos.area} edges={['top', 'left', 'right']}>
         <ScrollView
           contentContainerStyle={estilos.conteudo}
           showsVerticalScrollIndicator={false}

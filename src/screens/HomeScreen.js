@@ -7,7 +7,7 @@ import { Button } from '../components/atoms/Button';
 import { obterResumoInicio } from '../services/inicio';
 import { cores, espacamentos, tipografia } from '../theme';
 
-export function HomeScreen({ navigation, route }) {
+export function HomeScreen({ route }) {
   const usuario = route.params?.usuario;
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'estudante';
 
@@ -51,15 +51,6 @@ export function HomeScreen({ navigation, route }) {
       {/* Os atalhos (Português, Conselhos, Atividades) serão ligados
           quando essas telas existirem: aoAbrirAtalho={...} */}
       {!carregando && !erro && resumo && <ResumoInicio resumo={resumo} />}
-
-      {/* TEMPORÁRIO: o "Sair" passará para a tela Perfil. */}
-      <View style={estilos.sair}>
-        <Button
-          titulo="Sair"
-          variante="secundario"
-          aoPressionar={() => navigation.replace('Login')}
-        />
-      </View>
     </ScreenTemplate>
   );
 }
@@ -71,5 +62,4 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     color: cores.perigo,
   },
-  sair: { marginTop: espacamentos.xl },
 });
