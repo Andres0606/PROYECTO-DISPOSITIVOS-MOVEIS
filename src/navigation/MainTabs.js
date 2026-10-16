@@ -2,9 +2,9 @@
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { HomeScreen } from '../screens/HomeScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { PerfilScreen } from '../screens/PerfilScreen';
+import { InicioStack } from './InicioStack';
 import { ExploreStack } from './ExploreStack';
 import { cores, tipografia } from '../theme';
 
@@ -47,7 +47,7 @@ export function MainTabs({ route }) {
     >
       <Tab.Screen
         name="Inicio"
-        component={HomeScreen}
+        component={InicioStack}
         initialParams={{ usuario }}
         options={opcoesAba('Início', 'Inicio')}
       />

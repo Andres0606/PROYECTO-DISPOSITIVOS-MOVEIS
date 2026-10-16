@@ -12,7 +12,12 @@ export function CabecalhoInterno({ titulo, aoVoltar }) {
           {/* Se o BotaoVoltar usar outro nome de prop, ajuste aqui. */}
           <BotaoVoltar aoPressionar={aoVoltar} />
         </View>
-        <Text style={estilos.titulo} numberOfLines={1}>
+        <Text
+          style={estilos.titulo}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+        >
           {titulo}
         </Text>
       </View>
@@ -36,9 +41,9 @@ const estilos = StyleSheet.create({
     zIndex: 1,
   },
   titulo: {
-    paddingHorizontal: 44,
+    paddingHorizontal: 32,
     textAlign: 'center',
-    fontSize: tipografia.tituloCartao,
+    fontSize: tipografia.titulo,
     fontWeight: '600',
     color: cores.texto,
   },

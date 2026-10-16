@@ -7,7 +7,7 @@ import { Button } from '../components/atoms/Button';
 import { obterResumoInicio } from '../services/inicio';
 import { cores, espacamentos, tipografia } from '../theme';
 
-export function HomeScreen({ route }) {
+export function HomeScreen({ navigation, route }) {
   const usuario = route.params?.usuario;
   const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'estudante';
 
@@ -31,6 +31,13 @@ export function HomeScreen({ route }) {
     carregar();
   }, [carregar]);
 
+  function abrirAtalho(chave) {
+    if (chave === 'portugues') {
+      navigation.navigate('Sobrevive');
+    }
+    // TODO: 'conselhos' e 'atividades' quando essas telas existirem.
+  }
+
   return (
     <ScreenTemplate titulo={`Olá, ${primeiroNome}`}>
       {carregando && (
@@ -48,9 +55,9 @@ export function HomeScreen({ route }) {
         </View>
       )}
 
-      {/* Os atalhos (Português, Conselhos, Atividades) serão ligados
-          quando essas telas existirem: aoAbrirAtalho={...} */}
-      {!carregando && !erro && resumo && <ResumoInicio resumo={resumo} />}
+      {!carregando && !erro && resumo && (
+        <ResumoInicio resumo={resumo} aoAbrirAtalho={abrirAtalho} />
+      )}
     </ScreenTemplate>
   );
 }
