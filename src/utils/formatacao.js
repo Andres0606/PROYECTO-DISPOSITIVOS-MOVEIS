@@ -12,3 +12,20 @@ export function formatarReais(valor) {
 export function formatarDistancia(km) {
   return `${Number(km).toFixed(1).replace('.', ',')} km`;
 }
+
+const MESES_CURTOS = [
+  'jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.',
+  'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.',
+];
+
+// Formata data ISO (AAAA-MM-DD) como no Figma: "2026-09-20" -> "20 set."
+// Devolve '' se a data for inválida.
+export function formatarDataCurta(iso) {
+  const [ano, mes, dia] = String(iso).split('-').map(Number);
+
+  if (!ano || !dia || !mes || mes < 1 || mes > 12) {
+    return '';
+  }
+
+  return `${dia} ${MESES_CURTOS[mes - 1]}`;
+}

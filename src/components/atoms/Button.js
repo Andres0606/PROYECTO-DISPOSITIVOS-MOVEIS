@@ -6,14 +6,19 @@ import { cores, espacamentos, gradientes, raios, tipografia } from '../../theme'
 export function Button({
   titulo,
   aoPressionar,
-  variante = 'primario', // 'primario' | 'secundario' | 'link'
+  // 'primario' (degradê, telas de acesso) | 'secundario' | 'link'
+  // 'escuro' (preto) | 'contorno' (branco com borda), usados nas telas internas
+  variante = 'primario',
   carregando = false,
   desabilitado = false,
   icone = null,
   grande = false, // só para 'primario': altura de 53 (Cadastro, Recuperar senha)
 }) {
   const inativo = carregando || desabilitado;
-  const corCarregando = variante === 'primario' ? cores.superficie : cores.texto;
+  const corCarregando =
+    variante === 'primario' || variante === 'escuro'
+      ? cores.superficie
+      : cores.texto;
 
   return (
     <Pressable
@@ -69,6 +74,16 @@ const estilos = StyleSheet.create({
     borderRadius: raios.sm,
     backgroundColor: cores.superficieSecundaria,
   },
+  escuro: {
+    borderRadius: raios.sm,
+    backgroundColor: cores.texto,
+  },
+  contorno: {
+    borderRadius: raios.sm,
+    borderWidth: 1,
+    borderColor: cores.bordaForte,
+    backgroundColor: cores.superficie,
+  },
   link: {
     minHeight: 0,
     paddingHorizontal: 0,
@@ -93,6 +108,16 @@ const estilosTexto = StyleSheet.create({
     color: cores.texto,
     fontSize: tipografia.corpo,
     fontWeight: '500',
+  },
+  escuro: {
+    color: cores.superficie,
+    fontSize: tipografia.corpo,
+    fontWeight: '700',
+  },
+  contorno: {
+    color: cores.texto,
+    fontSize: tipografia.corpo,
+    fontWeight: '700',
   },
   link: {
     color: cores.textoSecundario,

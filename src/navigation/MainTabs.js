@@ -44,6 +44,8 @@ export function MainTabs({ route }) {
         tabBarInactiveTintColor: cores.textoSecundario,
         tabBarLabelStyle: estilos.rotulo,
         tabBarStyle: estilos.barra,
+        // Esconde a barra enquanto o teclado está aberto (formulários).
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen

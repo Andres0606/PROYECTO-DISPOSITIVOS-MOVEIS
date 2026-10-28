@@ -2,6 +2,7 @@
 // cabeçalho e conteúdo rolável).
 // - Sem aoVoltar: título centralizado de aba + divisor.
 // - Com aoVoltar: cabeçalho interno (chevron + título + divisor).
+// - acaoCabecalho (opcional): ação à direita do cabeçalho interno (ex.: lápis).
 // - flutuante (opcional): elemento fixo no canto inferior direito (ex.: botão "+").
 // Só a borda superior é protegida: a barra de abas já cuida da inferior.
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -11,7 +12,13 @@ import { Divider } from '../molecules/Divider';
 import { CabecalhoInterno } from '../molecules/CabecalhoInterno';
 import { cores, espacamentos, gradientes, tipografia } from '../../theme';
 
-export function ScreenTemplate({ titulo, aoVoltar, flutuante, children }) {
+export function ScreenTemplate({
+  titulo,
+  aoVoltar,
+  acaoCabecalho,
+  flutuante,
+  children,
+}) {
   return (
     <LinearGradient
       colors={gradientes.fundo.cores}
@@ -30,7 +37,11 @@ export function ScreenTemplate({ titulo, aoVoltar, flutuante, children }) {
           {!!titulo && (
             <View style={estilos.cabecalho}>
               {aoVoltar ? (
-                <CabecalhoInterno titulo={titulo} aoVoltar={aoVoltar} />
+                <CabecalhoInterno
+                  titulo={titulo}
+                  aoVoltar={aoVoltar}
+                  acaoDireita={acaoCabecalho}
+                />
               ) : (
                 <>
                   <Text style={estilos.titulo}>{titulo}</Text>

@@ -1,8 +1,8 @@
 // MOLECULE — ItemTarefa (checkbox + título + lápis, com linha inferior)
-// aoAbrir e aoEditar são opcionais: serão ligados às telas Detalhes e Editar tarefa.
+// aoAbrir e aoEditar são opcionais.
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Checkbox } from '../atoms/Checkbox';
+import { BotaoIcone } from '../atoms/BotaoIcone';
 import { cores, espacamentos, tipografia } from '../../theme';
 
 export function ItemTarefa({
@@ -29,14 +29,11 @@ export function ItemTarefa({
         </Text>
       </Pressable>
 
-      <Pressable
-        onPress={aoEditar}
-        hitSlop={10}
-        accessibilityRole="button"
-        accessibilityLabel="Editar tarefa"
-      >
-        <Ionicons name="pencil-outline" size={16} color={cores.texto} />
-      </Pressable>
+      <BotaoIcone
+        nome="pencil-outline"
+        rotulo="Editar tarefa"
+        aoPressionar={aoEditar}
+      />
     </View>
   );
 }

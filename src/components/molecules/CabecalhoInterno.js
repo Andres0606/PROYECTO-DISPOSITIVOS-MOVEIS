@@ -1,10 +1,11 @@
 // MOLECULE — CabecalhoInterno (chevron de voltar + título centralizado + divisor)
+// acaoDireita (opcional): elemento fixo à direita, ex.: lápis de editar.
 import { StyleSheet, Text, View } from 'react-native';
 import { BotaoVoltar } from '../atoms/BotaoVoltar';
 import { Divider } from './Divider';
 import { cores, espacamentos, tipografia } from '../../theme';
 
-export function CabecalhoInterno({ titulo, aoVoltar }) {
+export function CabecalhoInterno({ titulo, aoVoltar, acaoDireita }) {
   return (
     <View>
       <View style={estilos.linha}>
@@ -12,6 +13,7 @@ export function CabecalhoInterno({ titulo, aoVoltar }) {
           {/* Se o BotaoVoltar usar outro nome de prop, ajuste aqui. */}
           <BotaoVoltar aoPressionar={aoVoltar} />
         </View>
+
         <Text
           style={estilos.titulo}
           numberOfLines={1}
@@ -20,6 +22,8 @@ export function CabecalhoInterno({ titulo, aoVoltar }) {
         >
           {titulo}
         </Text>
+
+        {!!acaoDireita && <View style={estilos.direita}>{acaoDireita}</View>}
       </View>
       <Divider />
     </View>
@@ -35,6 +39,14 @@ const estilos = StyleSheet.create({
   voltar: {
     position: 'absolute',
     left: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  direita: {
+    position: 'absolute',
+    right: 0,
     top: 0,
     bottom: 0,
     justifyContent: 'center',
