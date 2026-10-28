@@ -5,6 +5,7 @@ import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ResumoInicio } from '../components/organisms/ResumoInicio';
 import { Button } from '../components/atoms/Button';
 import { obterResumoInicio } from '../services/inicio';
+import { logout } from '../services/auth';
 import { cores, espacamentos, tipografia } from '../theme';
 
 export function HomeScreen({ navigation, route }) {
@@ -18,6 +19,7 @@ export function HomeScreen({ navigation, route }) {
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro('');
+
     try {
       setResumo(await obterResumoInicio());
     } catch (e) {
@@ -35,7 +37,21 @@ export function HomeScreen({ navigation, route }) {
     if (chave === 'portugues') {
       navigation.navigate('Sobrevive');
     }
+
     // TODO: 'conselhos' e 'atividades' quando essas telas existirem.
+  }
+
+  async function sair() {
+    try {
+      await logout();
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (e) {
+      setErro('Não foi possível encerrar a sessão.');
+    }
   }
 
   return (
@@ -47,6 +63,7 @@ export function HomeScreen({ navigation, route }) {
       {!carregando && !!erro && (
         <View style={estilos.centro}>
           <Text style={estilos.erro}>{erro}</Text>
+
           <Button
             titulo="Tentar novamente"
             variante="secundario"
@@ -56,17 +73,38 @@ export function HomeScreen({ navigation, route }) {
       )}
 
       {!carregando && !erro && resumo && (
-        <ResumoInicio resumo={resumo} aoAbrirAtalho={abrirAtalho} />
+        <>
+          <ResumoInicio
+            resumo={resumo}
+            aoAbrirAtalho={abrirAtalho}
+          />
+
+          <View style={estilos.logout}>
+            <Button
+              titulo="Sair"
+              variante="secundario"
+              aoPressionar={sair}
+            />
+          </View>
+        </>
       )}
     </ScreenTemplate>
   );
 }
 
 const estilos = StyleSheet.create({
-  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  centro: {
+    marginTop: espacamentos.xl,
+    gap: espacamentos.md,
+  },
+
   erro: {
     fontSize: tipografia.corpo,
     textAlign: 'center',
     color: cores.perigo,
+  },
+
+  logout: {
+    marginTop: espacamentos.xl,
   },
 });

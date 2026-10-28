@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
-import { PerfilScreen } from '../screens/PerfilScreen';
+import { PerfilStack } from './PerfilStack';
 import { InicioStack } from './InicioStack';
 import { ExploreStack } from './ExploreStack';
 import { cores, tipografia } from '../theme';
@@ -51,26 +51,30 @@ export function MainTabs({ route }) {
         initialParams={{ usuario }}
         options={opcoesAba('Início', 'Inicio')}
       />
+
       <Tab.Screen
         name="Explorar"
         component={ExploreStack}
         options={opcoesAba('Explorar', 'Explorar')}
       />
+
       <Tab.Screen
         name="Intercambio"
         component={PlaceholderScreen}
         initialParams={{ titulo: 'Meu Intercâmbio' }}
         options={opcoesAba('Intercâmbio', 'Intercambio')}
       />
+
       <Tab.Screen
         name="Gastos"
         component={PlaceholderScreen}
         initialParams={{ titulo: 'Meus Gastos' }}
         options={opcoesAba('Gastos', 'Gastos')}
       />
+
       <Tab.Screen
         name="Perfil"
-        component={PerfilScreen}
+        component={PerfilStack}
         initialParams={{ usuario }}
         options={opcoesAba('Perfil', 'Perfil')}
       />
@@ -86,6 +90,7 @@ const estilos = StyleSheet.create({
     elevation: 0,
     paddingTop: 6,
   },
+
   rotulo: {
     fontSize: tipografia.legenda,
     fontWeight: '500',

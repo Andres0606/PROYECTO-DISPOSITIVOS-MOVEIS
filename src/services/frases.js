@@ -1,6 +1,5 @@
 // SERVICE — Frases (Sobrevive em Português)
-// ETAPA FRONT: dados estáticos. Depois, o corpo destas funções será trocado
-// por chamadas HTTP reais, sem alterar as screens.
+
 
 const CATEGORIAS = [
   { id: 'universidade', nome: 'Universidade', totalFrases: 12 },
