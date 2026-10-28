@@ -68,7 +68,7 @@ export function MainTabs({ route }) {
       <Tab.Screen
         name="Gastos"
         component={PlaceholderScreen}
-        initialParams={{ titulo: 'Meus Gastos' }}
+        initialParams={{ titulo: 'Meus Gastossss' }}
         options={opcoesAba('Gastos', 'Gastos')}
       />
 
