@@ -2,6 +2,7 @@
 // cabeçalho e conteúdo rolável).
 // - Sem aoVoltar: título centralizado de aba + divisor.
 // - Com aoVoltar: cabeçalho interno (chevron + título + divisor).
+// - flutuante (opcional): elemento fixo no canto inferior direito (ex.: botão "+").
 // Só a borda superior é protegida: a barra de abas já cuida da inferior.
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,7 +11,7 @@ import { Divider } from '../molecules/Divider';
 import { CabecalhoInterno } from '../molecules/CabecalhoInterno';
 import { cores, espacamentos, gradientes, tipografia } from '../../theme';
 
-export function ScreenTemplate({ titulo, aoVoltar, children }) {
+export function ScreenTemplate({ titulo, aoVoltar, flutuante, children }) {
   return (
     <LinearGradient
       colors={gradientes.fundo.cores}
@@ -19,7 +20,10 @@ export function ScreenTemplate({ titulo, aoVoltar, children }) {
     >
       <SafeAreaView style={estilos.area} edges={['top', 'left', 'right']}>
         <ScrollView
-          contentContainerStyle={estilos.conteudo}
+          contentContainerStyle={[
+            estilos.conteudo,
+            !!flutuante && estilos.comFlutuante,
+          ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -37,6 +41,8 @@ export function ScreenTemplate({ titulo, aoVoltar, children }) {
           )}
           {children}
         </ScrollView>
+
+        {!!flutuante && <View style={estilos.flutuante}>{flutuante}</View>}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -51,6 +57,8 @@ const estilos = StyleSheet.create({
     paddingTop: espacamentos.sm,
     paddingBottom: espacamentos.lg,
   },
+  // Espaço extra para o último item não ficar atrás do botão flutuante.
+  comFlutuante: { paddingBottom: 80 },
   cabecalho: { marginBottom: espacamentos.lg },
   titulo: {
     marginBottom: espacamentos.md,
@@ -58,5 +66,10 @@ const estilos = StyleSheet.create({
     fontSize: tipografia.titulo,
     fontWeight: '600',
     color: cores.texto,
+  },
+  flutuante: {
+    position: 'absolute',
+    right: espacamentos.md,
+    bottom: espacamentos.md,
   },
 });

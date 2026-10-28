@@ -6,6 +6,7 @@ import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { PerfilStack } from './PerfilStack';
 import { InicioStack } from './InicioStack';
 import { ExploreStack } from './ExploreStack';
+import { IntercambioStack } from './IntercambioStack';
 import { cores, tipografia } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -60,15 +61,14 @@ export function MainTabs({ route }) {
 
       <Tab.Screen
         name="Intercambio"
-        component={PlaceholderScreen}
-        initialParams={{ titulo: 'Meu Intercâmbio' }}
+        component={IntercambioStack}
         options={opcoesAba('Intercâmbio', 'Intercambio')}
       />
 
       <Tab.Screen
         name="Gastos"
         component={PlaceholderScreen}
-        initialParams={{ titulo: 'Meus Gastossss' }}
+        initialParams={{ titulo: 'Meus Gastos' }}
         options={opcoesAba('Gastos', 'Gastos')}
       />
 

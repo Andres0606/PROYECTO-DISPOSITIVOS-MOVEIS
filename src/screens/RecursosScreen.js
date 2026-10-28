@@ -47,7 +47,7 @@ function formatarGps(coords) {
   return `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
 }
 
-export function RecursosScreen() {
+export function RecursosScreen({ navigation }) {
   const [fotoUri, setFotoUri] = useState(null);
   const [coords, setCoords] = useState(null);
   const [permissoes, setPermissoes] = useState(null);
@@ -151,7 +151,10 @@ export function RecursosScreen() {
   }
 
   return (
-    <ScreenTemplate titulo="Recursos nativos">
+    <ScreenTemplate
+      titulo="Recursos nativos"
+      aoVoltar={() => navigation.goBack()}
+    >
       {!!erro && (
         <Text style={estilos.erro}>
           {erro}
