@@ -7,6 +7,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { SurviveScreen } from '../screens/SurviveScreen';
 import { ListaFrasesScreen } from '../screens/ListaFrasesScreen';
 import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
+import { ConselhosScreen } from '../screens/ConselhosScreen';
 
 import { cores } from '../theme';
 
@@ -46,7 +47,12 @@ export function InicioStack({ route }) {
         component={FraseDetalheScreen}
       />
 
-      {/* Próximas: Conselhos, Atividades */}
+      <Stack.Screen
+        name="Conselhos"
+        component={ConselhosScreen}
+      />
+
+      {/* Próxima: Atividades */}
     </Stack.Navigator>
   );
 }

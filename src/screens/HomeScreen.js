@@ -1,15 +1,28 @@
 // SCREEN — Início (resumo do intercâmbio)
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ResumoInicio } from '../components/organisms/ResumoInicio';
 import { Button } from '../components/atoms/Button';
+
 import { obterResumoInicio } from '../services/inicio';
-import { cores, espacamentos, tipografia } from '../theme';
+
+import {
+  cores,
+  espacamentos,
+  tipografia,
+} from '../theme';
 
 export function HomeScreen({ navigation, route }) {
   const usuario = route.params?.usuario;
-  const primeiroNome = usuario?.nome?.split(' ')[0] ?? 'estudante';
+  const primeiroNome =
+    usuario?.nome?.split(' ')[0] ?? 'estudante';
 
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -20,9 +33,12 @@ export function HomeScreen({ navigation, route }) {
     setErro('');
 
     try {
-      setResumo(await obterResumoInicio());
+      const resultado = await obterResumoInicio();
+      setResumo(resultado);
     } catch (e) {
-      setErro('Não foi possível carregar seu resumo. Tente novamente.');
+      setErro(
+        'Não foi possível carregar seu resumo. Tente novamente.'
+      );
     } finally {
       setCarregando(false);
     }
@@ -35,20 +51,34 @@ export function HomeScreen({ navigation, route }) {
   function abrirAtalho(chave) {
     if (chave === 'portugues') {
       navigation.navigate('Sobrevive');
+      return;
     }
 
-    // TODO: 'conselhos' e 'atividades' quando essas telas existirem.
+    if (chave === 'conselhos') {
+      navigation.navigate('Conselhos');
+      return;
+    }
+
+    // TODO: ligar quando a tela de atividades existir.
+    if (chave === 'atividades') {
+      return;
+    }
   }
 
   return (
     <ScreenTemplate titulo={`Olá, ${primeiroNome}`}>
       {carregando && (
-        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+        <ActivityIndicator
+          color={cores.primaria}
+          style={estilos.centro}
+        />
       )}
 
       {!carregando && !!erro && (
         <View style={estilos.centro}>
-          <Text style={estilos.erro}>{erro}</Text>
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
 
           <Button
             titulo="Tentar novamente"
@@ -59,7 +89,10 @@ export function HomeScreen({ navigation, route }) {
       )}
 
       {!carregando && !erro && resumo && (
-        <ResumoInicio resumo={resumo} aoAbrirAtalho={abrirAtalho} />
+        <ResumoInicio
+          resumo={resumo}
+          aoAbrirAtalho={abrirAtalho}
+        />
       )}
     </ScreenTemplate>
   );
