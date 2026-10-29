@@ -2,11 +2,11 @@
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { PerfilStack } from './PerfilStack';
 import { InicioStack } from './InicioStack';
 import { ExploreStack } from './ExploreStack';
 import { IntercambioStack } from './IntercambioStack';
+import { GastosStack } from './GastosStack';
 import { cores, tipografia } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -69,8 +69,7 @@ export function MainTabs({ route }) {
 
       <Tab.Screen
         name="Gastos"
-        component={PlaceholderScreen}
-        initialParams={{ titulo: 'Meus Gastos' }}
+        component={GastosStack}
         options={opcoesAba('Gastos', 'Gastos')}
       />
 
