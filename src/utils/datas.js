@@ -37,3 +37,12 @@ export function isoParaBr(iso) {
   const [ano, mes, dia] = iso.split('-');
   return `${dia}/${mes}/${ano}`;
 }
+
+// Data de hoje no formato dd/mm/aaaa
+export function hojeBr() {
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+
+  return `${dia}/${mes}/${agora.getFullYear()}`;
+}

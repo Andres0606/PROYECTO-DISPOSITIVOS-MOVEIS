@@ -8,7 +8,7 @@ import { Button } from '../components/atoms/Button';
 import { obterResumoGastos } from '../services/gastos';
 import { cores, espacamentos, tipografia } from '../theme';
 
-export function ExpenseSummaryScreen() {
+export function ExpenseSummaryScreen({ navigation }) {
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -44,9 +44,12 @@ export function ExpenseSummaryScreen() {
     }, [carregar])
   );
 
-  // TODO: ligar às telas Registrar gasto, Histórico e Estatísticas
-  // (props aoRegistrar, aoAbrirHistorico e aoAbrirEstatisticas).
-  function registrarGasto() {}
+  function registrarGasto() {
+    navigation.navigate('RegistrarGasto');
+  }
+
+  // TODO: ligar às telas Histórico e Estatísticas
+  // (props aoAbrirHistorico e aoAbrirEstatisticas).
 
   return (
     <ScreenTemplate titulo="Meus gastos">
