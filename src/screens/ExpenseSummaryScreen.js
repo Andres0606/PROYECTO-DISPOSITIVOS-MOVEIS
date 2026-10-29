@@ -52,7 +52,9 @@ export function ExpenseSummaryScreen({ navigation }) {
     navigation.navigate('Historico');
   }
 
-  // TODO: ligar à tela Estatísticas (prop aoAbrirEstatisticas).
+  function abrirEstatisticas() {
+    navigation.navigate('Estatisticas');
+  }
 
   return (
     <ScreenTemplate titulo="Meus gastos">
@@ -76,6 +78,7 @@ export function ExpenseSummaryScreen({ navigation }) {
           resumo={resumo}
           aoRegistrar={registrarGasto}
           aoAbrirHistorico={abrirHistorico}
+          aoAbrirEstatisticas={abrirEstatisticas}
         />
       )}
     </ScreenTemplate>

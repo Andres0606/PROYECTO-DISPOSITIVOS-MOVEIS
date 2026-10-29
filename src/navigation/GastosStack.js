@@ -5,6 +5,7 @@ import { ExpenseSummaryScreen } from '../screens/ExpenseSummaryScreen';
 import { ExpenseCreateScreen } from '../screens/ExpenseCreateScreen';
 import { ExpenseHistoryScreen } from '../screens/ExpenseHistoryScreen';
 import { ExpenseEditScreen } from '../screens/ExpenseEditScreen';
+import { ExpenseStatsScreen } from '../screens/ExpenseStatsScreen';
 import { cores } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -22,7 +23,7 @@ export function GastosStack() {
       <Stack.Screen name="RegistrarGasto" component={ExpenseCreateScreen} />
       <Stack.Screen name="Historico" component={ExpenseHistoryScreen} />
       <Stack.Screen name="EditarGasto" component={ExpenseEditScreen} />
-      {/* Próxima: Estatisticas */}
+      <Stack.Screen name="Estatisticas" component={ExpenseStatsScreen} />
     </Stack.Navigator>
   );
 }
