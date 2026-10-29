@@ -5,9 +5,9 @@
 //
 // Os 11 gastos de exemplo somam 1.245 de um orçamento de 2.000, igual ao
 // Figma (Resumo de gastos) e ao card "Gastos de setembro" da tela Início.
-// Os quatro primeiros vêm do Figma (Histórico).
+// Os quatro primeiros vêm do Figma (Histórico) e são os mais recentes.
 // "data" usa formato ISO (AAAA-MM-DD). Por enquanto o resumo soma todos os
-// gastos da lista; a separação por mês virá com Histórico e Estatísticas.
+// gastos da lista; a separação por mês virá com Estatísticas.
 
 const ORCAMENTO_MENSAL = 2000;
 
@@ -20,13 +20,13 @@ let GASTOS = [
   gasto('g2', 'Restaurante Sabor', 42, 'Alimentação', '2026-09-06'),
   gasto('g3', 'Uber Ecoparque', 18, 'Serviços', '2026-09-05'),
   gasto('g4', 'Libreria Central', 60, 'Universidade', '2026-09-03'),
-  gasto('g5', 'Jantar com a turma', 120, 'Alimentação', '2026-09-12'),
-  gasto('g6', 'Café e lanches da semana', 148, 'Alimentação', '2026-09-15'),
-  gasto('g7', 'Almoço no restaurante universitário', 200, 'Alimentação', '2026-09-18'),
-  gasto('g8', 'Casaco de inverno', 220, 'Compras', '2026-09-10'),
-  gasto('g9', 'Material de estudo', 100, 'Compras', '2026-09-11'),
-  gasto('g10', 'Passagem para Florianópolis', 240, 'Viagens', '2026-09-20'),
-  gasto('g11', 'Lavanderia', 12, 'Outros', '2026-09-09'),
+  gasto('g5', 'Jantar com a turma', 120, 'Alimentação', '2026-09-02'),
+  gasto('g6', 'Café e lanches da semana', 148, 'Alimentação', '2026-09-01'),
+  gasto('g7', 'Almoço no restaurante universitário', 200, 'Alimentação', '2026-09-02'),
+  gasto('g8', 'Casaco de inverno', 220, 'Compras', '2026-09-01'),
+  gasto('g9', 'Material de estudo', 100, 'Compras', '2026-09-02'),
+  gasto('g10', 'Passagem para Florianópolis', 240, 'Viagens', '2026-09-01'),
+  gasto('g11', 'Lavanderia', 12, 'Outros', '2026-09-02'),
 ];
 
 let proximoId = 12;
@@ -37,6 +37,15 @@ function esperar(ms) {
 
 function arredondar(numero) {
   return Math.round(numero * 100) / 100;
+}
+
+function buscar(id) {
+  const encontrado = GASTOS.find((item) => item.id === id);
+
+  if (!encontrado) {
+    throw new Error('Gasto não encontrado.');
+  }
+  return encontrado;
 }
 
 // As 3 categorias com maior valor + "Outros" (todo o resto, incluindo
@@ -76,6 +85,21 @@ export async function obterResumoGastos() {
   };
 }
 
+// Mais recente primeiro; na mesma data, o último registrado aparece antes.
+export async function obterGastos() {
+  await esperar(400);
+
+  return [...GASTOS]
+    .reverse()
+    .sort((a, b) => b.data.localeCompare(a.data))
+    .map((item) => ({ ...item }));
+}
+
+export async function obterGasto(id) {
+  await esperar(250);
+  return { ...buscar(id) };
+}
+
 // dados: { conceito, valor (número), categoria, data (ISO), descricao }
 export async function criarGasto(dados) {
   await esperar(400);
@@ -91,4 +115,28 @@ export async function criarGasto(dados) {
 
   GASTOS = [...GASTOS, novo];
   return { ...novo };
+}
+
+export async function atualizarGasto(id, dados) {
+  await esperar(400);
+
+  const existente = buscar(id);
+  const atualizado = {
+    ...existente,
+    conceito: dados.conceito,
+    valor: dados.valor,
+    categoria: dados.categoria,
+    data: dados.data,
+    descricao: dados.descricao ?? '',
+  };
+
+  GASTOS = GASTOS.map((item) => (item.id === id ? atualizado : item));
+  return { ...atualizado };
+}
+
+export async function excluirGasto(id) {
+  await esperar(300);
+  buscar(id);
+
+  GASTOS = GASTOS.filter((item) => item.id !== id);
 }

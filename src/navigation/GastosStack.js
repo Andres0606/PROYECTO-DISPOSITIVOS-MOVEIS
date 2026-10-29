@@ -3,6 +3,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ExpenseSummaryScreen } from '../screens/ExpenseSummaryScreen';
 import { ExpenseCreateScreen } from '../screens/ExpenseCreateScreen';
+import { ExpenseHistoryScreen } from '../screens/ExpenseHistoryScreen';
+import { ExpenseEditScreen } from '../screens/ExpenseEditScreen';
 import { cores } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -18,7 +20,9 @@ export function GastosStack() {
     >
       <Stack.Screen name="GastosResumo" component={ExpenseSummaryScreen} />
       <Stack.Screen name="RegistrarGasto" component={ExpenseCreateScreen} />
-      {/* Próximas: Historico, Estatisticas, EditarGasto */}
+      <Stack.Screen name="Historico" component={ExpenseHistoryScreen} />
+      <Stack.Screen name="EditarGasto" component={ExpenseEditScreen} />
+      {/* Próxima: Estatisticas */}
     </Stack.Navigator>
   );
 }

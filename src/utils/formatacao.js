@@ -35,3 +35,16 @@ export function formatarDataCurta(iso) {
 
   return `${dia} ${MESES_CURTOS[mes - 1]}`;
 }
+
+// Dia com dois dígitos e mês abreviado, sem ponto: "2026-09-07" -> "07 set"
+// Devolve '' se a data for inválida.
+export function formatarDiaMes(iso) {
+  const [ano, mes, dia] = String(iso).split('-').map(Number);
+
+  if (!ano || !dia || !mes || mes < 1 || mes > 12) {
+    return '';
+  }
+
+  const mesCurto = MESES_CURTOS[mes - 1].replace('.', '');
+  return `${String(dia).padStart(2, '0')} ${mesCurto}`;
+}

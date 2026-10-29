@@ -1,8 +1,10 @@
 // ORGANISM — FormularioGasto (campos, validação e botões)
-// Usado em Registrar gasto e, depois, em Editar gasto.
+// Usado em Registrar gasto e Editar gasto.
 // - valoresIniciais (opcional): { conceito, valor (número), categoria, data (ISO), descricao }
 // - aoEnviar(dados): { conceito, valor (número), categoria, data (ISO), descricao }
 // - aoExcluir (opcional): se existir, mostra o botão "Excluir" ao lado (modo edição)
+// - semDescricao (opcional): esconde o campo Descrição (Editar gasto, como no Figma);
+//   a descrição que o gasto já tinha é mantida ao salvar.
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '../atoms/Button';
@@ -32,6 +34,7 @@ export function FormularioGasto({
   rotuloEnviar,
   aoEnviar,
   aoExcluir,
+  semDescricao = false,
   carregando = false,
   excluindo = false,
   erroGeral = '',
@@ -74,7 +77,9 @@ export function FormularioGasto({
       valor: valorParaNumero(valor),
       categoria,
       data: brParaIso(data),
-      descricao: descricao.trim(),
+      descricao: semDescricao
+        ? valoresIniciais?.descricao ?? ''
+        : descricao.trim(),
     });
   }
 
@@ -119,15 +124,17 @@ export function FormularioGasto({
         margemInferior={espacamentos.md}
       />
 
-      <FormField
-        rotulo="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
-        multiline
-        numberOfLines={3}
-        autoCapitalize="sentences"
-        margemInferior={espacamentos.md}
-      />
+      {!semDescricao && (
+        <FormField
+          rotulo="Descrição"
+          value={descricao}
+          onChangeText={setDescricao}
+          multiline
+          numberOfLines={3}
+          autoCapitalize="sentences"
+          margemInferior={espacamentos.md}
+        />
+      )}
 
       {!!erroGeral && <Text style={estilos.erroGeral}>{erroGeral}</Text>}
 
