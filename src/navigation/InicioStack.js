@@ -6,20 +6,14 @@ import {
 } from '@react-navigation/native-stack';
 
 import { HomeScreen } from '../screens/HomeScreen';
-
 import { SurviveScreen } from '../screens/SurviveScreen';
-
 import { ListaFrasesScreen } from '../screens/ListaFrasesScreen';
-
 import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
-
 import { ConselhosScreen } from '../screens/ConselhosScreen';
-
 import { ConselhoDetalheScreen } from '../screens/ConselhoDetalheScreen';
-
 import { CriarConselhoScreen } from '../screens/CriarConselhoScreen';
-
 import { EditarConselhoScreen } from '../screens/EditarConselhoScreen';
+import { AtividadesScreen } from '../screens/AtividadesScreen';
 
 import { cores } from '../theme';
 
@@ -35,7 +29,6 @@ export function InicioStack({
   return (
     <Stack.Navigator
       initialRouteName="InicioHome"
-
       screenOptions={{
         headerShown: false,
 
@@ -100,7 +93,12 @@ export function InicioStack({
         }
       />
 
-      {/* Próxima: Atividades */}
+      <Stack.Screen
+        name="Atividades"
+        component={
+          AtividadesScreen
+        }
+      />
     </Stack.Navigator>
   );
 }

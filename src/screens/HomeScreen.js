@@ -1,5 +1,11 @@
 // SCREEN — Início (resumo do intercâmbio)
-import { useCallback, useEffect, useState } from 'react';
+
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
 import {
   ActivityIndicator,
   StyleSheet,
@@ -19,30 +25,46 @@ import {
   tipografia,
 } from '../theme';
 
-export function HomeScreen({ navigation, route }) {
-  const usuario = route.params?.usuario;
+export function HomeScreen({
+  navigation,
+  route,
+}) {
+  const usuario =
+    route.params?.usuario;
+
   const primeiroNome =
-    usuario?.nome?.split(' ')[0] ?? 'estudante';
+    usuario?.nome?.split(' ')[0] ??
+    'estudante';
 
-  const [resumo, setResumo] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
+  const [resumo, setResumo] =
+    useState(null);
 
-  const carregar = useCallback(async () => {
-    setCarregando(true);
-    setErro('');
+  const [carregando, setCarregando] =
+    useState(true);
 
-    try {
-      const resultado = await obterResumoInicio();
-      setResumo(resultado);
-    } catch (e) {
-      setErro(
-        'Não foi possível carregar seu resumo. Tente novamente.'
-      );
-    } finally {
-      setCarregando(false);
-    }
-  }, []);
+  const [erro, setErro] =
+    useState('');
+
+  const carregar = useCallback(
+    async () => {
+      setCarregando(true);
+      setErro('');
+
+      try {
+        const resultado =
+          await obterResumoInicio();
+
+        setResumo(resultado);
+      } catch (e) {
+        setErro(
+          'Não foi possível carregar seu resumo. Tente novamente.'
+        );
+      } finally {
+        setCarregando(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     carregar();
@@ -50,23 +72,34 @@ export function HomeScreen({ navigation, route }) {
 
   function abrirAtalho(chave) {
     if (chave === 'portugues') {
-      navigation.navigate('Sobrevive');
+      navigation.navigate(
+        'Sobrevive'
+      );
+
       return;
     }
 
     if (chave === 'conselhos') {
-      navigation.navigate('Conselhos');
+      navigation.navigate(
+        'Conselhos'
+      );
+
       return;
     }
 
-    // TODO: ligar quando a tela de atividades existir.
     if (chave === 'atividades') {
+      navigation.navigate(
+        'Atividades'
+      );
+
       return;
     }
   }
 
   return (
-    <ScreenTemplate titulo={`Olá, ${primeiroNome}`}>
+    <ScreenTemplate
+      titulo={`Olá, ${primeiroNome}`}
+    >
       {carregando && (
         <ActivityIndicator
           color={cores.primaria}
@@ -74,39 +107,50 @@ export function HomeScreen({ navigation, route }) {
         />
       )}
 
-      {!carregando && !!erro && (
-        <View style={estilos.centro}>
-          <Text style={estilos.erro}>
-            {erro}
-          </Text>
+      {!carregando &&
+        !!erro && (
+          <View style={estilos.centro}>
+            <Text style={estilos.erro}>
+              {erro}
+            </Text>
 
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
+            <Button
+              titulo="Tentar novamente"
+              variante="secundario"
+              aoPressionar={carregar}
+            />
+          </View>
+        )}
+
+      {!carregando &&
+        !erro &&
+        resumo && (
+          <ResumoInicio
+            resumo={resumo}
+            aoAbrirAtalho={
+              abrirAtalho
+            }
           />
-        </View>
-      )}
-
-      {!carregando && !erro && resumo && (
-        <ResumoInicio
-          resumo={resumo}
-          aoAbrirAtalho={abrirAtalho}
-        />
-      )}
+        )}
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  centro: {
-    marginTop: espacamentos.xl,
-    gap: espacamentos.md,
-  },
+const estilos =
+  StyleSheet.create({
+    centro: {
+      marginTop:
+        espacamentos.xl,
 
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
-});
+      gap: espacamentos.md,
+    },
+
+    erro: {
+      fontSize:
+        tipografia.corpo,
+
+      textAlign: 'center',
+
+      color: cores.perigo,
+    },
+  });
