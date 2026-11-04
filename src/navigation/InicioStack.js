@@ -1,36 +1,51 @@
 // NAVIGATION — InicioStack
 // Mantém a barra de abas visível ao abrir telas a partir do Início.
 
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 
 import { HomeScreen } from '../screens/HomeScreen';
+
 import { SurviveScreen } from '../screens/SurviveScreen';
+
 import { ListaFrasesScreen } from '../screens/ListaFrasesScreen';
+
 import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
+
 import { ConselhosScreen } from '../screens/ConselhosScreen';
+
 import { ConselhoDetalheScreen } from '../screens/ConselhoDetalheScreen';
+
+import { CriarConselhoScreen } from '../screens/CriarConselhoScreen';
 
 import { cores } from '../theme';
 
-const Stack = createNativeStackNavigator();
+const Stack =
+  createNativeStackNavigator();
 
 export function InicioStack({ route }) {
-  const usuario = route.params?.usuario;
+  const usuario =
+    route.params?.usuario;
 
   return (
     <Stack.Navigator
       initialRouteName="InicioHome"
       screenOptions={{
         headerShown: false,
+
         contentStyle: {
-          backgroundColor: cores.fundo,
+          backgroundColor:
+            cores.fundo,
         },
       }}
     >
       <Stack.Screen
         name="InicioHome"
         component={HomeScreen}
-        initialParams={{ usuario }}
+        initialParams={{
+          usuario,
+        }}
       />
 
       <Stack.Screen
@@ -40,22 +55,37 @@ export function InicioStack({ route }) {
 
       <Stack.Screen
         name="ListaFrases"
-        component={ListaFrasesScreen}
+        component={
+          ListaFrasesScreen
+        }
       />
 
       <Stack.Screen
         name="FraseDetalhe"
-        component={FraseDetalheScreen}
+        component={
+          FraseDetalheScreen
+        }
       />
 
       <Stack.Screen
         name="Conselhos"
-        component={ConselhosScreen}
+        component={
+          ConselhosScreen
+        }
       />
 
       <Stack.Screen
         name="ConselhoDetalhe"
-        component={ConselhoDetalheScreen}
+        component={
+          ConselhoDetalheScreen
+        }
+      />
+
+      <Stack.Screen
+        name="CriarConselho"
+        component={
+          CriarConselhoScreen
+        }
       />
 
       {/* Próxima: Atividades */}

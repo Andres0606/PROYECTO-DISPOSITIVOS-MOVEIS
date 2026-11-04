@@ -5,6 +5,7 @@ import {
 } from 'react';
 
 import {
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -26,7 +27,8 @@ export function ConselhoDetalheScreen({
   navigation,
   route,
 }) {
-  const conselho = route.params?.conselho;
+  const conselho =
+    route.params?.conselho;
 
   const [curtido, setCurtido] =
     useState(false);
@@ -35,7 +37,9 @@ export function ConselhoDetalheScreen({
     return (
       <ScreenTemplate
         titulo="Conselhos"
-        aoVoltar={() => navigation.goBack()}
+        aoVoltar={() =>
+          navigation.goBack()
+        }
       >
         <Text style={estilos.erro}>
           Conselho não encontrado.
@@ -45,16 +49,24 @@ export function ConselhoDetalheScreen({
   }
 
   function alternarCurtida() {
-    setCurtido((atual) => !atual);
+    setCurtido(
+      (atual) => !atual
+    );
   }
 
   return (
     <ScreenTemplate
       titulo="Conselhos"
-      aoVoltar={() => navigation.goBack()}
+      aoVoltar={() =>
+        navigation.goBack()
+      }
     >
       {/* AUTOR */}
-      <View style={estilos.cartaoAutor}>
+      <View
+        style={
+          estilos.cartaoAutor
+        }
+      >
         <View style={estilos.avatar}>
           <Ionicons
             name="person-outline"
@@ -68,13 +80,18 @@ export function ConselhoDetalheScreen({
             {conselho.autor}
           </Text>
 
-          <View style={estilos.dadosAutor}>
+          <View
+            style={
+              estilos.dadosAutor
+            }
+          >
             <Text style={estilos.pais}>
               {conselho.pais}
             </Text>
 
             <Text style={estilos.data}>
-              {conselho.tempo ?? '27 ago'}
+              {conselho.tempo ??
+                '27 ago'}
             </Text>
           </View>
         </View>
@@ -86,16 +103,34 @@ export function ConselhoDetalheScreen({
       </Text>
 
       {/* CATEGORIAS */}
-      <View style={estilos.categorias}>
-        <View style={estilos.categoria}>
-          <Text style={estilos.categoriaTexto}>
+      <View
+        style={
+          estilos.categorias
+        }
+      >
+        <View
+          style={estilos.categoria}
+        >
+          <Text
+            style={
+              estilos.categoriaTexto
+            }
+          >
             {conselho.categoria}
           </Text>
         </View>
 
         {conselho.tag && (
-          <View style={estilos.categoria}>
-            <Text style={estilos.categoriaTexto}>
+          <View
+            style={
+              estilos.categoria
+            }
+          >
+            <Text
+              style={
+                estilos.categoriaTexto
+              }
+            >
               {conselho.tag}
             </Text>
           </View>
@@ -103,42 +138,61 @@ export function ConselhoDetalheScreen({
       </View>
 
       {/* DESCRIÇÃO */}
-      <Text style={estilos.descricao}>
+      <Text
+        style={estilos.descricao}
+      >
         {conselho.descricao}
       </Text>
 
-      {/* BOTÃO EDITAR */}
-      <View style={estilos.areaEditar}>
+      {/* IMAGEM OPCIONAL */}
+      {!!conselho.imagem && (
+        <Image
+          source={{
+            uri: conselho.imagem,
+          }}
+          style={estilos.imagem}
+          resizeMode="cover"
+        />
+      )}
+
+      {/* EDITAR */}
+      <View
+        style={estilos.areaEditar}
+      >
         <Pressable
           style={({ pressed }) => [
             estilos.botaoEditar,
-            pressed && estilos.pressionado,
+
+            pressed &&
+              estilos.pressionado,
           ]}
           onPress={() => {
-            // Próxima tela: editar conselho
+            // Próxima etapa:
+            // editar conselho.
           }}
         >
-          <Text style={estilos.botaoEditarTexto}>
+          <Text
+            style={
+              estilos.botaoEditarTexto
+            }
+          >
             Editar
           </Text>
         </Pressable>
       </View>
 
-      {/* RODAPÉ */}
+      {/* INTERAÇÕES */}
       <View style={estilos.rodape}>
         <Pressable
           onPress={alternarCurtida}
           hitSlop={12}
           style={({ pressed }) => [
             estilos.curtidas,
-            pressed && estilos.pressionado,
+
+            pressed &&
+              estilos.pressionado,
           ]}
           accessibilityRole="button"
-          accessibilityLabel={
-            curtido
-              ? 'Remover curtida'
-              : 'Curtir conselho'
-          }
         >
           <Ionicons
             name={
@@ -156,8 +210,13 @@ export function ConselhoDetalheScreen({
           </Text>
         </Pressable>
 
-        <Text style={estilos.comentarios}>
-          {conselho.comentarios ?? 0}{' '}
+        <Text
+          style={
+            estilos.comentarios
+          }
+        >
+          {conselho.comentarios ??
+            0}{' '}
           Comentários
         </Text>
       </View>
@@ -170,7 +229,8 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
 
-    backgroundColor: cores.superficie,
+    backgroundColor:
+      cores.superficie,
 
     borderWidth: 1,
     borderColor: cores.borda,
@@ -180,7 +240,8 @@ const estilos = StyleSheet.create({
     padding: espacamentos.sm,
 
     marginTop: espacamentos.lg,
-    marginBottom: espacamentos.md,
+    marginBottom:
+      espacamentos.md,
   },
 
   avatar: {
@@ -194,34 +255,49 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    marginRight: espacamentos.md,
+    marginRight:
+      espacamentos.md,
   },
 
   autor: {
-    fontSize: tipografia.subtitulo,
+    fontSize:
+      tipografia.subtitulo,
+
     fontWeight: '600',
+
     color: cores.texto,
   },
 
   dadosAutor: {
     flexDirection: 'row',
+
     gap: espacamentos.sm,
+
     marginTop: 2,
   },
 
   pais: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
+    fontSize:
+      tipografia.legenda,
+
+    color:
+      cores.textoSecundario,
   },
 
   data: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
+    fontSize:
+      tipografia.legenda,
+
+    color:
+      cores.textoSecundario,
   },
 
   titulo: {
-    marginHorizontal: espacamentos.sm,
-    marginBottom: espacamentos.md,
+    marginHorizontal:
+      espacamentos.sm,
+
+    marginBottom:
+      espacamentos.md,
 
     fontSize: 18,
     fontWeight: '700',
@@ -231,16 +307,22 @@ const estilos = StyleSheet.create({
 
   categorias: {
     flexDirection: 'row',
+
     gap: espacamentos.sm,
 
-    marginHorizontal: espacamentos.sm,
-    marginBottom: espacamentos.lg,
+    marginHorizontal:
+      espacamentos.sm,
+
+    marginBottom:
+      espacamentos.lg,
   },
 
   categoria: {
     minWidth: 95,
 
-    paddingHorizontal: espacamentos.md,
+    paddingHorizontal:
+      espacamentos.md,
+
     paddingVertical: 6,
 
     borderWidth: 1,
@@ -248,34 +330,55 @@ const estilos = StyleSheet.create({
 
     borderRadius: raios.pill,
 
-    backgroundColor: cores.superficie,
+    backgroundColor:
+      cores.superficie,
 
     alignItems: 'center',
   },
 
   categoriaTexto: {
     fontSize: 11,
+
     color: cores.texto,
   },
 
   descricao: {
-    marginHorizontal: espacamentos.sm,
+    marginHorizontal:
+      espacamentos.sm,
 
-    fontSize: tipografia.legenda,
+    fontSize:
+      tipografia.legenda,
+
     lineHeight: 20,
 
     color: cores.texto,
   },
 
+  imagem: {
+    width: '100%',
+    height: 180,
+
+    marginTop:
+      espacamentos.lg,
+
+    borderRadius: raios.sm,
+
+    backgroundColor:
+      cores.superficie,
+  },
+
   areaEditar: {
     alignItems: 'flex-end',
 
-    marginTop: 60,
-    marginHorizontal: espacamentos.sm,
+    marginTop: 40,
+
+    marginHorizontal:
+      espacamentos.sm,
   },
 
   botaoEditar: {
-    backgroundColor: '#272727',
+    backgroundColor:
+      '#272727',
 
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -284,17 +387,25 @@ const estilos = StyleSheet.create({
   },
 
   botaoEditarTexto: {
-    fontSize: tipografia.legenda,
+    fontSize:
+      tipografia.legenda,
+
     color: '#FFFFFF',
   },
 
   rodape: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+
+    justifyContent:
+      'space-between',
+
     alignItems: 'center',
 
-    marginTop: espacamentos.md,
-    marginHorizontal: espacamentos.sm,
+    marginTop:
+      espacamentos.md,
+
+    marginHorizontal:
+      espacamentos.sm,
   },
 
   curtidas: {
@@ -303,18 +414,27 @@ const estilos = StyleSheet.create({
 
     gap: espacamentos.xs,
 
-    paddingHorizontal: espacamentos.xs,
-    paddingVertical: espacamentos.xs,
+    paddingHorizontal:
+      espacamentos.xs,
+
+    paddingVertical:
+      espacamentos.xs,
   },
 
   numero: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
+    fontSize:
+      tipografia.legenda,
+
+    color:
+      cores.textoSecundario,
   },
 
   comentarios: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
+    fontSize:
+      tipografia.legenda,
+
+    color:
+      cores.textoSecundario,
   },
 
   pressionado: {
@@ -322,10 +442,14 @@ const estilos = StyleSheet.create({
   },
 
   erro: {
-    marginTop: espacamentos.xl,
+    marginTop:
+      espacamentos.xl,
+
     textAlign: 'center',
 
-    fontSize: tipografia.corpo,
+    fontSize:
+      tipografia.corpo,
+
     color: cores.perigo,
   },
 });

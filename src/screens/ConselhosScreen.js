@@ -1,25 +1,30 @@
 // SCREEN — Conselhos de estudantes de intercâmbio
+
 import {
   useCallback,
-  useEffect,
   useState,
 } from 'react';
 
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
+import {
+  useFocusEffect,
+} from '@react-navigation/native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { CardConselho } from '../components/molecules/CardConselho';
 
-import { obterConselhos } from '../services/conselhos';
+import {
+  obterConselhos,
+} from '../services/conselhos';
 
 import {
   cores,
@@ -28,7 +33,9 @@ import {
   tipografia,
 } from '../theme';
 
-export function ConselhosScreen({ navigation }) {
+export function ConselhosScreen({
+  navigation,
+}) {
   const [ordenacao, setOrdenacao] =
     useState('recentes');
 
@@ -62,9 +69,11 @@ export function ConselhosScreen({ navigation }) {
     }
   }, [ordenacao]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar])
+  );
 
   function alternarCurtida(id) {
     setCurtidos((atuais) => {
@@ -79,15 +88,17 @@ export function ConselhosScreen({ navigation }) {
   }
 
   function abrirConselho(conselho) {
-    navigation.navigate('ConselhoDetalhe', {
-      conselho,
-    });
+    navigation.navigate(
+      'ConselhoDetalhe',
+      {
+        conselho,
+      }
+    );
   }
 
   function criarConselho() {
-    Alert.alert(
-      'Novo conselho',
-      'O cadastro de conselhos será implementado na próxima etapa.'
+    navigation.navigate(
+      'CriarConselho'
     );
   }
 
@@ -96,7 +107,8 @@ export function ConselhosScreen({ navigation }) {
       onPress={criarConselho}
       style={({ pressed }) => [
         estilos.botaoAdicionar,
-        pressed && estilos.pressionado,
+        pressed &&
+          estilos.pressionado,
       ]}
       accessibilityRole="button"
       accessibilityLabel="Adicionar conselho"
@@ -112,9 +124,12 @@ export function ConselhosScreen({ navigation }) {
   return (
     <ScreenTemplate
       titulo="Conselhos de estudantes de intercâmbio"
-      aoVoltar={() => navigation.goBack()}
+      aoVoltar={() =>
+        navigation.goBack()
+      }
       flutuante={botaoFlutuante}
     >
+      {/* RECENTES / POPULARES */}
       <View style={estilos.segmentado}>
         <Pressable
           onPress={() =>
@@ -122,11 +137,17 @@ export function ConselhosScreen({ navigation }) {
           }
           style={[
             estilos.segmento,
-            ordenacao === 'recentes' &&
+
+            ordenacao ===
+              'recentes' &&
               estilos.segmentoAtivo,
           ]}
         >
-          <Text style={estilos.segmentoTexto}>
+          <Text
+            style={
+              estilos.segmentoTexto
+            }
+          >
             Recentes
           </Text>
         </Pressable>
@@ -137,16 +158,23 @@ export function ConselhosScreen({ navigation }) {
           }
           style={[
             estilos.segmento,
-            ordenacao === 'populares' &&
+
+            ordenacao ===
+              'populares' &&
               estilos.segmentoAtivo,
           ]}
         >
-          <Text style={estilos.segmentoTexto}>
+          <Text
+            style={
+              estilos.segmentoTexto
+            }
+          >
             Populares
           </Text>
         </Pressable>
       </View>
 
+      {/* CARREGANDO */}
       {carregando && (
         <ActivityIndicator
           color={cores.primaria}
@@ -154,91 +182,128 @@ export function ConselhosScreen({ navigation }) {
         />
       )}
 
-      {!carregando && !!erro && (
-        <Text style={estilos.erro}>
-          {erro}
-        </Text>
-      )}
+      {/* ERRO */}
+      {!carregando &&
+        !!erro && (
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
+        )}
 
-      {!carregando && !erro && (
-        <View style={estilos.lista}>
-          {conselhos.map((conselho) => (
-            <CardConselho
-              key={conselho.id}
-              conselho={conselho}
-              curtido={curtidos.includes(
-                conselho.id
-              )}
-              aoAbrir={() =>
-                abrirConselho(conselho)
-              }
-              aoCurtir={() =>
-                alternarCurtida(
-                  conselho.id
-                )
-              }
-            />
-          ))}
-        </View>
-      )}
+      {/* LISTA */}
+      {!carregando &&
+        !erro && (
+          <View style={estilos.lista}>
+            {conselhos.map(
+              (conselho) => (
+                <CardConselho
+                  key={conselho.id}
+
+                  conselho={
+                    conselho
+                  }
+
+                  curtido={curtidos.includes(
+                    conselho.id
+                  )}
+
+                  aoAbrir={() =>
+                    abrirConselho(
+                      conselho
+                    )
+                  }
+
+                  aoCurtir={() =>
+                    alternarCurtida(
+                      conselho.id
+                    )
+                  }
+                />
+              )
+            )}
+          </View>
+        )}
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  segmentado: {
-    height: 38,
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: cores.segmentoBorda,
-    borderRadius: raios.pill,
-    overflow: 'hidden',
-    marginBottom: espacamentos.md,
-  },
+const estilos =
+  StyleSheet.create({
+    segmentado: {
+      height: 38,
 
-  segmento: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+      flexDirection: 'row',
 
-  segmentoAtivo: {
-    backgroundColor:
-      cores.segmentoSelecionado,
-  },
+      borderWidth: 1,
+      borderColor:
+        cores.segmentoBorda,
 
-  segmentoTexto: {
-    fontSize: tipografia.legenda,
-    color: cores.texto,
-  },
+      borderRadius: raios.pill,
 
-  lista: {
-    gap: espacamentos.md,
-  },
+      overflow: 'hidden',
 
-  carregando: {
-    marginTop: espacamentos.xl,
-  },
+      marginBottom:
+        espacamentos.md,
+    },
 
-  erro: {
-    marginTop: espacamentos.xl,
-    textAlign: 'center',
-    fontSize: tipografia.corpo,
-    color: cores.perigo,
-  },
+    segmento: {
+      flex: 1,
 
-  botaoAdicionar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: cores.superficie,
-    borderWidth: 3,
-    borderColor: cores.texto,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  pressionado: {
-    opacity: 0.55,
-  },
-});
+    segmentoAtivo: {
+      backgroundColor:
+        cores.segmentoSelecionado,
+    },
+
+    segmentoTexto: {
+      fontSize:
+        tipografia.legenda,
+
+      color: cores.texto,
+    },
+
+    lista: {
+      gap: espacamentos.md,
+    },
+
+    carregando: {
+      marginTop:
+        espacamentos.xl,
+    },
+
+    erro: {
+      marginTop:
+        espacamentos.xl,
+
+      textAlign: 'center',
+
+      fontSize:
+        tipografia.corpo,
+
+      color: cores.perigo,
+    },
+
+    botaoAdicionar: {
+      width: 48,
+      height: 48,
+
+      borderRadius: 24,
+
+      backgroundColor:
+        cores.superficie,
+
+      borderWidth: 3,
+      borderColor:
+        cores.texto,
+
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    pressionado: {
+      opacity: 0.55,
+    },
+  });
