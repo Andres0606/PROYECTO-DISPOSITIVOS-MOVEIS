@@ -1,6 +1,7 @@
 // SCREEN — Detalhes da atividade
 
 import {
+  useCallback,
   useState,
 } from 'react';
 
@@ -12,7 +13,15 @@ import {
   View,
 } from 'react-native';
 
+import {
+  useFocusEffect,
+} from '@react-navigation/native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
+
+import {
+  obterAtividadePorId,
+} from '../services/atividades';
 
 import {
   cores,
@@ -25,15 +34,50 @@ export function AtividadeDetalheScreen({
   navigation,
   route,
 }) {
-  const atividade =
+  const atividadeInicial =
     route.params?.atividade;
 
   const ordenacao =
     route.params?.ordenacao ??
     'recentes';
 
-  const [interessado, setInteressado] =
+  const [atividade, setAtividade] =
+    useState(
+      atividadeInicial
+    );
+
+  const [
+    interessado,
+    setInteressado,
+  ] =
     useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function carregarAtividade() {
+        if (
+          !atividadeInicial?.id
+        ) {
+          return;
+        }
+
+        const resultado =
+          await obterAtividadePorId(
+            atividadeInicial.id
+          );
+
+        if (resultado) {
+          setAtividade(
+            resultado
+          );
+        }
+      }
+
+      carregarAtividade();
+    }, [
+      atividadeInicial?.id,
+    ])
+  );
 
   if (!atividade) {
     return (
@@ -57,11 +101,12 @@ export function AtividadeDetalheScreen({
   }
 
   function editarAtividade() {
-    // Próxima tela:
-    // navigation.navigate(
-    //   'EditarAtividade',
-    //   { atividade }
-    // );
+    navigation.navigate(
+      'EditarAtividade',
+      {
+        atividade,
+      }
+    );
   }
 
   return (
@@ -71,8 +116,11 @@ export function AtividadeDetalheScreen({
         navigation.goBack()
       }
     >
-      {/* RECENTES / POPULARES */}
-      <View style={estilos.segmentado}>
+      <View
+        style={
+          estilos.segmentado
+        }
+      >
         <View
           style={[
             estilos.segmento,
@@ -110,11 +158,11 @@ export function AtividadeDetalheScreen({
         </View>
       </View>
 
-      {/* IMAGEM */}
       {atividade.imagem ? (
         <Image
           source={{
-            uri: atividade.imagem,
+            uri:
+              atividade.imagem,
           }}
           style={estilos.imagem}
           resizeMode="cover"
@@ -135,12 +183,12 @@ export function AtividadeDetalheScreen({
         </View>
       )}
 
-      {/* TÍTULO */}
-      <Text style={estilos.titulo}>
+      <Text
+        style={estilos.titulo}
+      >
         {atividade.titulo}
       </Text>
 
-      {/* CATEGORIA */}
       <View
         style={estilos.categoria}
       >
@@ -153,52 +201,57 @@ export function AtividadeDetalheScreen({
         </Text>
       </View>
 
-      {/* DATA E HORÁRIO */}
-      <Text style={estilos.informacao}>
+      <Text
+        style={estilos.informacao}
+      >
         {atividade.dataCompleta ??
           atividade.data}
         {' · '}
         {atividade.horario}
       </Text>
 
-      {/* LOCAL */}
-      <Text style={estilos.informacao}>
-        {atividade.local ??
-          'Ecoparque Chapecó'}
+      <Text
+        style={estilos.informacao}
+      >
+        {atividade.local}
       </Text>
 
-      {/* INTERESSADOS */}
       <Text
         style={
           estilos.interessados
         }
       >
         {atividade.interessados +
-          (interessado ? 1 : 0)}{' '}
+          (interessado
+            ? 1
+            : 0)}{' '}
         pessoas interessadas
       </Text>
 
-      {/* DESCRIÇÃO */}
       <View
         style={
           estilos.descricaoBox
         }
       >
         <Text
-          style={estilos.descricao}
+          style={
+            estilos.descricao
+          }
         >
-          {atividade.descricao ??
-            'Encontro informal para estudantes de intercâmbio que queiram conhecer gente e passar a tarde no parque.'}
+          {atividade.descricao}
         </Text>
       </View>
 
-      {/* BOTÕES */}
-      <View style={estilos.botoes}>
+      <View
+        style={estilos.botoes}
+      >
         <Pressable
           onPress={
             alternarInteresse
           }
-          style={({ pressed }) => [
+          style={({
+            pressed,
+          }) => [
             estilos.botaoInteresse,
 
             interessado &&
@@ -223,7 +276,9 @@ export function AtividadeDetalheScreen({
           onPress={
             editarAtividade
           }
-          style={({ pressed }) => [
+          style={({
+            pressed,
+          }) => [
             estilos.botaoEditar,
 
             pressed &&
@@ -334,7 +389,8 @@ const estilos =
 
       fontSize: 19,
 
-      fontWeight: '700',
+      fontWeight:
+        '700',
 
       color:
         cores.texto,
@@ -343,8 +399,6 @@ const estilos =
     categoria: {
       alignSelf:
         'flex-start',
-
-      minWidth: 70,
 
       paddingHorizontal:
         espacamentos.md,
