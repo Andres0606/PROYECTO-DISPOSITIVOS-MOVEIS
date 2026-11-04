@@ -78,6 +78,12 @@ export function ConselhosScreen({ navigation }) {
     });
   }
 
+  function abrirConselho(conselho) {
+    navigation.navigate('ConselhoDetalhe', {
+      conselho,
+    });
+  }
+
   function criarConselho() {
     Alert.alert(
       'Novo conselho',
@@ -163,6 +169,9 @@ export function ConselhosScreen({ navigation }) {
               curtido={curtidos.includes(
                 conselho.id
               )}
+              aoAbrir={() =>
+                abrirConselho(conselho)
+              }
               aoCurtir={() =>
                 alternarCurtida(
                   conselho.id

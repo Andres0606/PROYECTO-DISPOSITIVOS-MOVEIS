@@ -19,50 +19,68 @@ export function CardConselho({
   conselho,
   curtido = false,
   aoCurtir,
+  aoAbrir,
 }) {
   return (
     <View style={estilos.cartao}>
-      <View style={estilos.cabecalho}>
-        <View style={estilos.avatar}>
-          <Ionicons
-            name="person-outline"
-            size={21}
-            color={cores.texto}
-          />
+      <Pressable
+        onPress={aoAbrir}
+        style={({ pressed }) => [
+          estilos.conteudo,
+          pressed && estilos.pressionado,
+        ]}
+        accessibilityRole="button"
+      >
+        <View style={estilos.cabecalho}>
+          <View style={estilos.avatar}>
+            <Ionicons
+              name="person-outline"
+              size={21}
+              color={cores.texto}
+            />
+          </View>
+
+          <Text style={estilos.autor}>
+            {conselho.autor}
+          </Text>
+
+          <Text style={estilos.pais}>
+            {conselho.pais}
+          </Text>
         </View>
 
-        <Text style={estilos.autor}>
-          {conselho.autor}
+        <Text style={estilos.texto}>
+          {conselho.texto}
         </Text>
 
-        <Text style={estilos.pais}>
-          {conselho.pais}
-        </Text>
-      </View>
-
-      <Text style={estilos.texto}>
-        {conselho.texto}
-      </Text>
-
-      <View style={estilos.rodape}>
         <View style={estilos.categoria}>
           <Text style={estilos.categoriaTexto}>
             {conselho.categoria}
           </Text>
         </View>
+      </Pressable>
+
+      <View style={estilos.rodape}>
+        <View />
 
         <Pressable
-          onPress={aoCurtir}
+          onPress={() => {
+            if (aoCurtir) {
+              aoCurtir();
+            }
+          }}
+          hitSlop={10}
           style={({ pressed }) => [
             estilos.curtidas,
             pressed && estilos.pressionado,
           ]}
           accessibilityRole="button"
+          accessibilityLabel="Curtir conselho"
         >
           <Ionicons
             name={curtido ? 'heart' : 'heart-outline'}
-            size={18}
-            color={cores.texto}
+            size={20}
+            color={curtido ? '#000000' : cores.texto}
           />
 
           <Text style={estilos.numeroCurtidas}>
@@ -81,6 +99,10 @@ const estilos = StyleSheet.create({
     borderColor: cores.borda,
     borderRadius: raios.sm,
     padding: espacamentos.sm,
+  },
+
+  conteudo: {
+    flex: 1,
   },
 
   cabecalho: {
@@ -124,9 +146,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: espacamentos.xs,
   },
 
   categoria: {
+    alignSelf: 'flex-start',
     minWidth: 94,
     height: 27,
     paddingHorizontal: espacamentos.md,
@@ -146,7 +170,9 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: espacamentos.xs,
-    padding: espacamentos.xs,
+    paddingHorizontal: espacamentos.sm,
+    paddingVertical: espacamentos.xs,
+    zIndex: 10,
   },
 
   numeroCurtidas: {

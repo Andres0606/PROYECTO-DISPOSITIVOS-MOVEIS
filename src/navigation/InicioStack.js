@@ -8,6 +8,7 @@ import { SurviveScreen } from '../screens/SurviveScreen';
 import { ListaFrasesScreen } from '../screens/ListaFrasesScreen';
 import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
 import { ConselhosScreen } from '../screens/ConselhosScreen';
+import { ConselhoDetalheScreen } from '../screens/ConselhoDetalheScreen';
 
 import { cores } from '../theme';
 
@@ -50,6 +51,11 @@ export function InicioStack({ route }) {
       <Stack.Screen
         name="Conselhos"
         component={ConselhosScreen}
+      />
+
+      <Stack.Screen
+        name="ConselhoDetalhe"
+        component={ConselhoDetalheScreen}
       />
 
       {/* Próxima: Atividades */}
