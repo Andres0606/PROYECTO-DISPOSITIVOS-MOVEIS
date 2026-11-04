@@ -1,12 +1,22 @@
 // SCREEN — Perfil
 
 import {
+  useCallback,
+  useState,
+} from 'react';
+
+import {
   Alert,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+
+import {
+  useFocusEffect,
+} from '@react-navigation/native';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,6 +25,11 @@ import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import {
   logout,
 } from '../services/auth';
+
+import {
+  obterFotoLocal,
+  obterUsuario,
+} from '../services/storage';
 
 import {
   cores,
@@ -27,8 +42,54 @@ export function PerfilScreen({
   navigation,
   route,
 }) {
-  const usuario =
+  const usuarioInicial =
     route.params?.usuario;
+
+  const [
+    usuario,
+    setUsuario,
+  ] = useState(
+    usuarioInicial
+  );
+
+  const [
+    fotoUri,
+    setFotoUri,
+  ] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function carregarPerfil() {
+        try {
+          const [
+            usuarioSalvo,
+            fotoSalva,
+          ] =
+            await Promise.all([
+              obterUsuario(),
+              obterFotoLocal(),
+            ]);
+
+          if (usuarioSalvo) {
+            setUsuario(
+              usuarioSalvo
+            );
+          }
+
+          setFotoUri(
+            fotoSalva ?? null
+          );
+        } catch (erro) {
+          console.log(
+            'Erro ao carregar perfil:',
+            erro
+          );
+        }
+      }
+
+      carregarPerfil();
+    }, [])
+  );
 
   const nome =
     usuario?.nome ??
@@ -43,9 +104,11 @@ export function PerfilScreen({
     '27 ago';
 
   function abrirEditarPerfil() {
-    Alert.alert(
-      'Editar perfil',
-      'A tela de edição do perfil será implementada na próxima etapa.'
+    navigation.navigate(
+      'EditarPerfil',
+      {
+        usuario,
+      }
     );
   }
 
@@ -79,13 +142,14 @@ export function PerfilScreen({
 
   function confirmarLogout() {
     Alert.alert(
-      'Cerrar sessão',
+      'Encerrar sessão',
       'Tem certeza que deseja sair da sua conta?',
       [
         {
           text: 'Cancelar',
           style: 'cancel',
         },
+
         {
           text: 'Sair',
           style: 'destructive',
@@ -106,6 +170,7 @@ export function PerfilScreen({
 
       navegacaoRaiz?.reset({
         index: 0,
+
         routes: [
           {
             name: 'Login',
@@ -130,17 +195,28 @@ export function PerfilScreen({
           estilos.cartaoUsuario
         }
       >
-        <View
-          style={
-            estilos.avatar
-          }
-        >
-          <Ionicons
-            name="person-outline"
-            size={28}
-            color="#000000"
+        {fotoUri ? (
+          <Image
+            source={{
+              uri: fotoUri,
+            }}
+            style={
+              estilos.avatarFoto
+            }
           />
-        </View>
+        ) : (
+          <View
+            style={
+              estilos.avatar
+            }
+          >
+            <Ionicons
+              name="person-outline"
+              size={28}
+              color="#000000"
+            />
+          </View>
+        )}
 
         <View
           style={
@@ -243,7 +319,7 @@ export function PerfilScreen({
               estilos.botaoLogoutTexto
             }
           >
-            Cerrar sessão
+            Encerrar sessão
           </Text>
         </Pressable>
       </View>
@@ -287,9 +363,11 @@ function OpcaoPerfil({
 const estilos =
   StyleSheet.create({
     cartaoUsuario: {
-      flexDirection: 'row',
+      flexDirection:
+        'row',
 
-      alignItems: 'center',
+      alignItems:
+        'center',
 
       marginTop:
         espacamentos.lg,
@@ -323,6 +401,19 @@ const estilos =
 
       justifyContent:
         'center',
+
+      backgroundColor:
+        '#A9A6AF',
+    },
+
+    avatarFoto: {
+      width: 48,
+      height: 48,
+
+      borderRadius: 24,
+
+      marginRight:
+        espacamentos.md,
 
       backgroundColor:
         '#A9A6AF',
