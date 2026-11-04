@@ -9,11 +9,14 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { SurviveScreen } from '../screens/SurviveScreen';
 import { ListaFrasesScreen } from '../screens/ListaFrasesScreen';
 import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
+
 import { ConselhosScreen } from '../screens/ConselhosScreen';
 import { ConselhoDetalheScreen } from '../screens/ConselhoDetalheScreen';
 import { CriarConselhoScreen } from '../screens/CriarConselhoScreen';
 import { EditarConselhoScreen } from '../screens/EditarConselhoScreen';
+
 import { AtividadesScreen } from '../screens/AtividadesScreen';
+import { AtividadeDetalheScreen } from '../screens/AtividadeDetalheScreen';
 
 import { cores } from '../theme';
 
@@ -97,6 +100,13 @@ export function InicioStack({
         name="Atividades"
         component={
           AtividadesScreen
+        }
+      />
+
+      <Stack.Screen
+        name="AtividadeDetalhe"
+        component={
+          AtividadeDetalheScreen
         }
       />
     </Stack.Navigator>

@@ -46,25 +46,26 @@ export function AtividadesScreen({
   const [erro, setErro] =
     useState('');
 
-  const carregar = useCallback(async () => {
-    setCarregando(true);
-    setErro('');
+  const carregar =
+    useCallback(async () => {
+      setCarregando(true);
+      setErro('');
 
-    try {
-      const resultado =
-        await obterAtividades(
-          ordenacao
+      try {
+        const resultado =
+          await obterAtividades(
+            ordenacao
+          );
+
+        setAtividades(resultado);
+      } catch (e) {
+        setErro(
+          'Não foi possível carregar as atividades.'
         );
-
-      setAtividades(resultado);
-    } catch (e) {
-      setErro(
-        'Não foi possível carregar as atividades.'
-      );
-    } finally {
-      setCarregando(false);
-    }
-  }, [ordenacao]);
+      } finally {
+        setCarregando(false);
+      }
+    }, [ordenacao]);
 
   useEffect(() => {
     carregar();
@@ -73,9 +74,12 @@ export function AtividadesScreen({
   function abrirAtividade(
     atividade
   ) {
-    Alert.alert(
-      atividade.titulo,
-      'Os detalhes da atividade serão implementados na próxima tela.'
+    navigation.navigate(
+      'AtividadeDetalhe',
+      {
+        atividade,
+        ordenacao,
+      }
     );
   }
 
@@ -112,13 +116,21 @@ export function AtividadesScreen({
       aoVoltar={() =>
         navigation.goBack()
       }
-      flutuante={botaoFlutuante}
+      flutuante={
+        botaoFlutuante
+      }
     >
       {/* RECENTES / POPULARES */}
-      <View style={estilos.segmentado}>
+      <View
+        style={
+          estilos.segmentado
+        }
+      >
         <Pressable
           onPress={() =>
-            setOrdenacao('recentes')
+            setOrdenacao(
+              'recentes'
+            )
           }
           style={[
             estilos.segmento,
@@ -139,7 +151,9 @@ export function AtividadesScreen({
 
         <Pressable
           onPress={() =>
-            setOrdenacao('populares')
+            setOrdenacao(
+              'populares'
+            )
           }
           style={[
             estilos.segmento,
@@ -162,15 +176,21 @@ export function AtividadesScreen({
       {/* CARREGANDO */}
       {carregando && (
         <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.carregando}
+          color={
+            cores.primaria
+          }
+          style={
+            estilos.carregando
+          }
         />
       )}
 
       {/* ERRO */}
       {!carregando &&
         !!erro && (
-          <Text style={estilos.erro}>
+          <Text
+            style={estilos.erro}
+          >
             {erro}
           </Text>
         )}
@@ -178,12 +198,18 @@ export function AtividadesScreen({
       {/* LISTA */}
       {!carregando &&
         !erro && (
-          <View style={estilos.lista}>
+          <View
+            style={estilos.lista}
+          >
             {atividades.map(
               (atividade) => (
                 <CardAtividade
-                  key={atividade.id}
-                  atividade={atividade}
+                  key={
+                    atividade.id
+                  }
+                  atividade={
+                    atividade
+                  }
                   aoAbrir={() =>
                     abrirAtividade(
                       atividade
@@ -203,7 +229,8 @@ const estilos =
     segmentado: {
       height: 38,
 
-      flexDirection: 'row',
+      flexDirection:
+        'row',
 
       borderWidth: 1,
 
@@ -213,7 +240,8 @@ const estilos =
       borderRadius:
         raios.pill,
 
-      overflow: 'hidden',
+      overflow:
+        'hidden',
 
       marginBottom:
         espacamentos.lg,
@@ -222,8 +250,11 @@ const estilos =
     segmento: {
       flex: 1,
 
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems:
+        'center',
+
+      justifyContent:
+        'center',
     },
 
     segmentoAtivo: {
@@ -235,11 +266,13 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      color: cores.texto,
+      color:
+        cores.texto,
     },
 
     lista: {
-      gap: espacamentos.md,
+      gap:
+        espacamentos.md,
     },
 
     carregando: {
@@ -251,12 +284,14 @@ const estilos =
       marginTop:
         espacamentos.xl,
 
-      textAlign: 'center',
+      textAlign:
+        'center',
 
       fontSize:
         tipografia.corpo,
 
-      color: cores.perigo,
+      color:
+        cores.perigo,
     },
 
     botaoAdicionar: {
@@ -268,8 +303,11 @@ const estilos =
       backgroundColor:
         '#000000',
 
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems:
+        'center',
+
+      justifyContent:
+        'center',
     },
 
     pressionado: {

@@ -3,26 +3,60 @@
 const ATIVIDADES = [
   {
     id: '1',
-    titulo: 'Piquenique no Ecoparque',
+
+    titulo:
+      'Piquenique no Ecoparque',
+
     categoria: 'Social',
+
     data: '14 sept',
+    dataCompleta:
+      '14 de setembro',
+
     horario: '15:00',
+
+    local:
+      'Ecoparque Chapecó',
+
     interessados: 12,
+
+    descricao:
+      'Encontro informal para estudantes de intercâmbio que queiram conhecer gente e passar a tarde no parque.',
+
     imagem:
       'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80',
-    dataOrdenacao: '2026-09-14T15:00:00',
+
+    dataOrdenacao:
+      '2026-09-14T15:00:00',
   },
 
   {
     id: '2',
-    titulo: 'Partida de futebol',
+
+    titulo:
+      'Partida de futebol',
+
     categoria: 'Social',
+
     data: '15 sept',
+    dataCompleta:
+      '15 de setembro',
+
     horario: '17:00',
+
+    local:
+      'Campo universitário',
+
     interessados: 8,
+
+    descricao:
+      'Partida amistosa de futebol entre estudantes para socializar, praticar esporte e conhecer novas pessoas.',
+
     imagem:
       'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80',
-    dataOrdenacao: '2026-09-15T17:00:00',
+
+    dataOrdenacao:
+      '2026-09-15T17:00:00',
   },
 ];
 
@@ -37,9 +71,13 @@ export async function obterAtividades(
 ) {
   await esperar(300);
 
-  const lista = [...ATIVIDADES];
+  const lista = [
+    ...ATIVIDADES,
+  ];
 
-  if (ordenacao === 'populares') {
+  if (
+    ordenacao === 'populares'
+  ) {
     return lista.sort(
       (a, b) =>
         b.interessados -
@@ -49,7 +87,24 @@ export async function obterAtividades(
 
   return lista.sort(
     (a, b) =>
-      new Date(a.dataOrdenacao) -
-      new Date(b.dataOrdenacao)
+      new Date(
+        a.dataOrdenacao
+      ) -
+      new Date(
+        b.dataOrdenacao
+      )
+  );
+}
+
+export async function obterAtividadePorId(
+  id
+) {
+  await esperar(100);
+
+  return (
+    ATIVIDADES.find(
+      (atividade) =>
+        atividade.id === id
+    ) ?? null
   );
 }
