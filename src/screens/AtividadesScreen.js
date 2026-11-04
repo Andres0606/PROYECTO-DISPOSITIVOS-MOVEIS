@@ -2,18 +2,20 @@
 
 import {
   useCallback,
-  useEffect,
   useState,
 } from 'react';
 
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+
+import {
+  useFocusEffect,
+} from '@react-navigation/native';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -67,9 +69,11 @@ export function AtividadesScreen({
       }
     }, [ordenacao]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar])
+  );
 
   function abrirAtividade(
     atividade
@@ -84,9 +88,8 @@ export function AtividadesScreen({
   }
 
   function criarAtividade() {
-    Alert.alert(
-      'Nova atividade',
-      'A criação de atividades será implementada na próxima etapa.'
+    navigation.navigate(
+      'CriarAtividade'
     );
   }
 

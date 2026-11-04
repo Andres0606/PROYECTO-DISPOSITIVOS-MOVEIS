@@ -17,6 +17,7 @@ import { EditarConselhoScreen } from '../screens/EditarConselhoScreen';
 
 import { AtividadesScreen } from '../screens/AtividadesScreen';
 import { AtividadeDetalheScreen } from '../screens/AtividadeDetalheScreen';
+import { CriarAtividadeScreen } from '../screens/CriarAtividadeScreen';
 
 import { cores } from '../theme';
 
@@ -107,6 +108,13 @@ export function InicioStack({
         name="AtividadeDetalhe"
         component={
           AtividadeDetalheScreen
+        }
+      />
+
+      <Stack.Screen
+        name="CriarAtividade"
+        component={
+          CriarAtividadeScreen
         }
       />
     </Stack.Navigator>

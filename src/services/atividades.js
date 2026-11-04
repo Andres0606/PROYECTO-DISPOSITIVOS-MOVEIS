@@ -1,6 +1,6 @@
 // SERVICE — Atividades e planos
 
-const ATIVIDADES = [
+let ATIVIDADES = [
   {
     id: '1',
 
@@ -10,6 +10,7 @@ const ATIVIDADES = [
     categoria: 'Social',
 
     data: '14 sept',
+
     dataCompleta:
       '14 de setembro',
 
@@ -39,6 +40,7 @@ const ATIVIDADES = [
     categoria: 'Social',
 
     data: '15 sept',
+
     dataCompleta:
       '15 de setembro',
 
@@ -107,4 +109,51 @@ export async function obterAtividadePorId(
         atividade.id === id
     ) ?? null
   );
+}
+
+export async function criarAtividade({
+  nome,
+  descricao,
+  categoria,
+  data,
+  hora,
+  local,
+}) {
+  await esperar(300);
+
+  const agora =
+    new Date();
+
+  const novaAtividade = {
+    id:
+      Date.now().toString(),
+
+    titulo: nome,
+
+    categoria,
+
+    data,
+
+    dataCompleta: data,
+
+    horario: hora,
+
+    local,
+
+    interessados: 0,
+
+    descricao,
+
+    imagem: null,
+
+    dataOrdenacao:
+      agora.toISOString(),
+  };
+
+  ATIVIDADES = [
+    novaAtividade,
+    ...ATIVIDADES,
+  ];
+
+  return novaAtividade;
 }
