@@ -19,18 +19,23 @@ import { ConselhoDetalheScreen } from '../screens/ConselhoDetalheScreen';
 
 import { CriarConselhoScreen } from '../screens/CriarConselhoScreen';
 
+import { EditarConselhoScreen } from '../screens/EditarConselhoScreen';
+
 import { cores } from '../theme';
 
 const Stack =
   createNativeStackNavigator();
 
-export function InicioStack({ route }) {
+export function InicioStack({
+  route,
+}) {
   const usuario =
     route.params?.usuario;
 
   return (
     <Stack.Navigator
       initialRouteName="InicioHome"
+
       screenOptions={{
         headerShown: false,
 
@@ -85,6 +90,13 @@ export function InicioStack({ route }) {
         name="CriarConselho"
         component={
           CriarConselhoScreen
+        }
+      />
+
+      <Stack.Screen
+        name="EditarConselho"
+        component={
+          EditarConselhoScreen
         }
       />
 

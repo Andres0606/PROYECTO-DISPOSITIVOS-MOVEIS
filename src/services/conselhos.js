@@ -106,6 +106,19 @@ export async function obterConselhos(
   );
 }
 
+export async function obterConselhoPorId(
+  id
+) {
+  await esperar(100);
+
+  return (
+    CONSELHOS.find(
+      (conselho) =>
+        conselho.id === id
+    ) ?? null
+  );
+}
+
 export async function criarConselho({
   titulo,
   categoria,
@@ -114,7 +127,8 @@ export async function criarConselho({
 }) {
   await esperar(300);
 
-  const agora = new Date();
+  const agora =
+    new Date();
 
   const novoConselho = {
     id: Date.now().toString(),
@@ -123,7 +137,6 @@ export async function criarConselho({
     pais: 'Colômbia',
 
     texto: titulo,
-
     descricao: conteudo,
 
     categoria,
@@ -135,7 +148,8 @@ export async function criarConselho({
     curtidas: 0,
     comentarios: 0,
 
-    data: agora.toISOString(),
+    data:
+      agora.toISOString(),
 
     tempo: 'agora',
   };
@@ -146,4 +160,40 @@ export async function criarConselho({
   ];
 
   return novoConselho;
+}
+
+export async function atualizarConselho(
+  id,
+  {
+    titulo,
+    categoria,
+    conteudo,
+  }
+) {
+  await esperar(300);
+
+  const indice =
+    CONSELHOS.findIndex(
+      (conselho) =>
+        conselho.id === id
+    );
+
+  if (indice === -1) {
+    throw new Error(
+      'Conselho não encontrado.'
+    );
+  }
+
+  const conselhoAtualizado = {
+    ...CONSELHOS[indice],
+
+    texto: titulo,
+    categoria,
+    descricao: conteudo,
+  };
+
+  CONSELHOS[indice] =
+    conselhoAtualizado;
+
+  return conselhoAtualizado;
 }

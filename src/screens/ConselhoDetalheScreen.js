@@ -1,6 +1,7 @@
 // SCREEN — Detalhes do conselho
 
 import {
+  useCallback,
   useState,
 } from 'react';
 
@@ -12,9 +13,17 @@ import {
   View,
 } from 'react-native';
 
+import {
+  useFocusEffect,
+} from '@react-navigation/native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
+
+import {
+  obterConselhoPorId,
+} from '../services/conselhos';
 
 import {
   cores,
@@ -27,11 +36,35 @@ export function ConselhoDetalheScreen({
   navigation,
   route,
 }) {
-  const conselho =
+  const conselhoInicial =
     route.params?.conselho;
+
+  const [conselho, setConselho] =
+    useState(conselhoInicial);
 
   const [curtido, setCurtido] =
     useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function carregarConselho() {
+        if (!conselhoInicial?.id) {
+          return;
+        }
+
+        const resultado =
+          await obterConselhoPorId(
+            conselhoInicial.id
+          );
+
+        if (resultado) {
+          setConselho(resultado);
+        }
+      }
+
+      carregarConselho();
+    }, [conselhoInicial?.id])
+  );
 
   if (!conselho) {
     return (
@@ -51,6 +84,15 @@ export function ConselhoDetalheScreen({
   function alternarCurtida() {
     setCurtido(
       (atual) => !atual
+    );
+  }
+
+  function editarConselho() {
+    navigation.navigate(
+      'EditarConselho',
+      {
+        conselho,
+      }
     );
   }
 
@@ -137,14 +179,14 @@ export function ConselhoDetalheScreen({
         )}
       </View>
 
-      {/* DESCRIÇÃO */}
+      {/* CONTEÚDO */}
       <Text
         style={estilos.descricao}
       >
         {conselho.descricao}
       </Text>
 
-      {/* IMAGEM OPCIONAL */}
+      {/* IMAGEM */}
       {!!conselho.imagem && (
         <Image
           source={{
@@ -160,16 +202,13 @@ export function ConselhoDetalheScreen({
         style={estilos.areaEditar}
       >
         <Pressable
+          onPress={editarConselho}
           style={({ pressed }) => [
             estilos.botaoEditar,
 
             pressed &&
               estilos.pressionado,
           ]}
-          onPress={() => {
-            // Próxima etapa:
-            // editar conselho.
-          }}
         >
           <Text
             style={
@@ -239,7 +278,9 @@ const estilos = StyleSheet.create({
 
     padding: espacamentos.sm,
 
-    marginTop: espacamentos.lg,
+    marginTop:
+      espacamentos.lg,
+
     marginBottom:
       espacamentos.md,
   },
@@ -250,7 +291,8 @@ const estilos = StyleSheet.create({
 
     borderRadius: 20,
 
-    backgroundColor: '#B7B5BB',
+    backgroundColor:
+      '#B7B5BB',
 
     alignItems: 'center',
     justifyContent: 'center',
