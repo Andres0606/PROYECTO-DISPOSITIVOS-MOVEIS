@@ -8,6 +8,7 @@ import { PerfilScreen } from '../screens/PerfilScreen';
 import { EditarPerfilScreen } from '../screens/EditarPerfilScreen';
 import { ConfiguracoesScreen } from '../screens/ConfiguracoesScreen';
 import { RecursosScreen } from '../screens/RecursosScreen';
+import { FavoritosScreen } from '../screens/FavoritosScreen';
 
 const Stack =
   createNativeStackNavigator();
@@ -45,6 +46,13 @@ export function PerfilStack({
         name="Configuracoes"
         component={
           ConfiguracoesScreen
+        }
+      />
+
+      <Stack.Screen
+        name="Favoritos"
+        component={
+          FavoritosScreen
         }
       />
 

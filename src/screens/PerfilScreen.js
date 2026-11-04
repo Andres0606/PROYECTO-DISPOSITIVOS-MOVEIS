@@ -113,9 +113,8 @@ export function PerfilScreen({
   }
 
   function abrirFavoritos() {
-    Alert.alert(
-      'Favoritos',
-      'A tela de favoritos será implementada na próxima etapa.'
+    navigation.navigate(
+      'Favoritos'
     );
   }
 
