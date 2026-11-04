@@ -6,6 +6,7 @@ import {
 
 import { PerfilScreen } from '../screens/PerfilScreen';
 import { EditarPerfilScreen } from '../screens/EditarPerfilScreen';
+import { ConfiguracoesScreen } from '../screens/ConfiguracoesScreen';
 import { RecursosScreen } from '../screens/RecursosScreen';
 
 const Stack =
@@ -37,6 +38,13 @@ export function PerfilStack({
         name="EditarPerfil"
         component={
           EditarPerfilScreen
+        }
+      />
+
+      <Stack.Screen
+        name="Configuracoes"
+        component={
+          ConfiguracoesScreen
         }
       />
 

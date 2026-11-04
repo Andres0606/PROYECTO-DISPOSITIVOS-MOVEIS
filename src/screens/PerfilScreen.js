@@ -120,9 +120,8 @@ export function PerfilScreen({
   }
 
   function abrirConfiguracao() {
-    Alert.alert(
-      'Configuração',
-      'A tela de configuração será implementada na próxima etapa.'
+    navigation.navigate(
+      'Configuracoes'
     );
   }
 
@@ -189,7 +188,6 @@ export function PerfilScreen({
     <ScreenTemplate
       titulo="Perfil"
     >
-      {/* USUÁRIO */}
       <View
         style={
           estilos.cartaoUsuario
@@ -255,7 +253,6 @@ export function PerfilScreen({
         </View>
       </View>
 
-      {/* MENU */}
       <View
         style={
           estilos.menu
@@ -297,7 +294,6 @@ export function PerfilScreen({
         />
       </View>
 
-      {/* LOGOUT */}
       <View
         style={
           estilos.areaLogout
@@ -414,9 +410,6 @@ const estilos =
 
       marginRight:
         espacamentos.md,
-
-      backgroundColor:
-        '#A9A6AF',
     },
 
     dadosUsuario: {
