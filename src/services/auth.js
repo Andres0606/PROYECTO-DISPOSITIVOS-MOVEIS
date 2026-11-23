@@ -1,6 +1,4 @@
 // SERVICE — Autenticação
-// Nesta etapa, a autenticação ainda é simulada.
-// Depois, fazerLogin e sessaoAtiva serão conectados à API real.
 
 import {
   limparSessao,
@@ -10,37 +8,28 @@ import {
   salvarUsuario,
 } from './storage';
 
-const USUARIO_TESTE = {
-  nome: 'Estudante Teste',
-  email: 'aluno@interchapeco.com',
-  senha: '123456',
-  pais: 'Colômbia',
-  universidade: 'Unochapecó',
-};
+import {
+  loginApi,
+} from './api';
 
-function esperar(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// ============================================================
+// LOGIN
+// ============================================================
 
-export async function fazerLogin(email, senha) {
-  await esperar(600);
+export async function fazerLogin(
+  email,
+  senha
+) {
+  const resultado =
+    await loginApi(
+      email.trim().toLowerCase(),
+      senha
+    );
 
-  const credenciaisCorretas =
-    email.toLowerCase() === USUARIO_TESTE.email &&
-    senha === USUARIO_TESTE.senha;
-
-  if (!credenciaisCorretas) {
-    throw new Error('E-mail ou senha inválidos.');
-  }
-
-  const token = 'token-fixo-de-teste';
-
-  const usuario = {
-    nome: USUARIO_TESTE.nome,
-    email: USUARIO_TESTE.email,
-    pais: USUARIO_TESTE.pais,
-    universidade: USUARIO_TESTE.universidade,
-  };
+  const {
+    token,
+    usuario,
+  } = resultado;
 
   await salvarToken(token);
   await salvarUsuario(usuario);
@@ -50,6 +39,11 @@ export async function fazerLogin(email, senha) {
     usuario,
   };
 }
+
+// ============================================================
+// CADASTRO
+// Ainda será conectado ao backend
+// ============================================================
 
 export async function fazerCadastro({
   nome,
@@ -57,50 +51,46 @@ export async function fazerCadastro({
   email,
   universidade,
 }) {
-  await esperar(600);
-
-  const token = 'token-fixo-de-teste';
-
-  const usuario = {
-    nome,
-    email,
-    pais,
-    universidade,
-  };
-
-  await salvarToken(token);
-  await salvarUsuario(usuario);
-
-  return {
-    token,
-    usuario,
-  };
+  throw new Error(
+    'Cadastro ainda não conectado ao backend.'
+  );
 }
 
-export async function recuperarSenha(email) {
-  await esperar(600);
+// ============================================================
+// RECUPERAÇÃO DE SENHA
+// Ainda será conectada ao backend
+// ============================================================
 
-  return {
-    enviado: true,
-    email,
-  };
+export async function recuperarSenha(
+  email
+) {
+  throw new Error(
+    'Recuperação de senha ainda não conectada ao backend.'
+  );
 }
+
+// ============================================================
+// VERIFICAÇÃO DE SESSÃO
+// ============================================================
 
 export async function sessaoAtiva() {
-  const token = await obterToken();
+  const token =
+    await obterToken();
 
-  if (!token) {
-    return false;
-  }
-
-  // Quando houver backend real, aqui será feita a validação
-  // do token com a API, como no projeto do professor.
-  return true;
+  return !!token;
 }
+
+// ============================================================
+// USUÁRIO DA SESSÃO
+// ============================================================
 
 export async function obterSessao() {
   return obterUsuario();
 }
+
+// ============================================================
+// LOGOUT
+// ============================================================
 
 export async function logout() {
   await limparSessao();
