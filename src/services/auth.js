@@ -10,6 +10,7 @@ import {
 
 import {
   loginApi,
+  obterUsuarioAutenticadoApi,
 } from './api';
 
 // ============================================================
@@ -70,14 +71,33 @@ export async function recuperarSenha(
 }
 
 // ============================================================
-// VERIFICAÇÃO DE SESSÃO
+// VERIFICAÇÃO REAL DA SESSÃO
 // ============================================================
 
 export async function sessaoAtiva() {
   const token =
     await obterToken();
 
-  return !!token;
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const resultado =
+      await obterUsuarioAutenticadoApi(
+        token
+      );
+
+    await salvarUsuario(
+      resultado.usuario
+    );
+
+    return true;
+  } catch (erro) {
+    await limparSessao();
+
+    return false;
+  }
 }
 
 // ============================================================
