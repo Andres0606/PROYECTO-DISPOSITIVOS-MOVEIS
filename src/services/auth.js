@@ -10,6 +10,7 @@ import {
 
 import {
   loginApi,
+  cadastroApi,
   obterUsuarioAutenticadoApi,
 } from './api';
 
@@ -43,18 +44,44 @@ export async function fazerLogin(
 
 // ============================================================
 // CADASTRO
-// Ainda será conectado ao backend
 // ============================================================
 
 export async function fazerCadastro({
   nome,
-  pais,
+  paisOrigemId,
+  universidadeOrigemId,
+  universidadeDestinoId,
   email,
-  universidade,
+  senha,
 }) {
-  throw new Error(
-    'Cadastro ainda não conectado ao backend.'
-  );
+  const resultado =
+    await cadastroApi({
+      nome: nome.trim(),
+
+      paisOrigemId,
+
+      universidadeOrigemId,
+
+      universidadeDestinoId,
+
+      email:
+        email.trim().toLowerCase(),
+
+      senha,
+    });
+
+  const {
+    token,
+    usuario,
+  } = resultado;
+
+  await salvarToken(token);
+  await salvarUsuario(usuario);
+
+  return {
+    token,
+    usuario,
+  };
 }
 
 // ============================================================
