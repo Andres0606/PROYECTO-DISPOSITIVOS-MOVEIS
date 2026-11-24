@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useState,
 } from 'react';
 
@@ -22,6 +23,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
+import { CampoSelecao } from '../components/molecules/CampoSelecao';
 
 import {
   capturarFoto,
@@ -32,8 +34,17 @@ import {
   obterFotoLocal,
   removerFotoLocal,
   salvarFotoLocal,
-  salvarUsuario,
 } from '../services/storage';
+
+import {
+  atualizarPerfil,
+} from '../services/auth';
+
+import {
+  obterPaises,
+  obterUniversidadesPorPais,
+  obterUniversidadesChapeco,
+} from '../services/api';
 
 import {
   cores,
@@ -49,21 +60,55 @@ export function EditarPerfilScreen({
   const usuario =
     route.params?.usuario ?? {};
 
+  // ==========================================================
+  // DADOS DO USUÁRIO
+  // ==========================================================
+
   const [nome, setNome] =
     useState(usuario?.nome ?? '');
 
-  const [pais, setPais] =
-    useState(usuario?.pais ?? '');
-
-  const [
-    universidade,
-    setUniversidade,
-  ] = useState(
-    usuario?.universidade ?? ''
-  );
-
   const [email, setEmail] =
     useState(usuario?.email ?? '');
+
+  const [paises, setPaises] =
+    useState([]);
+
+  const [
+    universidadesOrigem,
+    setUniversidadesOrigem,
+  ] = useState([]);
+
+  const [
+    universidadesDestino,
+    setUniversidadesDestino,
+  ] = useState([]);
+
+  const [
+    paisSelecionado,
+    setPaisSelecionado,
+  ] = useState(
+    usuario?.paisOrigem ?? null
+  );
+
+  const [
+    universidadeOrigemSelecionada,
+    setUniversidadeOrigemSelecionada,
+  ] = useState(
+    usuario?.universidadeOrigem ??
+      null
+  );
+
+  const [
+    universidadeDestinoSelecionada,
+    setUniversidadeDestinoSelecionada,
+  ] = useState(
+    usuario?.universidadeDestino ??
+      null
+  );
+
+  // ==========================================================
+  // FOTO
+  // ==========================================================
 
   const [fotoUri, setFotoUri] =
     useState(null);
@@ -74,6 +119,15 @@ export function EditarPerfilScreen({
   const [salvando, setSalvando] =
     useState(false);
 
+  const [
+    carregandoDados,
+    setCarregandoDados,
+  ] = useState(true);
+
+  // ==========================================================
+  // CARREGAR FOTO LOCAL
+  // ==========================================================
+
   useFocusEffect(
     useCallback(() => {
       async function carregarFoto() {
@@ -82,7 +136,9 @@ export function EditarPerfilScreen({
             await obterFotoLocal();
 
           if (fotoSalva) {
-            setFotoUri(fotoSalva);
+            setFotoUri(
+              fotoSalva
+            );
           }
         } catch (erro) {
           console.log(
@@ -96,6 +152,63 @@ export function EditarPerfilScreen({
     }, [])
   );
 
+  // ==========================================================
+  // CARREGAR CATÁLOGOS
+  // ==========================================================
+
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        const [
+          listaPaises,
+          listaDestino,
+        ] = await Promise.all([
+          obterPaises(),
+          obterUniversidadesChapeco(),
+        ]);
+
+        setPaises(
+          listaPaises
+        );
+
+        setUniversidadesDestino(
+          listaDestino
+        );
+
+        if (
+          usuario?.paisOrigem?.id
+        ) {
+          const listaOrigem =
+            await obterUniversidadesPorPais(
+              usuario.paisOrigem.id
+            );
+
+          setUniversidadesOrigem(
+            listaOrigem
+          );
+        }
+      } catch (erro) {
+        Alert.alert(
+          'Erro',
+          erro?.message ??
+            'Não foi possível carregar os dados.'
+        );
+      } finally {
+        setCarregandoDados(
+          false
+        );
+      }
+    }
+
+    carregarDados();
+  }, [
+    usuario?.paisOrigem?.id,
+  ]);
+
+  // ==========================================================
+  // VALIDAÇÕES
+  // ==========================================================
+
   function contemLetras(valor) {
     return /[A-Za-zÀ-ÿ]/.test(
       valor
@@ -107,6 +220,103 @@ export function EditarPerfilScreen({
       valor
     );
   }
+
+  // ==========================================================
+  // PAÍS
+  // ==========================================================
+
+  async function selecionarPais(
+    nomePais
+  ) {
+    const pais =
+      paises.find(
+        (item) =>
+          item.nome === nomePais
+      );
+
+    if (!pais) {
+      return;
+    }
+
+    setPaisSelecionado(
+      pais
+    );
+
+    setUniversidadeOrigemSelecionada(
+      null
+    );
+
+    setUniversidadesOrigem(
+      []
+    );
+
+    try {
+      const universidades =
+        await obterUniversidadesPorPais(
+          pais.id
+        );
+
+      setUniversidadesOrigem(
+        universidades
+      );
+    } catch (erro) {
+      Alert.alert(
+        'Erro',
+        erro?.message ??
+          'Não foi possível carregar as universidades.'
+      );
+    }
+  }
+
+  // ==========================================================
+  // UNIVERSIDADE DE ORIGEM
+  // ==========================================================
+
+  function selecionarUniversidadeOrigem(
+    nomeUniversidade
+  ) {
+    const universidade =
+      universidadesOrigem.find(
+        (item) =>
+          item.nome ===
+          nomeUniversidade
+      );
+
+    if (!universidade) {
+      return;
+    }
+
+    setUniversidadeOrigemSelecionada(
+      universidade
+    );
+  }
+
+  // ==========================================================
+  // UNIVERSIDADE DE DESTINO
+  // ==========================================================
+
+  function selecionarUniversidadeDestino(
+    nomeUniversidade
+  ) {
+    const universidade =
+      universidadesDestino.find(
+        (item) =>
+          item.nome ===
+          nomeUniversidade
+      );
+
+    if (!universidade) {
+      return;
+    }
+
+    setUniversidadeDestinoSelecionada(
+      universidade
+    );
+  }
+
+  // ==========================================================
+  // FOTO — CÂMERA
+  // ==========================================================
 
   async function tirarFoto() {
     setOcupado('camera');
@@ -135,6 +345,10 @@ export function EditarPerfilScreen({
     }
   }
 
+  // ==========================================================
+  // FOTO — GALERIA
+  // ==========================================================
+
   async function abrirGaleria() {
     setOcupado('galeria');
 
@@ -161,6 +375,10 @@ export function EditarPerfilScreen({
       setOcupado('');
     }
   }
+
+  // ==========================================================
+  // REMOVER FOTO
+  // ==========================================================
 
   function confirmarRemocaoFoto() {
     Alert.alert(
@@ -194,15 +412,13 @@ export function EditarPerfilScreen({
     }
   }
 
+  // ==========================================================
+  // SALVAR PERFIL
+  // ==========================================================
+
   async function salvarAlteracoes() {
     const nomeLimpo =
       nome.trim();
-
-    const paisLimpo =
-      pais.trim();
-
-    const universidadeLimpa =
-      universidade.trim();
 
     const emailLimpo =
       email
@@ -221,28 +437,32 @@ export function EditarPerfilScreen({
       return;
     }
 
-    if (
-      paisLimpo.length < 3 ||
-      !contemLetras(paisLimpo)
-    ) {
+    if (!paisSelecionado) {
       Alert.alert(
         'País inválido',
-        'Informe um país válido.'
+        'Selecione seu país de origem.'
       );
 
       return;
     }
 
     if (
-      universidadeLimpa.length <
-        3 ||
-      !contemLetras(
-        universidadeLimpa
-      )
+      !universidadeOrigemSelecionada
     ) {
       Alert.alert(
         'Universidade inválida',
-        'Informe uma universidade válida.'
+        'Selecione sua universidade de origem.'
+      );
+
+      return;
+    }
+
+    if (
+      !universidadeDestinoSelecionada
+    ) {
+      Alert.alert(
+        'Universidade inválida',
+        'Selecione sua universidade em Chapecó.'
       );
 
       return;
@@ -259,34 +479,43 @@ export function EditarPerfilScreen({
       return;
     }
 
-    const usuarioAtualizado = {
-      ...usuario,
-
-      nome:
-        nomeLimpo,
-
-      pais:
-        paisLimpo,
-
-      universidade:
-        universidadeLimpa,
-
-      email:
-        emailLimpo,
-    };
-
     try {
       setSalvando(true);
 
-      await salvarUsuario(
-        usuarioAtualizado
-      );
+      await atualizarPerfil({
+        nome:
+          nomeLimpo,
 
-      navigation.goBack();
+        paisOrigemId:
+          paisSelecionado.id,
+
+        universidadeOrigemId:
+          universidadeOrigemSelecionada.id,
+
+        universidadeDestinoId:
+          universidadeDestinoSelecionada.id,
+
+        email:
+          emailLimpo,
+      });
+
+      Alert.alert(
+        'Perfil atualizado',
+        'Suas alterações foram salvas com sucesso.',
+        [
+          {
+            text: 'OK',
+
+            onPress: () =>
+              navigation.goBack(),
+          },
+        ]
+      );
     } catch (erro) {
       Alert.alert(
         'Erro',
-        'Não foi possível atualizar o perfil.'
+        erro?.message ??
+          'Não foi possível atualizar o perfil.'
       );
     } finally {
       setSalvando(false);
@@ -294,7 +523,13 @@ export function EditarPerfilScreen({
   }
 
   const trabalhando =
-    !!ocupado || salvando;
+    !!ocupado ||
+    salvando ||
+    carregandoDados;
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <ScreenTemplate
@@ -304,10 +539,9 @@ export function EditarPerfilScreen({
       }
     >
       {/* FOTO */}
+
       <View
-        style={
-          estilos.areaFoto
-        }
+        style={estilos.areaFoto}
       >
         {fotoUri ? (
           <Image
@@ -348,15 +582,9 @@ export function EditarPerfilScreen({
           }
         >
           <Pressable
-            onPress={
-              tirarFoto
-            }
-            disabled={
-              trabalhando
-            }
-            style={({
-              pressed,
-            }) => [
+            onPress={tirarFoto}
+            disabled={trabalhando}
+            style={({ pressed }) => [
               estilos.botaoFoto,
 
               pressed &&
@@ -377,8 +605,7 @@ export function EditarPerfilScreen({
                 estilos.botaoFotoTexto
               }
             >
-              {ocupado ===
-              'camera'
+              {ocupado === 'camera'
                 ? 'Abrindo...'
                 : 'Tirar foto'}
             </Text>
@@ -391,9 +618,7 @@ export function EditarPerfilScreen({
             disabled={
               trabalhando
             }
-            style={({
-              pressed,
-            }) => [
+            style={({ pressed }) => [
               estilos.botaoGaleria,
 
               pressed &&
@@ -416,8 +641,7 @@ export function EditarPerfilScreen({
                 estilos.botaoGaleriaTexto
               }
             >
-              {ocupado ===
-              'galeria'
+              {ocupado === 'galeria'
                 ? 'Abrindo...'
                 : 'Galeria'}
             </Text>
@@ -432,9 +656,7 @@ export function EditarPerfilScreen({
             disabled={
               trabalhando
             }
-            style={({
-              pressed,
-            }) => [
+            style={({ pressed }) => [
               estilos.botaoRemoverFoto,
 
               pressed &&
@@ -453,119 +675,111 @@ export function EditarPerfilScreen({
       </View>
 
       {/* FORMULÁRIO */}
+
       <View
-        style={
-          estilos.formulario
-        }
+        style={estilos.formulario}
       >
         <View
           style={estilos.campo}
         >
           <Text
-            style={
-              estilos.rotulo
-            }
+            style={estilos.rotulo}
           >
             Nome completo
           </Text>
 
           <TextInput
             value={nome}
-            onChangeText={
-              setNome
-            }
+            onChangeText={setNome}
             placeholder="Laura Gómez"
             placeholderTextColor={
               cores.textoSecundario
             }
-            style={
-              estilos.input
-            }
+            style={estilos.input}
             maxLength={80}
             autoCapitalize="words"
           />
         </View>
 
+        <CampoSelecao
+          rotulo="País de origem"
+          opcoes={
+            paises.map(
+              (pais) =>
+                pais.nome
+            )
+          }
+          valor={
+            paisSelecionado?.nome ||
+            'Selecione seu país'
+          }
+          aoMudar={
+            selecionarPais
+          }
+          margemInferior={
+            espacamentos.sm
+          }
+        />
+
+        <CampoSelecao
+          rotulo="Universidade de origem"
+          opcoes={
+            universidadesOrigem.map(
+              (universidade) =>
+                universidade.nome
+            )
+          }
+          valor={
+            universidadeOrigemSelecionada
+              ?.nome ||
+            'Selecione sua universidade'
+          }
+          aoMudar={
+            selecionarUniversidadeOrigem
+          }
+          margemInferior={
+            espacamentos.sm
+          }
+        />
+
+        <CampoSelecao
+          rotulo="Universidade em Chapecó"
+          opcoes={
+            universidadesDestino.map(
+              (universidade) =>
+                universidade.nome
+            )
+          }
+          valor={
+            universidadeDestinoSelecionada
+              ?.nome ||
+            'Selecione a universidade'
+          }
+          aoMudar={
+            selecionarUniversidadeDestino
+          }
+          margemInferior={
+            espacamentos.sm
+          }
+        />
+
         <View
           style={estilos.campo}
         >
           <Text
-            style={
-              estilos.rotulo
-            }
-          >
-            País de origem
-          </Text>
-
-          <TextInput
-            value={pais}
-            onChangeText={
-              setPais
-            }
-            placeholder="Colômbia"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
-            style={
-              estilos.input
-            }
-            maxLength={60}
-            autoCapitalize="words"
-          />
-        </View>
-
-        <View
-          style={estilos.campo}
-        >
-          <Text
-            style={
-              estilos.rotulo
-            }
-          >
-            Universidade
-          </Text>
-
-          <TextInput
-            value={
-              universidade
-            }
-            onChangeText={
-              setUniversidade
-            }
-            placeholder="Unochapecó"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
-            style={
-              estilos.input
-            }
-            maxLength={100}
-          />
-        </View>
-
-        <View
-          style={estilos.campo}
-        >
-          <Text
-            style={
-              estilos.rotulo
-            }
+            style={estilos.rotulo}
           >
             E-mail
           </Text>
 
           <TextInput
             value={email}
-            onChangeText={
-              setEmail
-            }
+            onChangeText={setEmail}
             placeholder="laura@gmail.com"
             placeholderTextColor={
               cores.textoSecundario
             }
-            style={
-              estilos.input
-            }
+            style={estilos.input}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -575,21 +789,16 @@ export function EditarPerfilScreen({
       </View>
 
       {/* GUARDAR */}
+
       <View
-        style={
-          estilos.areaBotao
-        }
+        style={estilos.areaBotao}
       >
         <Pressable
           onPress={
             salvarAlteracoes
           }
-          disabled={
-            trabalhando
-          }
-          style={({
-            pressed,
-          }) => [
+          disabled={trabalhando}
+          style={({ pressed }) => [
             estilos.botaoSalvar,
 
             pressed &&
@@ -614,11 +823,14 @@ export function EditarPerfilScreen({
   );
 }
 
+// ============================================================
+// ESTILOS
+// ============================================================
+
 const estilos =
   StyleSheet.create({
     areaFoto: {
-      alignItems:
-        'center',
+      alignItems: 'center',
 
       marginTop:
         espacamentos.lg,
@@ -646,8 +858,7 @@ const estilos =
 
       borderRadius: 53,
 
-      alignItems:
-        'center',
+      alignItems: 'center',
 
       justifyContent:
         'center',
@@ -663,8 +874,7 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      fontWeight:
-        '700',
+      fontWeight: '700',
 
       color:
         cores.texto,
@@ -674,14 +884,12 @@ const estilos =
     },
 
     botoesFoto: {
-      flexDirection:
-        'row',
+      flexDirection: 'row',
 
       gap:
         espacamentos.sm,
 
-      width:
-        '100%',
+      width: '100%',
     },
 
     botaoFoto: {
@@ -689,13 +897,11 @@ const estilos =
 
       minHeight: 42,
 
-      flexDirection:
-        'row',
+      flexDirection: 'row',
 
       gap: 6,
 
-      alignItems:
-        'center',
+      alignItems: 'center',
 
       justifyContent:
         'center',
@@ -711,11 +917,9 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      fontWeight:
-        '700',
+      fontWeight: '700',
 
-      color:
-        '#FFFFFF',
+      color: '#FFFFFF',
     },
 
     botaoGaleria: {
@@ -723,13 +927,11 @@ const estilos =
 
       minHeight: 42,
 
-      flexDirection:
-        'row',
+      flexDirection: 'row',
 
       gap: 6,
 
-      alignItems:
-        'center',
+      alignItems: 'center',
 
       justifyContent:
         'center',
@@ -750,8 +952,7 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      fontWeight:
-        '700',
+      fontWeight: '700',
 
       color:
         cores.texto,
@@ -774,8 +975,7 @@ const estilos =
       color:
         cores.perigo,
 
-      fontWeight:
-        '600',
+      fontWeight: '600',
     },
 
     formulario: {
@@ -791,8 +991,7 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      fontWeight:
-        '700',
+      fontWeight: '700',
 
       color:
         cores.texto,
@@ -842,8 +1041,7 @@ const estilos =
       borderRadius:
         raios.sm,
 
-      alignItems:
-        'center',
+      alignItems: 'center',
 
       justifyContent:
         'center',
@@ -853,11 +1051,9 @@ const estilos =
       fontSize:
         tipografia.legenda,
 
-      fontWeight:
-        '700',
+      fontWeight: '700',
 
-      color:
-        '#FFFFFF',
+      color: '#FFFFFF',
     },
 
     pressionado: {

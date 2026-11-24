@@ -156,3 +156,42 @@ export async function obterUsuarioAutenticadoApi(
 
   return processarResposta(resposta);
 }
+// ============================================================
+// ATUALIZAR PERFIL
+// ============================================================
+
+export async function atualizarPerfilApi(
+  token,
+  {
+    nome,
+    paisOrigemId,
+    universidadeOrigemId,
+    universidadeDestinoId,
+    email,
+  }
+) {
+  const resposta = await fetch(
+    `${API_URL}/auth/me`,
+    {
+      method: 'PUT',
+
+      headers: {
+        'Content-Type':
+          'application/json',
+
+        Authorization:
+          `Bearer ${token}`,
+      },
+
+      body: JSON.stringify({
+        nome,
+        paisOrigemId,
+        universidadeOrigemId,
+        universidadeDestinoId,
+        email,
+      }),
+    }
+  );
+
+  return processarResposta(resposta);
+}

@@ -12,6 +12,7 @@ import {
   loginApi,
   cadastroApi,
   obterUsuarioAutenticadoApi,
+  atualizarPerfilApi,
 } from './api';
 
 // ============================================================
@@ -134,7 +135,34 @@ export async function sessaoAtiva() {
 export async function obterSessao() {
   return obterUsuario();
 }
+// ============================================================
+// ATUALIZAR PERFIL
+// ============================================================
 
+export async function atualizarPerfil(
+  dados
+) {
+  const token =
+    await obterToken();
+
+  if (!token) {
+    throw new Error(
+      'Sessão não encontrada.'
+    );
+  }
+
+  const resultado =
+    await atualizarPerfilApi(
+      token,
+      dados
+    );
+
+  await salvarUsuario(
+    resultado.usuario
+  );
+
+  return resultado.usuario;
+}
 // ============================================================
 // LOGOUT
 // ============================================================
