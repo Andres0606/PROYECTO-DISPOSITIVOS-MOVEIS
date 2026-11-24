@@ -1,9 +1,6 @@
 // SCREEN — Perfil
 
-import {
-  useCallback,
-  useState,
-} from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   Alert,
@@ -14,17 +11,12 @@ import {
   View,
 } from 'react-native';
 
-import {
-  useFocusEffect,
-} from '@react-navigation/native';
-
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 
-import {
-  logout,
-} from '../services/auth';
+import { logout } from '../services/auth';
 
 import {
   obterFotoLocal,
@@ -38,52 +30,36 @@ import {
   tipografia,
 } from '../theme';
 
-export function PerfilScreen({
-  navigation,
-  route,
-}) {
-  const usuarioInicial =
-    route.params?.usuario;
+// ============================================================
+// SCREEN — PERFIL
+// ============================================================
 
-  const [
-    usuario,
-    setUsuario,
-  ] = useState(
-    usuarioInicial
-  );
+export function PerfilScreen({ navigation, route }) {
+  const usuarioInicial = route.params?.usuario;
 
-  const [
-    fotoUri,
-    setFotoUri,
-  ] = useState(null);
+  const [usuario, setUsuario] = useState(usuarioInicial);
+  const [fotoUri, setFotoUri] = useState(null);
+
+  // ==========================================================
+  // CARREGAR PERFIL
+  // ==========================================================
 
   useFocusEffect(
     useCallback(() => {
       async function carregarPerfil() {
         try {
-          const [
-            usuarioSalvo,
-            fotoSalva,
-          ] =
-            await Promise.all([
-              obterUsuario(),
-              obterFotoLocal(),
-            ]);
+          const [usuarioSalvo, fotoSalva] = await Promise.all([
+            obterUsuario(),
+            obterFotoLocal(),
+          ]);
 
           if (usuarioSalvo) {
-            setUsuario(
-              usuarioSalvo
-            );
+            setUsuario(usuarioSalvo);
           }
 
-          setFotoUri(
-            fotoSalva ?? null
-          );
+          setFotoUri(fotoSalva ?? null);
         } catch (erro) {
-          console.log(
-            'Erro ao carregar perfil:',
-            erro
-          );
+          console.log('Erro ao carregar perfil:', erro);
         }
       }
 
@@ -91,37 +67,41 @@ export function PerfilScreen({
     }, [])
   );
 
+  // ==========================================================
+  // DADOS DO USUÁRIO
+  // ==========================================================
+
   const nome =
-    usuario?.nome ??
-    'Laura';
+    usuario?.nome ?? 'Usuário';
 
   const pais =
-    usuario?.pais ??
-    'Colômbia';
+    usuario?.paisOrigem?.nome ?? 'Não informado';
 
-  const tempo =
-    usuario?.tempo ??
-    '27 ago';
+  const universidadeOrigem =
+    usuario?.universidadeOrigem?.nome ?? 'Não informada';
+
+  const universidadeDestino =
+    usuario?.universidadeDestino?.nome ?? 'Não informada';
+
+  const email =
+    usuario?.email ?? 'Não informado';
+
+  // ==========================================================
+  // NAVEGAÇÃO
+  // ==========================================================
 
   function abrirEditarPerfil() {
-    navigation.navigate(
-      'EditarPerfil',
-      {
-        usuario,
-      }
-    );
+    navigation.navigate('EditarPerfil', {
+      usuario,
+    });
   }
 
   function abrirFavoritos() {
-    navigation.navigate(
-      'Favoritos'
-    );
+    navigation.navigate('Favoritos');
   }
 
   function abrirConfiguracao() {
-    navigation.navigate(
-      'Configuracoes'
-    );
+    navigation.navigate('Configuracoes');
   }
 
   function abrirMeusConselhos() {
@@ -138,6 +118,10 @@ export function PerfilScreen({
     );
   }
 
+  // ==========================================================
+  // LOGOUT
+  // ==========================================================
+
   function confirmarLogout() {
     Alert.alert(
       'Encerrar sessão',
@@ -147,7 +131,6 @@ export function PerfilScreen({
           text: 'Cancelar',
           style: 'cancel',
         },
-
         {
           text: 'Sair',
           style: 'destructive',
@@ -161,14 +144,12 @@ export function PerfilScreen({
     try {
       await logout();
 
-      const navegacaoRaiz =
-        navigation
-          .getParent()
-          ?.getParent();
+      const navegacaoRaiz = navigation
+        .getParent()
+        ?.getParent();
 
       navegacaoRaiz?.reset({
         index: 0,
-
         routes: [
           {
             name: 'Login',
@@ -176,37 +157,28 @@ export function PerfilScreen({
         ],
       });
     } catch (erro) {
-      console.log(
-        'Erro ao encerrar sessão:',
-        erro
-      );
+      console.log('Erro ao encerrar sessão:', erro);
     }
   }
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
-    <ScreenTemplate
-      titulo="Perfil"
-    >
-      <View
-        style={
-          estilos.cartaoUsuario
-        }
-      >
+    <ScreenTemplate titulo="Perfil">
+
+      {/* CARTÃO DO USUÁRIO */}
+
+      <View style={estilos.cartaoUsuario}>
+
         {fotoUri ? (
           <Image
-            source={{
-              uri: fotoUri,
-            }}
-            style={
-              estilos.avatarFoto
-            }
+            source={{ uri: fotoUri }}
+            style={estilos.avatarFoto}
           />
         ) : (
-          <View
-            style={
-              estilos.avatar
-            }
-          >
+          <View style={estilos.avatar}>
             <Ionicons
               name="person-outline"
               size={28}
@@ -215,134 +187,96 @@ export function PerfilScreen({
           </View>
         )}
 
-        <View
-          style={
-            estilos.dadosUsuario
-          }
-        >
-          <Text
-            style={
-              estilos.nomeUsuario
-            }
-          >
+        <View style={estilos.dadosUsuario}>
+
+          <Text style={estilos.nomeUsuario}>
             {nome}
           </Text>
 
-          <View
-            style={
-              estilos.linhaInformacoes
-            }
-          >
-            <Text
-              style={
-                estilos.informacao
-              }
-            >
-              {pais}
-            </Text>
+          <Text style={estilos.informacao}>
+            {email}
+          </Text>
 
-            <Text
-              style={
-                estilos.informacao
-              }
-            >
-              {tempo}
-            </Text>
-          </View>
+          <Text style={estilos.informacao}>
+            País de origem: {pais}
+          </Text>
+
+          <Text style={estilos.informacao}>
+            Universidade de origem: {universidadeOrigem}
+          </Text>
+
+          <Text style={estilos.informacao}>
+            Universidade em Chapecó: {universidadeDestino}
+          </Text>
+
         </View>
       </View>
 
-      <View
-        style={
-          estilos.menu
-        }
-      >
+      {/* MENU DO PERFIL */}
+
+      <View style={estilos.menu}>
+
         <OpcaoPerfil
           titulo="Editar perfil"
-          aoPressionar={
-            abrirEditarPerfil
-          }
+          aoPressionar={abrirEditarPerfil}
         />
 
         <OpcaoPerfil
           titulo="Favoritos"
-          aoPressionar={
-            abrirFavoritos
-          }
+          aoPressionar={abrirFavoritos}
         />
 
         <OpcaoPerfil
           titulo="Configuração"
-          aoPressionar={
-            abrirConfiguracao
-          }
+          aoPressionar={abrirConfiguracao}
         />
 
         <OpcaoPerfil
           titulo="Meus conselhos"
-          aoPressionar={
-            abrirMeusConselhos
-          }
+          aoPressionar={abrirMeusConselhos}
         />
 
         <OpcaoPerfil
           titulo="Minhas atividades"
-          aoPressionar={
-            abrirMinhasAtividades
-          }
+          aoPressionar={abrirMinhasAtividades}
         />
+
       </View>
 
-      <View
-        style={
-          estilos.areaLogout
-        }
-      >
+      {/* ENCERRAR SESSÃO */}
+
+      <View style={estilos.areaLogout}>
         <Pressable
-          onPress={
-            confirmarLogout
-          }
+          onPress={confirmarLogout}
           style={({ pressed }) => [
             estilos.botaoLogout,
-
-            pressed &&
-              estilos.pressionado,
+            pressed && estilos.pressionado,
           ]}
         >
-          <Text
-            style={
-              estilos.botaoLogoutTexto
-            }
-          >
+          <Text style={estilos.botaoLogoutTexto}>
             Encerrar sessão
           </Text>
         </Pressable>
       </View>
+
     </ScreenTemplate>
   );
 }
 
-function OpcaoPerfil({
-  titulo,
-  aoPressionar,
-}) {
+// ============================================================
+// OPÇÃO DO MENU
+// ============================================================
+
+function OpcaoPerfil({ titulo, aoPressionar }) {
   return (
     <Pressable
-      onPress={
-        aoPressionar
-      }
+      onPress={aoPressionar}
       style={({ pressed }) => [
         estilos.opcao,
-
-        pressed &&
-          estilos.opcaoPressionada,
+        pressed && estilos.opcaoPressionada,
       ]}
     >
-      <Text
-        style={
-          estilos.opcaoTexto
-        }
-      >
+      <Text style={estilos.opcaoTexto}>
         {titulo}
       </Text>
 
@@ -355,180 +289,103 @@ function OpcaoPerfil({
   );
 }
 
-const estilos =
-  StyleSheet.create({
-    cartaoUsuario: {
-      flexDirection:
-        'row',
+// ============================================================
+// ESTILOS
+// ============================================================
 
-      alignItems:
-        'center',
+const estilos = StyleSheet.create({
+  cartaoUsuario: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: espacamentos.lg,
+    padding: espacamentos.md,
+    backgroundColor: cores.superficie,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    borderRadius: raios.sm,
+  },
 
-      marginTop:
-        espacamentos.lg,
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: espacamentos.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#A9A6AF',
+  },
 
-      padding:
-        espacamentos.md,
+  avatarFoto: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: espacamentos.md,
+  },
 
-      backgroundColor:
-        cores.superficie,
+  dadosUsuario: {
+    flex: 1,
+    gap: 4,
+  },
 
-      borderWidth: 1,
+  nomeUsuario: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: cores.texto,
+    marginBottom: 4,
+  },
 
-      borderColor:
-        cores.borda,
+  informacao: {
+    fontSize: tipografia.legenda,
+    color: cores.textoSecundario,
+  },
 
-      borderRadius:
-        raios.sm,
-    },
+  menu: {
+    marginTop: espacamentos.md,
+  },
 
-    avatar: {
-      width: 48,
-      height: 48,
+  opcao: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: cores.borda,
+  },
 
-      borderRadius: 24,
+  opcaoTexto: {
+    fontSize: tipografia.corpo,
+    fontWeight: '600',
+    color: cores.texto,
+  },
 
-      marginRight:
-        espacamentos.md,
+  opcaoPressionada: {
+    opacity: 0.5,
+  },
 
-      alignItems:
-        'center',
+  areaLogout: {
+    marginTop: espacamentos.xl,
+    paddingHorizontal: espacamentos.sm,
+    marginBottom: espacamentos.md,
+  },
 
-      justifyContent:
-        'center',
+  botaoLogout: {
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    borderRadius: raios.sm,
+    backgroundColor: cores.superficie,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-      backgroundColor:
-        '#A9A6AF',
-    },
+  botaoLogoutTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: cores.texto,
+  },
 
-    avatarFoto: {
-      width: 48,
-      height: 48,
-
-      borderRadius: 24,
-
-      marginRight:
-        espacamentos.md,
-    },
-
-    dadosUsuario: {
-      flex: 1,
-    },
-
-    nomeUsuario: {
-      fontSize: 18,
-
-      fontWeight:
-        '700',
-
-      color:
-        cores.texto,
-
-      marginBottom: 4,
-    },
-
-    linhaInformacoes: {
-      flexDirection:
-        'row',
-
-      alignItems:
-        'center',
-
-      gap:
-        espacamentos.md,
-    },
-
-    informacao: {
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.textoSecundario,
-    },
-
-    menu: {
-      marginTop:
-        espacamentos.md,
-    },
-
-    opcao: {
-      minHeight: 52,
-
-      flexDirection:
-        'row',
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'space-between',
-
-      paddingHorizontal: 2,
-
-      borderBottomWidth: 1,
-
-      borderBottomColor:
-        cores.borda,
-    },
-
-    opcaoTexto: {
-      fontSize:
-        tipografia.corpo,
-
-      fontWeight:
-        '600',
-
-      color:
-        cores.texto,
-    },
-
-    opcaoPressionada: {
-      opacity: 0.5,
-    },
-
-    areaLogout: {
-      marginTop: 135,
-
-      paddingHorizontal:
-        espacamentos.sm,
-
-      marginBottom:
-        espacamentos.md,
-    },
-
-    botaoLogout: {
-      minHeight: 48,
-
-      borderWidth: 1,
-
-      borderColor:
-        cores.borda,
-
-      borderRadius:
-        raios.sm,
-
-      backgroundColor:
-        cores.superficie,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-    },
-
-    botaoLogoutTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight:
-        '700',
-
-      color:
-        cores.texto,
-    },
-
-    pressionado: {
-      opacity: 0.6,
-    },
-  });
+  pressionado: {
+    opacity: 0.6,
+  },
+});
