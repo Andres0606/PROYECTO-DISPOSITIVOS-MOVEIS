@@ -15,6 +15,7 @@ import { RegisterScreen } from './src/screens/RegisterScreen';
 import { RecoverPasswordScreen } from './src/screens/RecoverPasswordScreen';
 
 import { MainTabs } from './src/navigation/MainTabs';
+import { AdminTabs } from './src/navigation/AdminTabs';
 
 import {
   PreferenciasProvider,
@@ -24,6 +25,24 @@ import {
 import { useTema } from './src/theme/useTema';
 
 const Stack = createNativeStackNavigator();
+
+// ============================================================
+// NAVEGAÇÃO POR PERFIL DE ACESSO
+// ============================================================
+
+function NavegacaoPorPerfil(props) {
+  const usuario = props.route.params?.usuario;
+
+  if (usuario?.rol?.nome === 'Administrador') {
+    return <AdminTabs {...props} />;
+  }
+
+  if (usuario?.rol?.nome === 'Estudante') {
+    return <MainTabs {...props} />;
+  }
+
+  return <LoginScreen navigation={props.navigation} />;
+}
 
 // ============================================================
 // NAVEGAÇÃO PRINCIPAL
@@ -99,7 +118,7 @@ function NavegacaoPrincipal() {
 
         <Stack.Screen
           name="Home"
-          component={MainTabs}
+          component={NavegacaoPorPerfil}
         />
 
       </Stack.Navigator>
