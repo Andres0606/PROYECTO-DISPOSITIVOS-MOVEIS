@@ -18,10 +18,7 @@ import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 
 import { logout } from '../services/auth';
 
-import {
-  obterFotoLocal,
-  obterUsuario,
-} from '../services/storage';
+import { obterUsuario } from '../services/storage';
 
 import {
   cores,
@@ -37,8 +34,8 @@ import {
 export function PerfilScreen({ navigation, route }) {
   const usuarioInicial = route.params?.usuario;
 
-  const [usuario, setUsuario] = useState(usuarioInicial);
-  const [fotoUri, setFotoUri] = useState(null);
+  const [usuario, setUsuario] =
+    useState(usuarioInicial);
 
   // ==========================================================
   // CARREGAR PERFIL
@@ -46,24 +43,29 @@ export function PerfilScreen({ navigation, route }) {
 
   useFocusEffect(
     useCallback(() => {
+      let ativo = true;
+
       async function carregarPerfil() {
         try {
-          const [usuarioSalvo, fotoSalva] = await Promise.all([
-            obterUsuario(),
-            obterFotoLocal(),
-          ]);
+          const usuarioSalvo =
+            await obterUsuario();
 
-          if (usuarioSalvo) {
+          if (ativo && usuarioSalvo) {
             setUsuario(usuarioSalvo);
           }
-
-          setFotoUri(fotoSalva ?? null);
         } catch (erro) {
-          console.log('Erro ao carregar perfil:', erro);
+          console.log(
+            'Erro ao carregar perfil:',
+            erro
+          );
         }
       }
 
       carregarPerfil();
+
+      return () => {
+        ativo = false;
+      };
     }, [])
   );
 
@@ -78,13 +80,18 @@ export function PerfilScreen({ navigation, route }) {
     usuario?.paisOrigem?.nome ?? 'Não informado';
 
   const universidadeOrigem =
-    usuario?.universidadeOrigem?.nome ?? 'Não informada';
+    usuario?.universidadeOrigem?.nome ??
+    'Não informada';
 
   const universidadeDestino =
-    usuario?.universidadeDestino?.nome ?? 'Não informada';
+    usuario?.universidadeDestino?.nome ??
+    'Não informada';
 
   const email =
     usuario?.email ?? 'Não informado';
+
+  const fotoUri =
+    usuario?.fotoUrl ?? null;
 
   // ==========================================================
   // NAVEGAÇÃO
@@ -157,7 +164,10 @@ export function PerfilScreen({ navigation, route }) {
         ],
       });
     } catch (erro) {
-      console.log('Erro ao encerrar sessão:', erro);
+      console.log(
+        'Erro ao encerrar sessão:',
+        erro
+      );
     }
   }
 
@@ -210,6 +220,7 @@ export function PerfilScreen({ navigation, route }) {
           </Text>
 
         </View>
+
       </View>
 
       {/* MENU DO PERFIL */}
@@ -246,6 +257,7 @@ export function PerfilScreen({ navigation, route }) {
       {/* ENCERRAR SESSÃO */}
 
       <View style={estilos.areaLogout}>
+
         <Pressable
           onPress={confirmarLogout}
           style={({ pressed }) => [
@@ -257,6 +269,7 @@ export function PerfilScreen({ navigation, route }) {
             Encerrar sessão
           </Text>
         </Pressable>
+
       </View>
 
     </ScreenTemplate>

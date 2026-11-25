@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+import { fetch as expoFetch } from 'expo/fetch';
 const API_URL = 'http://10.0.2.2:3000';
 
 // ============================================================
@@ -190,6 +192,73 @@ export async function atualizarPerfilApi(
         universidadeDestinoId,
         email,
       }),
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// ATUALIZAR FOTO DO PERFIL
+// ============================================================
+
+// ============================================================
+// ATUALIZAR FOTO DO PERFIL
+// ============================================================
+
+export async function atualizarFotoPerfilApi(
+  token,
+  imagem
+) {
+  if (!imagem?.uri) {
+    throw new Error('Nenhuma imagem selecionada.');
+  }
+
+  const arquivo = new File(imagem.uri);
+
+  if (!arquivo.exists) {
+    throw new Error('Arquivo não encontrado.');
+  }
+
+  if (arquivo.size > 5 * 1024 * 1024) {
+    throw new Error(
+      'A imagem deve ter no máximo 5 MB.'
+    );
+  }
+
+  const formulario = new FormData();
+
+  formulario.append('foto', arquivo);
+
+  const resposta = await expoFetch(
+    `${API_URL}/auth/me/foto`,
+    {
+      method: 'PUT',
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+
+      body: formulario,
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// REMOVER FOTO DO PERFIL
+// ============================================================
+
+export async function removerFotoPerfilApi(token) {
+  const resposta = await fetch(
+    `${API_URL}/auth/me/foto`,
+    {
+      method: 'DELETE',
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 

@@ -1,10 +1,6 @@
 // SCREEN — Editar perfil
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Alert,
@@ -15,10 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-
-import {
-  useFocusEffect,
-} from '@react-navigation/native';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -31,13 +23,9 @@ import {
 } from '../services/nativos';
 
 import {
-  obterFotoLocal,
-  removerFotoLocal,
-  salvarFotoLocal,
-} from '../services/storage';
-
-import {
   atualizarPerfil,
+  atualizarFotoPerfil,
+  removerFotoPerfil,
 } from '../services/auth';
 
 import {
@@ -53,12 +41,8 @@ import {
   tipografia,
 } from '../theme';
 
-export function EditarPerfilScreen({
-  navigation,
-  route,
-}) {
-  const usuario =
-    route.params?.usuario ?? {};
+export function EditarPerfilScreen({ navigation, route }) {
+  const usuario = route.params?.usuario;
 
   // ==========================================================
   // DADOS DO USUÁRIO
@@ -73,45 +57,31 @@ export function EditarPerfilScreen({
   const [paises, setPaises] =
     useState([]);
 
-  const [
-    universidadesOrigem,
-    setUniversidadesOrigem,
-  ] = useState([]);
+  const [universidadesOrigem, setUniversidadesOrigem] =
+    useState([]);
 
-  const [
-    universidadesDestino,
-    setUniversidadesDestino,
-  ] = useState([]);
+  const [universidadesDestino, setUniversidadesDestino] =
+    useState([]);
 
-  const [
-    paisSelecionado,
-    setPaisSelecionado,
-  ] = useState(
-    usuario?.paisOrigem ?? null
-  );
+  const [paisSelecionado, setPaisSelecionado] =
+    useState(usuario?.paisOrigem ?? null);
 
   const [
     universidadeOrigemSelecionada,
     setUniversidadeOrigemSelecionada,
-  ] = useState(
-    usuario?.universidadeOrigem ??
-      null
-  );
+  ] = useState(usuario?.universidadeOrigem ?? null);
 
   const [
     universidadeDestinoSelecionada,
     setUniversidadeDestinoSelecionada,
-  ] = useState(
-    usuario?.universidadeDestino ??
-      null
-  );
+  ] = useState(usuario?.universidadeDestino ?? null);
 
   // ==========================================================
-  // FOTO
+  // FOTO E ESTADOS
   // ==========================================================
 
   const [fotoUri, setFotoUri] =
-    useState(null);
+    useState(usuario?.fotoUrl ?? null);
 
   const [ocupado, setOcupado] =
     useState('');
@@ -119,38 +89,8 @@ export function EditarPerfilScreen({
   const [salvando, setSalvando] =
     useState(false);
 
-  const [
-    carregandoDados,
-    setCarregandoDados,
-  ] = useState(true);
-
-  // ==========================================================
-  // CARREGAR FOTO LOCAL
-  // ==========================================================
-
-  useFocusEffect(
-    useCallback(() => {
-      async function carregarFoto() {
-        try {
-          const fotoSalva =
-            await obterFotoLocal();
-
-          if (fotoSalva) {
-            setFotoUri(
-              fotoSalva
-            );
-          }
-        } catch (erro) {
-          console.log(
-            'Erro ao carregar foto:',
-            erro
-          );
-        }
-      }
-
-      carregarFoto();
-    }, [])
-  );
+  const [carregandoDados, setCarregandoDados] =
+    useState(true);
 
   // ==========================================================
   // CARREGAR CATÁLOGOS
@@ -159,33 +99,22 @@ export function EditarPerfilScreen({
   useEffect(() => {
     async function carregarDados() {
       try {
-        const [
-          listaPaises,
-          listaDestino,
-        ] = await Promise.all([
-          obterPaises(),
-          obterUniversidadesChapeco(),
-        ]);
+        const [listaPaises, listaDestino] =
+          await Promise.all([
+            obterPaises(),
+            obterUniversidadesChapeco(),
+          ]);
 
-        setPaises(
-          listaPaises
-        );
+        setPaises(listaPaises);
+        setUniversidadesDestino(listaDestino);
 
-        setUniversidadesDestino(
-          listaDestino
-        );
-
-        if (
-          usuario?.paisOrigem?.id
-        ) {
+        if (usuario?.paisOrigem?.id) {
           const listaOrigem =
             await obterUniversidadesPorPais(
               usuario.paisOrigem.id
             );
 
-          setUniversidadesOrigem(
-            listaOrigem
-          );
+          setUniversidadesOrigem(listaOrigem);
         }
       } catch (erro) {
         Alert.alert(
@@ -194,71 +123,47 @@ export function EditarPerfilScreen({
             'Não foi possível carregar os dados.'
         );
       } finally {
-        setCarregandoDados(
-          false
-        );
+        setCarregandoDados(false);
       }
     }
 
     carregarDados();
-  }, [
-    usuario?.paisOrigem?.id,
-  ]);
+  }, [usuario?.paisOrigem?.id]);
 
   // ==========================================================
   // VALIDAÇÕES
   // ==========================================================
 
   function contemLetras(valor) {
-    return /[A-Za-zÀ-ÿ]/.test(
-      valor
-    );
+    return /[A-Za-zÀ-ÿ]/.test(valor);
   }
 
   function emailValido(valor) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      valor
-    );
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
   }
 
   // ==========================================================
   // PAÍS
   // ==========================================================
 
-  async function selecionarPais(
-    nomePais
-  ) {
-    const pais =
-      paises.find(
-        (item) =>
-          item.nome === nomePais
-      );
+  async function selecionarPais(nomePais) {
+    const pais = paises.find(
+      (item) => item.nome === nomePais
+    );
 
     if (!pais) {
       return;
     }
 
-    setPaisSelecionado(
-      pais
-    );
-
-    setUniversidadeOrigemSelecionada(
-      null
-    );
-
-    setUniversidadesOrigem(
-      []
-    );
+    setPaisSelecionado(pais);
+    setUniversidadeOrigemSelecionada(null);
+    setUniversidadesOrigem([]);
 
     try {
       const universidades =
-        await obterUniversidadesPorPais(
-          pais.id
-        );
+        await obterUniversidadesPorPais(pais.id);
 
-      setUniversidadesOrigem(
-        universidades
-      );
+      setUniversidadesOrigem(universidades);
     } catch (erro) {
       Alert.alert(
         'Erro',
@@ -272,46 +177,47 @@ export function EditarPerfilScreen({
   // UNIVERSIDADE DE ORIGEM
   // ==========================================================
 
-  function selecionarUniversidadeOrigem(
-    nomeUniversidade
-  ) {
-    const universidade =
-      universidadesOrigem.find(
-        (item) =>
-          item.nome ===
-          nomeUniversidade
-      );
+  function selecionarUniversidadeOrigem(nomeUniversidade) {
+    const universidade = universidadesOrigem.find(
+      (item) => item.nome === nomeUniversidade
+    );
 
     if (!universidade) {
       return;
     }
 
-    setUniversidadeOrigemSelecionada(
-      universidade
-    );
+    setUniversidadeOrigemSelecionada(universidade);
   }
 
   // ==========================================================
   // UNIVERSIDADE DE DESTINO
   // ==========================================================
 
-  function selecionarUniversidadeDestino(
-    nomeUniversidade
-  ) {
-    const universidade =
-      universidadesDestino.find(
-        (item) =>
-          item.nome ===
-          nomeUniversidade
-      );
+  function selecionarUniversidadeDestino(nomeUniversidade) {
+    const universidade = universidadesDestino.find(
+      (item) => item.nome === nomeUniversidade
+    );
 
     if (!universidade) {
       return;
     }
 
-    setUniversidadeDestinoSelecionada(
-      universidade
-    );
+    setUniversidadeDestinoSelecionada(universidade);
+  }
+
+  // ==========================================================
+  // FOTO — ENVIAR PARA O BACKEND
+  // ==========================================================
+
+  async function enviarImagem(imagem) {
+    if (!imagem?.uri) {
+      return;
+    }
+
+    const novaFotoUrl =
+      await atualizarFotoPerfil(imagem);
+
+    setFotoUri(novaFotoUrl);
   }
 
   // ==========================================================
@@ -322,23 +228,18 @@ export function EditarPerfilScreen({
     setOcupado('camera');
 
     try {
-      const resultado =
-        await capturarFoto();
+      const resultado = await capturarFoto();
 
       if (resultado?.uri) {
-        setFotoUri(
-          resultado.uri
-        );
+        setOcupado('enviando');
 
-        await salvarFotoLocal(
-          resultado.uri
-        );
+        await enviarImagem(resultado);
       }
     } catch (erro) {
       Alert.alert(
         'Erro',
         erro?.message ??
-          'Não foi possível tirar a foto.'
+          'Não foi possível atualizar a foto.'
       );
     } finally {
       setOcupado('');
@@ -353,23 +254,18 @@ export function EditarPerfilScreen({
     setOcupado('galeria');
 
     try {
-      const resultado =
-        await escolherImagem();
+      const resultado = await escolherImagem();
 
       if (resultado?.uri) {
-        setFotoUri(
-          resultado.uri
-        );
+        setOcupado('enviando');
 
-        await salvarFotoLocal(
-          resultado.uri
-        );
+        await enviarImagem(resultado);
       }
     } catch (erro) {
       Alert.alert(
         'Erro',
         erro?.message ??
-          'Não foi possível escolher a imagem.'
+          'Não foi possível atualizar a foto.'
       );
     } finally {
       setOcupado('');
@@ -389,7 +285,6 @@ export function EditarPerfilScreen({
           text: 'Cancelar',
           style: 'cancel',
         },
-
         {
           text: 'Remover',
           style: 'destructive',
@@ -400,15 +295,20 @@ export function EditarPerfilScreen({
   }
 
   async function removerFoto() {
+    setOcupado('removendo');
+
     try {
-      await removerFotoLocal();
+      await removerFotoPerfil();
 
       setFotoUri(null);
     } catch (erro) {
       Alert.alert(
         'Erro',
-        'Não foi possível remover a foto.'
+        erro?.message ??
+          'Não foi possível remover a foto.'
       );
+    } finally {
+      setOcupado('');
     }
   }
 
@@ -417,13 +317,10 @@ export function EditarPerfilScreen({
   // ==========================================================
 
   async function salvarAlteracoes() {
-    const nomeLimpo =
-      nome.trim();
+    const nomeLimpo = nome.trim();
 
     const emailLimpo =
-      email
-        .trim()
-        .toLowerCase();
+      email.trim().toLowerCase();
 
     if (
       nomeLimpo.length < 3 ||
@@ -446,9 +343,7 @@ export function EditarPerfilScreen({
       return;
     }
 
-    if (
-      !universidadeOrigemSelecionada
-    ) {
+    if (!universidadeOrigemSelecionada) {
       Alert.alert(
         'Universidade inválida',
         'Selecione sua universidade de origem.'
@@ -457,9 +352,7 @@ export function EditarPerfilScreen({
       return;
     }
 
-    if (
-      !universidadeDestinoSelecionada
-    ) {
+    if (!universidadeDestinoSelecionada) {
       Alert.alert(
         'Universidade inválida',
         'Selecione sua universidade em Chapecó.'
@@ -468,9 +361,7 @@ export function EditarPerfilScreen({
       return;
     }
 
-    if (
-      !emailValido(emailLimpo)
-    ) {
+    if (!emailValido(emailLimpo)) {
       Alert.alert(
         'E-mail inválido',
         'Informe um endereço de e-mail válido.'
@@ -483,8 +374,7 @@ export function EditarPerfilScreen({
       setSalvando(true);
 
       await atualizarPerfil({
-        nome:
-          nomeLimpo,
+        nome: nomeLimpo,
 
         paisOrigemId:
           paisSelecionado.id,
@@ -495,8 +385,7 @@ export function EditarPerfilScreen({
         universidadeDestinoId:
           universidadeDestinoSelecionada.id,
 
-        email:
-          emailLimpo,
+        email: emailLimpo,
       });
 
       Alert.alert(
@@ -505,9 +394,7 @@ export function EditarPerfilScreen({
         [
           {
             text: 'OK',
-
-            onPress: () =>
-              navigation.goBack(),
+            onPress: () => navigation.goBack(),
           },
         ]
       );
@@ -523,9 +410,7 @@ export function EditarPerfilScreen({
   }
 
   const trabalhando =
-    !!ocupado ||
-    salvando ||
-    carregandoDados;
+    !!ocupado || salvando || carregandoDados;
 
   // ==========================================================
   // RENDER
@@ -534,64 +419,56 @@ export function EditarPerfilScreen({
   return (
     <ScreenTemplate
       titulo="Editar Perfil"
-      aoVoltar={() =>
-        navigation.goBack()
-      }
+      aoVoltar={() => {
+        if (!ocupado && !salvando) {
+          navigation.goBack();
+        }
+      }}
     >
       {/* FOTO */}
 
-      <View
-        style={estilos.areaFoto}
-      >
+      <View style={estilos.areaFoto}>
+
         {fotoUri ? (
           <Image
-            source={{
-              uri: fotoUri,
-            }}
-            style={
-              estilos.fotoPerfil
-            }
+            source={{ uri: fotoUri }}
+            style={estilos.fotoPerfil}
           />
         ) : (
-          <View
-            style={
-              estilos.fotoVazia
-            }
-          >
+          <View style={estilos.fotoVazia}>
             <Ionicons
               name="person-outline"
               size={48}
-              color={
-                cores.textoSecundario
-              }
+              color={cores.textoSecundario}
             />
           </View>
         )}
 
-        <Text
-          style={
-            estilos.tituloFoto
-          }
-        >
+        <Text style={estilos.tituloFoto}>
           Foto de perfil
         </Text>
 
-        <View
-          style={
-            estilos.botoesFoto
-          }
-        >
+        {ocupado === 'enviando' && (
+          <Text style={estilos.statusFoto}>
+            Enviando foto...
+          </Text>
+        )}
+
+        {ocupado === 'removendo' && (
+          <Text style={estilos.statusFoto}>
+            Removendo foto...
+          </Text>
+        )}
+
+        <View style={estilos.botoesFoto}>
+
           <Pressable
             onPress={tirarFoto}
             disabled={trabalhando}
             style={({ pressed }) => [
               estilos.botaoFoto,
-
-              pressed &&
-                estilos.pressionado,
-
-              trabalhando &&
-                estilos.desabilitado,
+              pressed && estilos.pressionado,
+              trabalhando && estilos.desabilitado,
             ]}
           >
             <Ionicons
@@ -600,11 +477,7 @@ export function EditarPerfilScreen({
               color="#FFFFFF"
             />
 
-            <Text
-              style={
-                estilos.botaoFotoTexto
-              }
-            >
+            <Text style={estilos.botaoFotoTexto}>
               {ocupado === 'camera'
                 ? 'Abrindo...'
                 : 'Tirar foto'}
@@ -612,79 +485,54 @@ export function EditarPerfilScreen({
           </Pressable>
 
           <Pressable
-            onPress={
-              abrirGaleria
-            }
-            disabled={
-              trabalhando
-            }
+            onPress={abrirGaleria}
+            disabled={trabalhando}
             style={({ pressed }) => [
               estilos.botaoGaleria,
-
-              pressed &&
-                estilos.pressionado,
-
-              trabalhando &&
-                estilos.desabilitado,
+              pressed && estilos.pressionado,
+              trabalhando && estilos.desabilitado,
             ]}
           >
             <Ionicons
               name="images-outline"
               size={18}
-              color={
-                cores.texto
-              }
+              color={cores.texto}
             />
 
-            <Text
-              style={
-                estilos.botaoGaleriaTexto
-              }
-            >
+            <Text style={estilos.botaoGaleriaTexto}>
               {ocupado === 'galeria'
                 ? 'Abrindo...'
                 : 'Galeria'}
             </Text>
           </Pressable>
+
         </View>
 
         {!!fotoUri && (
           <Pressable
-            onPress={
-              confirmarRemocaoFoto
-            }
-            disabled={
-              trabalhando
-            }
+            onPress={confirmarRemocaoFoto}
+            disabled={trabalhando}
             style={({ pressed }) => [
               estilos.botaoRemoverFoto,
-
-              pressed &&
-                estilos.pressionado,
+              pressed && estilos.pressionado,
+              trabalhando && estilos.desabilitado,
             ]}
           >
-            <Text
-              style={
-                estilos.botaoRemoverFotoTexto
-              }
-            >
+            <Text style={estilos.botaoRemoverFotoTexto}>
               Remover foto
             </Text>
           </Pressable>
         )}
+
       </View>
 
       {/* FORMULÁRIO */}
 
-      <View
-        style={estilos.formulario}
-      >
-        <View
-          style={estilos.campo}
-        >
-          <Text
-            style={estilos.rotulo}
-          >
+      <View style={estilos.formulario}>
+
+        <View style={estilos.campo}>
+
+          <Text style={estilos.rotulo}>
             Nome completo
           </Text>
 
@@ -692,83 +540,58 @@ export function EditarPerfilScreen({
             value={nome}
             onChangeText={setNome}
             placeholder="Laura Gómez"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
+            placeholderTextColor={cores.textoSecundario}
             style={estilos.input}
             maxLength={80}
             autoCapitalize="words"
           />
+
         </View>
 
         <CampoSelecao
           rotulo="País de origem"
-          opcoes={
-            paises.map(
-              (pais) =>
-                pais.nome
-            )
-          }
+          opcoes={paises.map((pais) => pais.nome)}
           valor={
             paisSelecionado?.nome ||
             'Selecione seu país'
           }
-          aoMudar={
-            selecionarPais
-          }
-          margemInferior={
-            espacamentos.sm
-          }
+          aoMudar={selecionarPais}
+          margemInferior={espacamentos.sm}
         />
 
         <CampoSelecao
           rotulo="Universidade de origem"
           opcoes={
             universidadesOrigem.map(
-              (universidade) =>
-                universidade.nome
+              (universidade) => universidade.nome
             )
           }
           valor={
-            universidadeOrigemSelecionada
-              ?.nome ||
+            universidadeOrigemSelecionada?.nome ||
             'Selecione sua universidade'
           }
-          aoMudar={
-            selecionarUniversidadeOrigem
-          }
-          margemInferior={
-            espacamentos.sm
-          }
+          aoMudar={selecionarUniversidadeOrigem}
+          margemInferior={espacamentos.sm}
         />
 
         <CampoSelecao
           rotulo="Universidade em Chapecó"
           opcoes={
             universidadesDestino.map(
-              (universidade) =>
-                universidade.nome
+              (universidade) => universidade.nome
             )
           }
           valor={
-            universidadeDestinoSelecionada
-              ?.nome ||
+            universidadeDestinoSelecionada?.nome ||
             'Selecione a universidade'
           }
-          aoMudar={
-            selecionarUniversidadeDestino
-          }
-          margemInferior={
-            espacamentos.sm
-          }
+          aoMudar={selecionarUniversidadeDestino}
+          margemInferior={espacamentos.sm}
         />
 
-        <View
-          style={estilos.campo}
-        >
-          <Text
-            style={estilos.rotulo}
-          >
+        <View style={estilos.campo}>
+
+          <Text style={estilos.rotulo}>
             E-mail
           </Text>
 
@@ -776,48 +599,38 @@ export function EditarPerfilScreen({
             value={email}
             onChangeText={setEmail}
             placeholder="laura@gmail.com"
-            placeholderTextColor={
-              cores.textoSecundario
-            }
+            placeholderTextColor={cores.textoSecundario}
             style={estilos.input}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={120}
           />
+
         </View>
+
       </View>
 
-      {/* GUARDAR */}
+      {/* GUARDAR ALTERAÇÕES */}
 
-      <View
-        style={estilos.areaBotao}
-      >
+      <View style={estilos.areaBotao}>
+
         <Pressable
-          onPress={
-            salvarAlteracoes
-          }
+          onPress={salvarAlteracoes}
           disabled={trabalhando}
           style={({ pressed }) => [
             estilos.botaoSalvar,
-
-            pressed &&
-              estilos.pressionado,
-
-            trabalhando &&
-              estilos.desabilitado,
+            pressed && estilos.pressionado,
+            trabalhando && estilos.desabilitado,
           ]}
         >
-          <Text
-            style={
-              estilos.botaoSalvarTexto
-            }
-          >
+          <Text style={estilos.botaoSalvarTexto}>
             {salvando
               ? 'Salvando...'
               : 'Guardar alterações'}
           </Text>
         </Pressable>
+
       </View>
     </ScreenTemplate>
   );
@@ -827,240 +640,148 @@ export function EditarPerfilScreen({
 // ESTILOS
 // ============================================================
 
-const estilos =
-  StyleSheet.create({
-    areaFoto: {
-      alignItems: 'center',
-
-      marginTop:
-        espacamentos.lg,
-
-      marginBottom:
-        espacamentos.lg,
-    },
-
-    fotoPerfil: {
-      width: 105,
-      height: 105,
-
-      borderRadius: 53,
-
-      backgroundColor:
-        cores.superficie,
-
-      marginBottom:
-        espacamentos.sm,
-    },
-
-    fotoVazia: {
-      width: 105,
-      height: 105,
-
-      borderRadius: 53,
-
-      alignItems: 'center',
-
-      justifyContent:
-        'center',
-
-      backgroundColor:
-        '#D6D4D8',
-
-      marginBottom:
-        espacamentos.sm,
-    },
-
-    tituloFoto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight: '700',
-
-      color:
-        cores.texto,
-
-      marginBottom:
-        espacamentos.sm,
-    },
-
-    botoesFoto: {
-      flexDirection: 'row',
-
-      gap:
-        espacamentos.sm,
-
-      width: '100%',
-    },
-
-    botaoFoto: {
-      flex: 1,
-
-      minHeight: 42,
-
-      flexDirection: 'row',
-
-      gap: 6,
-
-      alignItems: 'center',
-
-      justifyContent:
-        'center',
-
-      borderRadius:
-        raios.sm,
-
-      backgroundColor:
-        '#000000',
-    },
-
-    botaoFotoTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight: '700',
-
-      color: '#FFFFFF',
-    },
-
-    botaoGaleria: {
-      flex: 1,
-
-      minHeight: 42,
-
-      flexDirection: 'row',
-
-      gap: 6,
-
-      alignItems: 'center',
-
-      justifyContent:
-        'center',
-
-      borderRadius:
-        raios.sm,
-
-      borderWidth: 1,
-
-      borderColor:
-        cores.borda,
-
-      backgroundColor:
-        cores.superficie,
-    },
-
-    botaoGaleriaTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight: '700',
-
-      color:
-        cores.texto,
-    },
-
-    botaoRemoverFoto: {
-      marginTop:
-        espacamentos.sm,
-
-      paddingVertical: 6,
-
-      paddingHorizontal:
-        espacamentos.md,
-    },
-
-    botaoRemoverFotoTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.perigo,
-
-      fontWeight: '600',
-    },
-
-    formulario: {
-      gap:
-        espacamentos.md,
-    },
-
-    campo: {
-      gap: 6,
-    },
-
-    rotulo: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight: '700',
-
-      color:
-        cores.texto,
-    },
-
-    input: {
-      minHeight: 46,
-
-      backgroundColor:
-        cores.superficie,
-
-      borderWidth: 1,
-
-      borderColor:
-        cores.borda,
-
-      borderRadius:
-        raios.sm,
-
-      paddingHorizontal:
-        espacamentos.md,
-
-      paddingVertical:
-        espacamentos.sm,
-
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.texto,
-    },
-
-    areaBotao: {
-      marginTop:
-        espacamentos.xl,
-
-      marginBottom:
-        espacamentos.md,
-    },
-
-    botaoSalvar: {
-      minHeight: 48,
-
-      backgroundColor:
-        '#000000',
-
-      borderRadius:
-        raios.sm,
-
-      alignItems: 'center',
-
-      justifyContent:
-        'center',
-    },
-
-    botaoSalvarTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight: '700',
-
-      color: '#FFFFFF',
-    },
-
-    pressionado: {
-      opacity: 0.6,
-    },
-
-    desabilitado: {
-      opacity: 0.5,
-    },
-  });
+const estilos = StyleSheet.create({
+  areaFoto: {
+    alignItems: 'center',
+    marginTop: espacamentos.lg,
+    marginBottom: espacamentos.lg,
+  },
+
+  fotoPerfil: {
+    width: 105,
+    height: 105,
+    borderRadius: 53,
+    backgroundColor: cores.superficie,
+    marginBottom: espacamentos.sm,
+  },
+
+  fotoVazia: {
+    width: 105,
+    height: 105,
+    borderRadius: 53,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#D6D4D8',
+    marginBottom: espacamentos.sm,
+  },
+
+  tituloFoto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: cores.texto,
+    marginBottom: espacamentos.sm,
+  },
+
+  statusFoto: {
+    fontSize: tipografia.legenda,
+    color: cores.textoSecundario,
+    marginBottom: espacamentos.sm,
+  },
+
+  botoesFoto: {
+    flexDirection: 'row',
+    gap: espacamentos.sm,
+    width: '100%',
+  },
+
+  botaoFoto: {
+    flex: 1,
+    minHeight: 42,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: raios.sm,
+    backgroundColor: '#000000',
+  },
+
+  botaoFotoTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  botaoGaleria: {
+    flex: 1,
+    minHeight: 42,
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: raios.sm,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    backgroundColor: cores.superficie,
+  },
+
+  botaoGaleriaTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: cores.texto,
+  },
+
+  botaoRemoverFoto: {
+    marginTop: espacamentos.sm,
+    paddingVertical: 6,
+    paddingHorizontal: espacamentos.md,
+  },
+
+  botaoRemoverFotoTexto: {
+    fontSize: tipografia.legenda,
+    color: cores.perigo,
+    fontWeight: '600',
+  },
+
+  formulario: {
+    gap: espacamentos.md,
+  },
+
+  campo: {
+    gap: 6,
+  },
+
+  rotulo: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: cores.texto,
+  },
+
+  input: {
+    minHeight: 46,
+    backgroundColor: cores.superficie,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    borderRadius: raios.sm,
+    paddingHorizontal: espacamentos.md,
+    paddingVertical: espacamentos.sm,
+    fontSize: tipografia.legenda,
+    color: cores.texto,
+  },
+
+  areaBotao: {
+    marginTop: espacamentos.xl,
+    marginBottom: espacamentos.md,
+  },
+
+  botaoSalvar: {
+    minHeight: 48,
+    backgroundColor: '#000000',
+    borderRadius: raios.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  botaoSalvarTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  pressionado: {
+    opacity: 0.6,
+  },
+
+  desabilitado: {
+    opacity: 0.5,
+  },
+});

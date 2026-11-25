@@ -123,8 +123,12 @@ export async function capturarFoto() {
     return null;
   }
 
+  const imagem = result.assets[0];
+
   return {
-    uri: result.assets[0].uri,
+    uri: imagem.uri,
+    nome: imagem.fileName,
+    tipo: imagem.mimeType,
   };
 }
 
@@ -155,8 +159,12 @@ export async function escolherImagem() {
     return null;
   }
 
+  const imagem = result.assets[0];
+
   return {
-    uri: result.assets[0].uri,
+    uri: imagem.uri,
+    nome: imagem.fileName,
+    tipo: imagem.mimeType,
   };
 }
 

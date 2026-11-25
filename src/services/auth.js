@@ -13,6 +13,8 @@ import {
   cadastroApi,
   obterUsuarioAutenticadoApi,
   atualizarPerfilApi,
+  atualizarFotoPerfilApi,
+  removerFotoPerfilApi,
 } from './api';
 
 // ============================================================
@@ -169,4 +171,47 @@ export async function atualizarPerfil(
 
 export async function logout() {
   await limparSessao();
+}
+
+// ============================================================
+// ATUALIZAR FOTO DO PERFIL
+// ============================================================
+
+export async function atualizarFotoPerfil(imagem) {
+  const token = await obterToken();
+
+  if (!token) {
+    throw new Error('Sessão não encontrada.');
+  }
+
+  const resultado = await atualizarFotoPerfilApi(
+    token,
+    imagem
+  );
+
+  const dados = await obterUsuarioAutenticadoApi(token);
+
+  await salvarUsuario(dados.usuario);
+
+  return resultado.fotoUrl;
+}
+
+// ============================================================
+// REMOVER FOTO DO PERFIL
+// ============================================================
+
+export async function removerFotoPerfil() {
+  const token = await obterToken();
+
+  if (!token) {
+    throw new Error('Sessão não encontrada.');
+  }
+
+  await removerFotoPerfilApi(token);
+
+  const dados = await obterUsuarioAutenticadoApi(token);
+
+  await salvarUsuario(dados.usuario);
+
+  return null;
 }
