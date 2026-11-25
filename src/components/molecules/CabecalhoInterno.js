@@ -1,21 +1,37 @@
-// MOLECULE — CabecalhoInterno (chevron de voltar + título centralizado + divisor)
-// acaoDireita (opcional): elemento fixo à direita, ex.: lápis de editar.
-import { StyleSheet, Text, View } from 'react-native';
+// MOLECULE — CabecalhoInterno
+
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { BotaoVoltar } from '../atoms/BotaoVoltar';
 import { Divider } from './Divider';
-import { cores, espacamentos, tipografia } from '../../theme';
 
-export function CabecalhoInterno({ titulo, aoVoltar, acaoDireita }) {
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
+
+export function CabecalhoInterno({
+  titulo,
+  aoVoltar,
+  acaoDireita,
+}) {
+  const { cores } = useTema();
+
   return (
     <View>
       <View style={estilos.linha}>
+
         <View style={estilos.voltar}>
-          {/* Se o BotaoVoltar usar outro nome de prop, ajuste aqui. */}
           <BotaoVoltar aoPressionar={aoVoltar} />
         </View>
 
         <Text
-          style={estilos.titulo}
+          style={[
+            estilos.titulo,
+            { color: cores.texto },
+          ]}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.8}
@@ -23,9 +39,16 @@ export function CabecalhoInterno({ titulo, aoVoltar, acaoDireita }) {
           {titulo}
         </Text>
 
-        {!!acaoDireita && <View style={estilos.direita}>{acaoDireita}</View>}
+        {!!acaoDireita && (
+          <View style={estilos.direita}>
+            {acaoDireita}
+          </View>
+        )}
+
       </View>
+
       <Divider />
+
     </View>
   );
 }
@@ -36,6 +59,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: espacamentos.md,
   },
+
   voltar: {
     position: 'absolute',
     left: 0,
@@ -44,6 +68,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
+
   direita: {
     position: 'absolute',
     right: 0,
@@ -52,11 +77,11 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
+
   titulo: {
     paddingHorizontal: 32,
     textAlign: 'center',
     fontSize: tipografia.titulo,
     fontWeight: '600',
-    color: cores.texto,
   },
 });

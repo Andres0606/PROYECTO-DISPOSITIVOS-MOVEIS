@@ -1,8 +1,18 @@
 // MOLECULE — ItemFrase
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { useMemo } from 'react';
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
-import { cores, espacamentos, tipografia } from '../../theme';
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 
 export function ItemFrase({
   frase,
@@ -10,8 +20,16 @@ export function ItemFrase({
   aoAbrir,
   aoAlternarFavorita,
 }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   return (
     <View style={estilos.container}>
+
       <Pressable
         onPress={aoAbrir}
         style={({ pressed }) => [
@@ -49,45 +67,48 @@ export function ItemFrase({
           color={cores.texto}
         />
       </Pressable>
+
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
-  container: {
-    minHeight: 62,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: cores.bordaForte,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    container: {
+      minHeight: 62,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: cores.bordaForte,
+    },
 
-  conteudo: {
-    flex: 1,
-    paddingVertical: espacamentos.sm,
-    paddingRight: espacamentos.md,
-  },
+    conteudo: {
+      flex: 1,
+      paddingVertical: espacamentos.sm,
+      paddingRight: espacamentos.md,
+    },
 
-  portugues: {
-    fontSize: tipografia.corpo,
-    fontWeight: '600',
-    color: cores.texto,
-    marginBottom: espacamentos.xs,
-  },
+    portugues: {
+      fontSize: tipografia.corpo,
+      fontWeight: '600',
+      color: cores.texto,
+      marginBottom: espacamentos.xs,
+    },
 
-  espanhol: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
-  },
+    espanhol: {
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
+    },
 
-  botaoFavorito: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    botaoFavorito: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  pressionado: {
-    opacity: 0.5,
-  },
-});
+    pressionado: {
+      opacity: 0.5,
+    },
+  });
+}

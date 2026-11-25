@@ -1,16 +1,21 @@
-// TEMPLATE — ScreenTemplate (tela interna padrão: fundo em degradê,
-// cabeçalho e conteúdo rolável).
-// - Sem aoVoltar: título centralizado de aba + divisor.
-// - Com aoVoltar: cabeçalho interno (chevron + título + divisor).
-// - acaoCabecalho (opcional): ação à direita do cabeçalho interno (ex.: lápis).
-// - flutuante (opcional): elemento fixo no canto inferior direito (ex.: botão "+").
-// Só a borda superior é protegida: a barra de abas já cuida da inferior.
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+// TEMPLATE — ScreenTemplate
+// Fundo em degradê, cabeçalho e conteúdo rolável.
+
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { Divider } from '../molecules/Divider';
 import { CabecalhoInterno } from '../molecules/CabecalhoInterno';
-import { cores, espacamentos, gradientes, tipografia } from '../../theme';
+
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 
 export function ScreenTemplate({
   titulo,
@@ -19,13 +24,18 @@ export function ScreenTemplate({
   flutuante,
   children,
 }) {
+  const { cores, gradientes } = useTema();
+
   return (
     <LinearGradient
       colors={gradientes.fundo.cores}
       locations={gradientes.fundo.locais}
       style={estilos.tela}
     >
-      <SafeAreaView style={estilos.area} edges={['top', 'left', 'right']}>
+      <SafeAreaView
+        style={estilos.area}
+        edges={['top', 'left', 'right']}
+      >
         <ScrollView
           contentContainerStyle={[
             estilos.conteudo,
@@ -44,40 +54,71 @@ export function ScreenTemplate({
                 />
               ) : (
                 <>
-                  <Text style={estilos.titulo}>{titulo}</Text>
+                  <Text
+                    style={[
+                      estilos.titulo,
+                      { color: cores.texto },
+                    ]}
+                  >
+                    {titulo}
+                  </Text>
+
                   <Divider />
                 </>
               )}
             </View>
           )}
+
           {children}
+
         </ScrollView>
 
-        {!!flutuante && <View style={estilos.flutuante}>{flutuante}</View>}
+        {!!flutuante && (
+          <View style={estilos.flutuante}>
+            {flutuante}
+          </View>
+        )}
+
       </SafeAreaView>
     </LinearGradient>
   );
 }
 
+// ============================================================
+// ESTILOS
+// ============================================================
+
 const estilos = StyleSheet.create({
-  tela: { flex: 1 },
-  area: { flex: 1 },
+  tela: {
+    flex: 1,
+  },
+
+  area: {
+    flex: 1,
+  },
+
   conteudo: {
     flexGrow: 1,
     paddingHorizontal: espacamentos.lg,
     paddingTop: espacamentos.sm,
     paddingBottom: espacamentos.lg,
   },
-  // Espaço extra para o último item não ficar atrás do botão flutuante.
-  comFlutuante: { paddingBottom: 80 },
-  cabecalho: { marginBottom: espacamentos.lg },
+
+  comFlutuante: {
+    paddingBottom: 80,
+  },
+
+  cabecalho: {
+    marginBottom: espacamentos.lg,
+  },
+
   titulo: {
     marginBottom: espacamentos.md,
     textAlign: 'center',
     fontSize: tipografia.titulo,
     fontWeight: '600',
-    color: cores.texto,
   },
+
   flutuante: {
     position: 'absolute',
     right: espacamentos.md,

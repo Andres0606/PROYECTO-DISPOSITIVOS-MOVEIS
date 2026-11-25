@@ -1,5 +1,12 @@
 // SCREEN — Lista de frases por categoria
-import { useCallback, useEffect, useState } from 'react';
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
 import {
   ActivityIndicator,
   StyleSheet,
@@ -13,19 +20,37 @@ import { Button } from '../components/atoms/Button';
 
 import { obterFrasesPorCategoria } from '../services/frases';
 
-import {
-  cores,
-  espacamentos,
-  tipografia,
-} from '../theme';
+import { espacamentos, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
-export function ListaFrasesScreen({ navigation, route }) {
+export function ListaFrasesScreen({
+  navigation,
+  route,
+}) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const categoria = route.params?.categoria;
 
-  const [frases, setFrases] = useState([]);
-  const [favoritas, setFavoritas] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
+  const [frases, setFrases] =
+    useState([]);
+
+  const [favoritas, setFavoritas] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState('');
+
+  // ==========================================================
+  // CARREGAR FRASES
+  // ==========================================================
 
   const carregar = useCallback(async () => {
     if (!categoria?.id) {
@@ -38,15 +63,18 @@ export function ListaFrasesScreen({ navigation, route }) {
     setErro('');
 
     try {
-      const resultado = await obterFrasesPorCategoria(
-        categoria.id
-      );
+      const resultado =
+        await obterFrasesPorCategoria(
+          categoria.id
+        );
 
       setFrases(resultado);
+
     } catch (e) {
       setErro(
         'Não foi possível carregar as frases. Tente novamente.'
       );
+
     } finally {
       setCarregando(false);
     }
@@ -56,23 +84,35 @@ export function ListaFrasesScreen({ navigation, route }) {
     carregar();
   }, [carregar]);
 
+  // ==========================================================
+  // ALTERNAR FAVORITA
+  // ==========================================================
+
   function alternarFavorita(fraseId) {
     setFavoritas((atuais) => {
-      const jaFavorita = atuais.includes(fraseId);
+      const jaFavorita =
+        atuais.includes(fraseId);
 
       if (jaFavorita) {
-        return atuais.filter((id) => id !== fraseId);
+        return atuais.filter(
+          (id) => id !== fraseId
+        );
       }
 
       return [...atuais, fraseId];
     });
   }
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <ScreenTemplate
       titulo={categoria?.nome ?? 'Frases'}
       aoVoltar={() => navigation.goBack()}
     >
+
       {carregando && (
         <ActivityIndicator
           color={cores.primaria}
@@ -82,6 +122,7 @@ export function ListaFrasesScreen({ navigation, route }) {
 
       {!carregando && !!erro && (
         <View style={estilos.estado}>
+
           <Text style={estilos.erro}>
             {erro}
           </Text>
@@ -91,6 +132,7 @@ export function ListaFrasesScreen({ navigation, route }) {
             variante="secundario"
             aoPressionar={carregar}
           />
+
         </View>
       )}
 
@@ -104,51 +146,62 @@ export function ListaFrasesScreen({ navigation, route }) {
 
       {!carregando && !erro && frases.length > 0 && (
         <View style={estilos.lista}>
+
           {frases.map((frase) => (
             <ItemFrase
-                key={frase.id}
-                frase={frase}
-                favorita={favoritas.includes(frase.id)}
-                aoAbrir={() =>
-                    navigation.navigate('FraseDetalhe', {
-                    frase,
-                    categoria,
-                    })
-                }
-                aoAlternarFavorita={() =>
-                    alternarFavorita(frase.id)
-                }
-                />
+              key={frase.id}
+
+              frase={frase}
+
+              favorita={
+                favoritas.includes(frase.id)
+              }
+
+              aoAbrir={() =>
+                navigation.navigate('FraseDetalhe', {
+                  frase,
+                  categoria,
+                })
+              }
+
+              aoAlternarFavorita={() =>
+                alternarFavorita(frase.id)
+              }
+            />
           ))}
+
         </View>
       )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  lista: {
-    marginTop: espacamentos.xs,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    lista: {
+      marginTop: espacamentos.xs,
+    },
 
-  carregando: {
-    marginTop: espacamentos.xl,
-  },
+    carregando: {
+      marginTop: espacamentos.xl,
+    },
 
-  estado: {
-    marginTop: espacamentos.xl,
-    gap: espacamentos.md,
-  },
+    estado: {
+      marginTop: espacamentos.xl,
+      gap: espacamentos.md,
+    },
 
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
+    erro: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.perigo,
+    },
 
-  vazio: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.textoSecundario,
-  },
-});
+    vazio: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.textoSecundario,
+    },
+  });
+}

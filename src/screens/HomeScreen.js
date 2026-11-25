@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -19,8 +20,9 @@ import { Button } from '../components/atoms/Button';
 
 import { obterResumoInicio } from '../services/inicio';
 
+import { useTema } from '../theme/useTema';
+
 import {
-  cores,
   espacamentos,
   tipografia,
 } from '../theme';
@@ -29,6 +31,13 @@ export function HomeScreen({
   navigation,
   route,
 }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const usuario =
     route.params?.usuario;
 
@@ -45,6 +54,10 @@ export function HomeScreen({
   const [erro, setErro] =
     useState('');
 
+  // ==========================================================
+  // CARREGAR RESUMO
+  // ==========================================================
+
   const carregar = useCallback(
     async () => {
       setCarregando(true);
@@ -55,10 +68,12 @@ export function HomeScreen({
           await obterResumoInicio();
 
         setResumo(resultado);
+
       } catch (e) {
         setErro(
           'Não foi possível carregar seu resumo. Tente novamente.'
         );
+
       } finally {
         setCarregando(false);
       }
@@ -70,31 +85,30 @@ export function HomeScreen({
     carregar();
   }, [carregar]);
 
+  // ==========================================================
+  // ABRIR ATALHOS
+  // ==========================================================
+
   function abrirAtalho(chave) {
     if (chave === 'portugues') {
-      navigation.navigate(
-        'Sobrevive'
-      );
-
+      navigation.navigate('Sobrevive');
       return;
     }
 
     if (chave === 'conselhos') {
-      navigation.navigate(
-        'Conselhos'
-      );
-
+      navigation.navigate('Conselhos');
       return;
     }
 
     if (chave === 'atividades') {
-      navigation.navigate(
-        'Atividades'
-      );
-
+      navigation.navigate('Atividades');
       return;
     }
   }
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <ScreenTemplate
@@ -107,50 +121,48 @@ export function HomeScreen({
         />
       )}
 
-      {!carregando &&
-        !!erro && (
-          <View style={estilos.centro}>
-            <Text style={estilos.erro}>
-              {erro}
-            </Text>
+      {!carregando && !!erro && (
+        <View style={estilos.centro}>
 
-            <Button
-              titulo="Tentar novamente"
-              variante="secundario"
-              aoPressionar={carregar}
-            />
-          </View>
-        )}
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
 
-      {!carregando &&
-        !erro &&
-        resumo && (
-          <ResumoInicio
-            resumo={resumo}
-            aoAbrirAtalho={
-              abrirAtalho
-            }
+          <Button
+            titulo="Tentar novamente"
+            variante="secundario"
+            aoPressionar={carregar}
           />
-        )}
+
+        </View>
+      )}
+
+      {!carregando && !erro && resumo && (
+        <ResumoInicio
+          resumo={resumo}
+          aoAbrirAtalho={abrirAtalho}
+        />
+      )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos =
-  StyleSheet.create({
-    centro: {
-      marginTop:
-        espacamentos.xl,
+// ============================================================
+// ESTILOS DINÂMICOS
+// ============================================================
 
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    centro: {
+      marginTop: espacamentos.xl,
       gap: espacamentos.md,
     },
 
     erro: {
-      fontSize:
-        tipografia.corpo,
-
+      fontSize: tipografia.corpo,
       textAlign: 'center',
-
       color: cores.perigo,
     },
   });
+}

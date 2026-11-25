@@ -1,23 +1,62 @@
 // ATOM — Button
-import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
+
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+} from 'react-native';
+
 import { LinearGradient } from 'expo-linear-gradient';
-import { cores, espacamentos, gradientes, raios, tipografia } from '../../theme';
+
+import {
+  espacamentos,
+  raios,
+  tipografia,
+} from '../../theme';
+
+import { useTema } from '../../theme/useTema';
 
 export function Button({
   titulo,
   aoPressionar,
-  // 'primario' (degradê, telas de acesso) | 'secundario' | 'link'
-  // 'escuro' (preto) | 'contorno' (branco com borda), usados nas telas internas
   variante = 'primario',
   carregando = false,
   desabilitado = false,
   icone = null,
-  grande = false, // só para 'primario': altura de 53 (Cadastro, Recuperar senha)
+  grande = false,
 }) {
+  const { cores, gradientes } = useTema();
+
   const inativo = carregando || desabilitado;
+
+  const coresTexto = {
+    primario: cores.textoSobrePrimaria,
+    secundario: cores.texto,
+    escuro: cores.textoBotaoPrincipal,
+    contorno: cores.texto,
+    link: cores.textoSecundario,
+  };
+
+  const coresBotao = {
+    secundario: {
+      backgroundColor: cores.superficieSecundaria,
+    },
+
+    escuro: {
+      backgroundColor: cores.botaoPrincipal,
+    },
+
+    contorno: {
+      borderColor: cores.bordaForte,
+      backgroundColor: cores.superficie,
+    },
+  };
+
   const corCarregando =
-    variante === 'primario' || variante === 'escuro'
-      ? cores.superficie
+    variante === 'primario' ||
+    variante === 'escuro'
+      ? coresTexto[variante]
       : cores.texto;
 
   return (
@@ -28,7 +67,12 @@ export function Button({
       style={({ pressed }) => [
         estilos.base,
         estilos[variante],
-        variante === 'primario' && grande && estilos.grande,
+        coresBotao[variante],
+
+        variante === 'primario' &&
+          grande &&
+          estilos.grande,
+
         pressed && estilos.pressionado,
         inativo && estilos.inativo,
       ]}
@@ -44,16 +88,31 @@ export function Button({
       )}
 
       {carregando ? (
-        <ActivityIndicator color={corCarregando} />
+        <ActivityIndicator
+          color={corCarregando}
+        />
       ) : (
         <>
           {icone}
-          <Text style={[estilos.texto, estilosTexto[variante]]}>{titulo}</Text>
+
+          <Text
+            style={[
+              estilos.texto,
+              estilosTexto[variante],
+              { color: coresTexto[variante] },
+            ]}
+          >
+            {titulo}
+          </Text>
         </>
       )}
     </Pressable>
   );
 }
+
+// ============================================================
+// ESTILOS DOS BOTÕES
+// ============================================================
 
 const estilos = StyleSheet.create({
   base: {
@@ -64,26 +123,30 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
     gap: espacamentos.sm,
   },
+
   primario: {
     minHeight: 41,
     borderRadius: raios.md,
     overflow: 'hidden',
   },
-  grande: { minHeight: 53 },
+
+  grande: {
+    minHeight: 53,
+  },
+
   secundario: {
     borderRadius: raios.sm,
-    backgroundColor: cores.superficieSecundaria,
   },
+
   escuro: {
     borderRadius: raios.sm,
-    backgroundColor: cores.texto,
   },
+
   contorno: {
     borderRadius: raios.sm,
     borderWidth: 1,
-    borderColor: cores.bordaForte,
-    backgroundColor: cores.superficie,
   },
+
   link: {
     minHeight: 0,
     paddingHorizontal: 0,
@@ -91,36 +154,48 @@ const estilos = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: 'transparent',
   },
-  pressionado: { opacity: 0.8 },
-  inativo: { opacity: 0.5 },
+
+  pressionado: {
+    opacity: 0.8,
+  },
+
+  inativo: {
+    opacity: 0.5,
+  },
 });
+
+// ============================================================
+// ESTILOS DOS TEXTOS
+// ============================================================
 
 const estilosTexto = StyleSheet.create({
   primario: {
-    color: cores.superficie,
     fontSize: tipografia.botao,
     fontWeight: '700',
     textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    textShadowOffset: { width: 0, height: 2 },
+    textShadowOffset: {
+      width: 0,
+      height: 2,
+    },
     textShadowRadius: 4,
   },
+
   secundario: {
-    color: cores.texto,
     fontSize: tipografia.corpo,
     fontWeight: '500',
   },
+
   escuro: {
-    color: cores.superficie,
     fontSize: tipografia.corpo,
     fontWeight: '700',
   },
+
   contorno: {
-    color: cores.texto,
     fontSize: tipografia.corpo,
     fontWeight: '700',
   },
+
   link: {
-    color: cores.textoSecundario,
     fontSize: tipografia.legenda,
     fontWeight: '400',
     lineHeight: 18,

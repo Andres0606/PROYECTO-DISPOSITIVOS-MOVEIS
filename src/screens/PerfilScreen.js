@@ -1,6 +1,10 @@
 // SCREEN — Perfil
 
-import { useCallback, useState } from 'react';
+import {
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   Alert,
@@ -17,11 +21,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 
 import { logout } from '../services/auth';
-
 import { obterUsuario } from '../services/storage';
 
+import { usePreferencias } from '../contexts/PreferenciasContext';
+import { useTema } from '../theme/useTema';
+
 import {
-  cores,
   espacamentos,
   raios,
   tipografia,
@@ -32,7 +37,18 @@ import {
 // ============================================================
 
 export function PerfilScreen({ navigation, route }) {
-  const usuarioInicial = route.params?.usuario;
+  const { cores } = useTema();
+
+  const { restaurarPreferencias } =
+    usePreferencias();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
+  const usuarioInicial =
+    route.params?.usuario;
 
   const [usuario, setUsuario] =
     useState(usuarioInicial);
@@ -77,7 +93,8 @@ export function PerfilScreen({ navigation, route }) {
     usuario?.nome ?? 'Usuário';
 
   const pais =
-    usuario?.paisOrigem?.nome ?? 'Não informado';
+    usuario?.paisOrigem?.nome ??
+    'Não informado';
 
   const universidadeOrigem =
     usuario?.universidadeOrigem?.nome ??
@@ -151,6 +168,8 @@ export function PerfilScreen({ navigation, route }) {
     try {
       await logout();
 
+      restaurarPreferencias();
+
       const navegacaoRaiz = navigation
         .getParent()
         ?.getParent();
@@ -192,7 +211,7 @@ export function PerfilScreen({ navigation, route }) {
             <Ionicons
               name="person-outline"
               size={28}
-              color="#000000"
+              color={cores.texto}
             />
           </View>
         )}
@@ -280,7 +299,17 @@ export function PerfilScreen({ navigation, route }) {
 // OPÇÃO DO MENU
 // ============================================================
 
-function OpcaoPerfil({ titulo, aoPressionar }) {
+function OpcaoPerfil({
+  titulo,
+  aoPressionar,
+}) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   return (
     <Pressable
       onPress={aoPressionar}
@@ -303,102 +332,104 @@ function OpcaoPerfil({ titulo, aoPressionar }) {
 }
 
 // ============================================================
-// ESTILOS
+// ESTILOS DINÂMICOS
 // ============================================================
 
-const estilos = StyleSheet.create({
-  cartaoUsuario: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: espacamentos.lg,
-    padding: espacamentos.md,
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raios.sm,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    cartaoUsuario: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: espacamentos.lg,
+      padding: espacamentos.md,
+      backgroundColor: cores.superficie,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      borderRadius: raios.sm,
+    },
 
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: espacamentos.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#A9A6AF',
-  },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      marginRight: espacamentos.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: cores.decoracao,
+    },
 
-  avatarFoto: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: espacamentos.md,
-  },
+    avatarFoto: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      marginRight: espacamentos.md,
+    },
 
-  dadosUsuario: {
-    flex: 1,
-    gap: 4,
-  },
+    dadosUsuario: {
+      flex: 1,
+      gap: 4,
+    },
 
-  nomeUsuario: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: cores.texto,
-    marginBottom: 4,
-  },
+    nomeUsuario: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: cores.texto,
+      marginBottom: 4,
+    },
 
-  informacao: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
-  },
+    informacao: {
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
+    },
 
-  menu: {
-    marginTop: espacamentos.md,
-  },
+    menu: {
+      marginTop: espacamentos.md,
+    },
 
-  opcao: {
-    minHeight: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: cores.borda,
-  },
+    opcao: {
+      minHeight: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 2,
+      borderBottomWidth: 1,
+      borderBottomColor: cores.borda,
+    },
 
-  opcaoTexto: {
-    fontSize: tipografia.corpo,
-    fontWeight: '600',
-    color: cores.texto,
-  },
+    opcaoTexto: {
+      fontSize: tipografia.corpo,
+      fontWeight: '600',
+      color: cores.texto,
+    },
 
-  opcaoPressionada: {
-    opacity: 0.5,
-  },
+    opcaoPressionada: {
+      opacity: 0.5,
+    },
 
-  areaLogout: {
-    marginTop: espacamentos.xl,
-    paddingHorizontal: espacamentos.sm,
-    marginBottom: espacamentos.md,
-  },
+    areaLogout: {
+      marginTop: espacamentos.xl,
+      paddingHorizontal: espacamentos.sm,
+      marginBottom: espacamentos.md,
+    },
 
-  botaoLogout: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raios.sm,
-    backgroundColor: cores.superficie,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    botaoLogout: {
+      minHeight: 48,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      borderRadius: raios.sm,
+      backgroundColor: cores.superficie,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  botaoLogoutTexto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: cores.texto,
-  },
+    botaoLogoutTexto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.texto,
+    },
 
-  pressionado: {
-    opacity: 0.6,
-  },
-});
+    pressionado: {
+      opacity: 0.6,
+    },
+  });
+}

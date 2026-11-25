@@ -1,18 +1,37 @@
-// ATOM — BotaoVoltar (chevron "voltar" das telas internas)
-import { Pressable, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../../theme';
+// ATOM — BotaoVoltar
 
-export function BotaoVoltar({ aoPressionar, style }) {
+import {
+  Pressable,
+  StyleSheet,
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+
+import { useTema } from '../../theme/useTema';
+
+export function BotaoVoltar({
+  aoPressionar,
+  style,
+}) {
+  const { cores } = useTema();
+
   return (
     <Pressable
       onPress={aoPressionar}
       hitSlop={12}
       accessibilityRole="button"
       accessibilityLabel="Voltar"
-      style={({ pressed }) => [estilos.botao, pressed && estilos.pressionado, style]}
+      style={({ pressed }) => [
+        estilos.botao,
+        pressed && estilos.pressionado,
+        style,
+      ]}
     >
-      <Ionicons name="chevron-back" size={24} color={cores.texto} />
+      <Ionicons
+        name="chevron-back"
+        size={24}
+        color={cores.texto}
+      />
     </Pressable>
   );
 }
@@ -24,5 +43,8 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pressionado: { opacity: 0.6 },
+
+  pressionado: {
+    opacity: 0.6,
+  },
 });

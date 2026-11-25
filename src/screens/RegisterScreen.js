@@ -1,30 +1,51 @@
 // SCREEN — Cadastro
+
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
+
 import { CenteredTemplate } from '../components/templates/CenteredTemplate';
 import { CabecalhoAcesso } from '../components/molecules/CabecalhoAcesso';
 import { RegisterForm } from '../components/organisms/RegisterForm';
+
 import { fazerCadastro } from '../services/auth';
+
+import { usePreferencias } from '../contexts/PreferenciasContext';
+
 import { espacamentos } from '../theme';
 
 export function RegisterScreen({ navigation }) {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
 
+  const { carregarPreferencias } = usePreferencias();
+
+  // ==========================================================
+  // CADASTRAR USUÁRIO
+  // ==========================================================
+
   async function cadastrar(dados) {
     setErro('');
     setCarregando(true);
+
     try {
       const { usuario } = await fazerCadastro(dados);
-      navigation.replace('Home', { usuario });
+
+      carregarPreferencias(usuario);
+
+      navigation.replace('Home', {
+        usuario,
+      });
+
     } catch (e) {
       setErro(e.message);
+    } finally {
       setCarregando(false);
     }
   }
 
   return (
     <CenteredTemplate variante="cadastro">
+
       <CabecalhoAcesso
         aoVoltar={() => navigation.goBack()}
         style={estilos.cabecalho}
@@ -35,10 +56,13 @@ export function RegisterScreen({ navigation }) {
         carregando={carregando}
         erroGeral={erro}
       />
+
     </CenteredTemplate>
   );
 }
 
 const estilos = StyleSheet.create({
-  cabecalho: { marginBottom: espacamentos.xl + espacamentos.xs },
+  cabecalho: {
+    marginBottom: espacamentos.xl + espacamentos.xs,
+  },
 });

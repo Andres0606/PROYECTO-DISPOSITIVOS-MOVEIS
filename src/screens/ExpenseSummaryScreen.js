@@ -1,20 +1,42 @@
-// SCREEN — Meus gastos (resumo do orçamento e distribuição por categoria)
-import { useCallback, useRef, useState } from 'react';
+// SCREEN — Meus gastos
+
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ResumoGastos } from '../components/organisms/ResumoGastos';
 import { Button } from '../components/atoms/Button';
+
 import { obterResumoGastos } from '../services/gastos';
-import { cores, espacamentos, tipografia } from '../theme';
+
+import { espacamentos, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
 export function ExpenseSummaryScreen({ navigation }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
-  // Depois da primeira carga, as recargas (ao voltar de outra tela) são
-  // silenciosas: sem indicador de carregamento e sem apagar o resumo.
   const jaCarregou = useRef(false);
 
   const carregar = useCallback(async () => {
@@ -23,21 +45,26 @@ export function ExpenseSummaryScreen({ navigation }) {
     if (primeira) {
       setCarregando(true);
     }
+
     setErro('');
 
     try {
       setResumo(await obterResumoGastos());
+
       jaCarregou.current = true;
+
     } catch (e) {
       if (primeira) {
-        setErro('Não foi possível carregar seus gastos. Tente novamente.');
+        setErro(
+          'Não foi possível carregar seus gastos. Tente novamente.'
+        );
       }
+
     } finally {
       setCarregando(false);
     }
   }, []);
 
-  // Recarrega sempre que a tela volta a ficar em foco.
   useFocusEffect(
     useCallback(() => {
       carregar();
@@ -58,18 +85,27 @@ export function ExpenseSummaryScreen({ navigation }) {
 
   return (
     <ScreenTemplate titulo="Meus gastos">
+
       {carregando && (
-        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+        <ActivityIndicator
+          color={cores.primaria}
+          style={estilos.centro}
+        />
       )}
 
       {!carregando && !!erro && (
         <View style={estilos.centro}>
-          <Text style={estilos.erro}>{erro}</Text>
+
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
+
           <Button
             titulo="Tentar novamente"
             variante="secundario"
             aoPressionar={carregar}
           />
+
         </View>
       )}
 
@@ -81,15 +117,22 @@ export function ExpenseSummaryScreen({ navigation }) {
           aoAbrirEstatisticas={abrirEstatisticas}
         />
       )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
-});
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    centro: {
+      marginTop: espacamentos.xl,
+      gap: espacamentos.md,
+    },
+
+    erro: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.perigo,
+    },
+  });
+}

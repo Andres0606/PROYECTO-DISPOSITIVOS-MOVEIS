@@ -1,21 +1,43 @@
 // SCREEN — Estatísticas de gastos
-import { useCallback, useRef, useState } from 'react';
+
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { EstatisticasGastos } from '../components/organisms/EstatisticasGastos';
 import { Button } from '../components/atoms/Button';
+
 import { obterEstatisticasGastos } from '../services/gastos';
-import { cores, espacamentos, tipografia } from '../theme';
+
+import { espacamentos, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
 export function ExpenseStatsScreen({ navigation }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const [estatisticas, setEstatisticas] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [visao, setVisao] = useState('mes');
 
-  // Depois da primeira carga, as recargas (ao voltar de outra tela) são
-  // silenciosas: sem indicador de carregamento e sem apagar os dados.
   const jaCarregou = useRef(false);
 
   const carregar = useCallback(async () => {
@@ -24,21 +46,28 @@ export function ExpenseStatsScreen({ navigation }) {
     if (primeira) {
       setCarregando(true);
     }
+
     setErro('');
 
     try {
-      setEstatisticas(await obterEstatisticasGastos());
+      setEstatisticas(
+        await obterEstatisticasGastos()
+      );
+
       jaCarregou.current = true;
+
     } catch (e) {
       if (primeira) {
-        setErro('Não foi possível carregar as estatísticas. Tente novamente.');
+        setErro(
+          'Não foi possível carregar as estatísticas. Tente novamente.'
+        );
       }
+
     } finally {
       setCarregando(false);
     }
   }, []);
 
-  // Recarrega sempre que a tela volta a ficar em foco.
   useFocusEffect(
     useCallback(() => {
       carregar();
@@ -46,19 +75,31 @@ export function ExpenseStatsScreen({ navigation }) {
   );
 
   return (
-    <ScreenTemplate titulo="Estatísticas" aoVoltar={() => navigation.goBack()}>
+    <ScreenTemplate
+      titulo="Estatísticas"
+      aoVoltar={() => navigation.goBack()}
+    >
+
       {carregando && (
-        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+        <ActivityIndicator
+          color={cores.primaria}
+          style={estilos.centro}
+        />
       )}
 
       {!carregando && !!erro && (
         <View style={estilos.centro}>
-          <Text style={estilos.erro}>{erro}</Text>
+
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
+
           <Button
             titulo="Tentar novamente"
             variante="secundario"
             aoPressionar={carregar}
           />
+
         </View>
       )}
 
@@ -69,15 +110,22 @@ export function ExpenseStatsScreen({ navigation }) {
           aoMudarVisao={setVisao}
         />
       )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
-});
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    centro: {
+      marginTop: espacamentos.xl,
+      gap: espacamentos.md,
+    },
+
+    erro: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.perigo,
+    },
+  });
+}

@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useMemo,
   useState,
 } from 'react';
 
@@ -14,10 +15,7 @@ import {
   View,
 } from 'react-native';
 
-import {
-  useFocusEffect,
-} from '@react-navigation/native';
-
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
@@ -28,15 +26,25 @@ import {
 } from '../services/favoritos';
 
 import {
-  cores,
   espacamentos,
   raios,
   tipografia,
 } from '../theme';
 
-export function FavoritosScreen({
-  navigation,
-}) {
+import { useTema } from '../theme/useTema';
+
+// ============================================================
+// SCREEN — FAVORITOS
+// ============================================================
+
+export function FavoritosScreen({ navigation }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const [tipo, setTipo] =
     useState('lugares');
 
@@ -46,23 +54,23 @@ export function FavoritosScreen({
   const [carregando, setCarregando] =
     useState(true);
 
-  const carregar =
-    useCallback(async () => {
-      setCarregando(true);
+  // ==========================================================
+  // CARREGAR FAVORITOS
+  // ==========================================================
 
-      try {
-        const resultado =
-          await obterFavoritos(
-            tipo
-          );
+  const carregar = useCallback(async () => {
+    setCarregando(true);
 
-        setFavoritos(
-          resultado
-        );
-      } finally {
-        setCarregando(false);
-      }
-    }, [tipo]);
+    try {
+      const resultado =
+        await obterFavoritos(tipo);
+
+      setFavoritos(resultado);
+
+    } finally {
+      setCarregando(false);
+    }
+  }, [tipo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,231 +78,176 @@ export function FavoritosScreen({
     }, [carregar])
   );
 
+  // ==========================================================
+  // REMOVER FAVORITO
+  // ==========================================================
+
   async function remover(item) {
-    await removerFavorito(
-      tipo,
-      item.id
-    );
+    await removerFavorito(tipo, item.id);
 
     setFavoritos(
       (atuais) =>
         atuais.filter(
           (favorito) =>
-            favorito.id !==
-            item.id
+            favorito.id !== item.id
         )
     );
   }
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <ScreenTemplate
       titulo="Favoritos"
-      aoVoltar={() =>
-        navigation.goBack()
-      }
+      aoVoltar={() => navigation.goBack()}
     >
+
       {/* ABAS */}
-      <View
-        style={
-          estilos.segmentado
-        }
-      >
+
+      <View style={estilos.segmentado}>
+
         <Pressable
-          onPress={() =>
-            setTipo('lugares')
-          }
+          onPress={() => setTipo('lugares')}
           style={[
             estilos.segmento,
-
-            tipo ===
-              'lugares' &&
+            tipo === 'lugares' &&
               estilos.segmentoAtivo,
           ]}
         >
-          <Text
-            style={
-              estilos.segmentoTexto
-            }
-          >
+          <Text style={estilos.segmentoTexto}>
             Lugares
           </Text>
         </Pressable>
 
         <Pressable
-          onPress={() =>
-            setTipo('frases')
-          }
+          onPress={() => setTipo('frases')}
           style={[
             estilos.segmento,
-
-            tipo ===
-              'frases' &&
+            tipo === 'frases' &&
               estilos.segmentoAtivo,
           ]}
         >
-          <Text
-            style={
-              estilos.segmentoTexto
-            }
-          >
+          <Text style={estilos.segmentoTexto}>
             Frases
           </Text>
         </Pressable>
 
         <Pressable
-          onPress={() =>
-            setTipo('atividades')
-          }
+          onPress={() => setTipo('atividades')}
           style={[
             estilos.segmento,
-
-            tipo ===
-              'atividades' &&
+            tipo === 'atividades' &&
               estilos.segmentoAtivo,
           ]}
         >
-          <Text
-            style={
-              estilos.segmentoTexto
-            }
-          >
+          <Text style={estilos.segmentoTexto}>
             Atividades
           </Text>
         </Pressable>
+
       </View>
 
       {/* CARREGANDO */}
+
       {carregando ? (
         <ActivityIndicator
           color={cores.primaria}
-          style={
-            estilos.carregando
-          }
+          style={estilos.carregando}
         />
       ) : (
         <>
           {favoritos.length === 0 ? (
-            <View
-              style={
-                estilos.vazio
-              }
-            >
+            <View style={estilos.vazio}>
+
               <Ionicons
                 name="heart-outline"
                 size={34}
-                color={
-                  cores.textoSecundario
-                }
+                color={cores.textoSecundario}
               />
 
-              <Text
-                style={
-                  estilos.vazioTexto
-                }
-              >
+              <Text style={estilos.vazioTexto}>
                 Nenhum favorito nesta categoria.
               </Text>
+
             </View>
           ) : (
-            <View
-              style={
-                estilos.lista
-              }
-            >
-              {favoritos.map(
-                (item) => (
-                  <ItemFavorito
-                    key={
-                      item.id
-                    }
-                    item={item}
-                    tipo={tipo}
-                    aoRemover={() =>
-                      remover(
-                        item
-                      )
-                    }
-                  />
-                )
-              )}
+            <View style={estilos.lista}>
+
+              {favoritos.map((item) => (
+                <ItemFavorito
+                  key={item.id}
+                  item={item}
+                  tipo={tipo}
+                  aoRemover={() => remover(item)}
+                />
+              ))}
+
             </View>
           )}
         </>
       )}
+
     </ScreenTemplate>
   );
 }
+
+// ============================================================
+// ITEM FAVORITO
+// ============================================================
 
 function ItemFavorito({
   item,
   tipo,
   aoRemover,
 }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const titulo =
-    item.nome ??
-    item.titulo;
+    item.nome ?? item.titulo;
 
   return (
-    <View
-      style={
-        estilos.item
-      }
-    >
+    <View style={estilos.item}>
+
       {tipo === 'lugares' ? (
         item.imagem ? (
           <Image
-            source={{
-              uri: item.imagem,
-            }}
-            style={
-              estilos.imagem
-            }
+            source={{ uri: item.imagem }}
+            style={estilos.imagem}
           />
         ) : (
-          <View
-            style={
-              estilos.imagemVazia
-            }
-          >
+          <View style={estilos.imagemVazia}>
             <Ionicons
               name="location-outline"
               size={22}
-              color={
-                cores.textoSecundario
-              }
+              color={cores.textoSecundario}
             />
           </View>
         )
       ) : (
-        <View
-          style={
-            estilos.iconeCategoria
-          }
-        >
+        <View style={estilos.iconeCategoria}>
           <Ionicons
             name={
-              tipo ===
-              'frases'
+              tipo === 'frases'
                 ? 'chatbubble-outline'
                 : 'calendar-outline'
             }
             size={22}
-            color={
-              cores.texto
-            }
+            color={cores.texto}
           />
         </View>
       )}
 
-      <View
-        style={
-          estilos.conteudo
-        }
-      >
+      <View style={estilos.conteudo}>
+
         <Text
-          style={
-            estilos.titulo
-          }
+          style={estilos.titulo}
           numberOfLines={1}
         >
           {titulo}
@@ -302,28 +255,21 @@ function ItemFavorito({
 
         {!!item.descricao && (
           <Text
-            style={
-              estilos.descricao
-            }
+            style={estilos.descricao}
             numberOfLines={1}
           >
             {item.descricao}
           </Text>
         )}
+
       </View>
 
       <Pressable
-        onPress={
-          aoRemover
-        }
+        onPress={aoRemover}
         hitSlop={12}
-        style={({
-          pressed,
-        }) => [
+        style={({ pressed }) => [
           estilos.coracao,
-
-          pressed &&
-            estilos.pressionado,
+          pressed && estilos.pressionado,
         ]}
       >
         <Ionicons
@@ -332,67 +278,47 @@ function ItemFavorito({
           color={cores.texto}
         />
       </Pressable>
+
     </View>
   );
 }
 
-const estilos =
-  StyleSheet.create({
+// ============================================================
+// ESTILOS DINÂMICOS
+// ============================================================
+
+function criarEstilos(cores) {
+  return StyleSheet.create({
     segmentado: {
       height: 38,
-
-      flexDirection:
-        'row',
-
+      flexDirection: 'row',
       borderWidth: 1,
-
-      borderColor:
-        cores.segmentoBorda,
-
-      borderRadius:
-        raios.pill,
-
-      overflow:
-        'hidden',
-
-      marginTop:
-        espacamentos.lg,
-
-      marginBottom:
-        espacamentos.md,
+      borderColor: cores.segmentoBorda,
+      borderRadius: raios.pill,
+      overflow: 'hidden',
+      marginTop: espacamentos.lg,
+      marginBottom: espacamentos.md,
     },
 
     segmento: {
       flex: 1,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
+      alignItems: 'center',
+      justifyContent: 'center',
       borderRightWidth: 1,
-
-      borderRightColor:
-        cores.segmentoBorda,
+      borderRightColor: cores.segmentoBorda,
     },
 
     segmentoAtivo: {
-      backgroundColor:
-        cores.segmentoSelecionado,
+      backgroundColor: cores.segmentoSelecionado,
     },
 
     segmentoTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.texto,
+      fontSize: tipografia.legenda,
+      color: cores.texto,
     },
 
     carregando: {
-      marginTop:
-        espacamentos.xl,
+      marginTop: espacamentos.xl,
     },
 
     lista: {
@@ -401,137 +327,79 @@ const estilos =
 
     item: {
       minHeight: 72,
-
-      flexDirection:
-        'row',
-
-      alignItems:
-        'center',
-
+      flexDirection: 'row',
+      alignItems: 'center',
       borderBottomWidth: 1,
-
-      borderBottomColor:
-        cores.borda,
-
-      paddingVertical:
-        espacamentos.sm,
-
-      paddingHorizontal:
-        espacamentos.xs,
+      borderBottomColor: cores.borda,
+      paddingVertical: espacamentos.sm,
+      paddingHorizontal: espacamentos.xs,
     },
 
     imagem: {
       width: 54,
       height: 54,
-
-      borderRadius:
-        raios.sm,
-
-      marginRight:
-        espacamentos.sm,
-
-      backgroundColor:
-        cores.superficie,
+      borderRadius: raios.sm,
+      marginRight: espacamentos.sm,
+      backgroundColor: cores.superficie,
     },
 
     imagemVazia: {
       width: 54,
       height: 54,
-
-      borderRadius:
-        raios.sm,
-
-      marginRight:
-        espacamentos.sm,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
-      backgroundColor:
-        '#ECECEC',
+      borderRadius: raios.sm,
+      marginRight: espacamentos.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: cores.superficieSecundaria,
     },
 
     iconeCategoria: {
       width: 54,
       height: 54,
-
-      borderRadius:
-        raios.sm,
-
-      marginRight:
-        espacamentos.sm,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
-      backgroundColor:
-        '#ECECEC',
+      borderRadius: raios.sm,
+      marginRight: espacamentos.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: cores.superficieSecundaria,
     },
 
     conteudo: {
       flex: 1,
-
-      paddingRight:
-        espacamentos.sm,
+      paddingRight: espacamentos.sm,
     },
 
     titulo: {
-      fontSize:
-        tipografia.corpo,
-
-      fontWeight:
-        '700',
-
-      color:
-        cores.texto,
+      fontSize: tipografia.corpo,
+      fontWeight: '700',
+      color: cores.texto,
     },
 
     descricao: {
       marginTop: 3,
-
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.textoSecundario,
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
     },
 
     coracao: {
       width: 38,
       height: 38,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
 
     vazio: {
       marginTop: 80,
-
-      alignItems:
-        'center',
-
-      gap:
-        espacamentos.sm,
+      alignItems: 'center',
+      gap: espacamentos.sm,
     },
 
     vazioTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.textoSecundario,
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
     },
 
     pressionado: {
       opacity: 0.5,
     },
   });
+}

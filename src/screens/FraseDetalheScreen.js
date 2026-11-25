@@ -1,19 +1,45 @@
 // SCREEN — Detalhe de uma frase
-import { StyleSheet, Text, View } from 'react-native';
+
+import { useMemo } from 'react';
+
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 
 import {
-  cores,
   espacamentos,
   raios,
   tipografia,
 } from '../theme';
 
-export function FraseDetalheScreen({ navigation, route }) {
-  const frase = route.params?.frase;
-  const categoria = route.params?.categoria;
+import { useTema } from '../theme/useTema';
+
+export function FraseDetalheScreen({
+  navigation,
+  route,
+}) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
+  const frase =
+    route.params?.frase;
+
+  const categoria =
+    route.params?.categoria;
+
+  // ==========================================================
+  // FRASE NÃO ENCONTRADA
+  // ==========================================================
 
   if (!frase) {
     return (
@@ -28,14 +54,22 @@ export function FraseDetalheScreen({ navigation, route }) {
     );
   }
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <ScreenTemplate
       titulo="Frase"
       aoVoltar={() => navigation.goBack()}
     >
+
       <View style={estilos.espacoSuperior} />
 
+      {/* CARTÃO DA FRASE */}
+
       <View style={estilos.cartao}>
+
         <Text style={estilos.portugues}>
           {frase.portugues}
         </Text>
@@ -45,7 +79,10 @@ export function FraseDetalheScreen({ navigation, route }) {
         <Text style={estilos.espanhol}>
           {frase.espanhol}
         </Text>
+
       </View>
+
+      {/* CATEGORIA */}
 
       <View style={estilos.categoria}>
         <Text style={estilos.categoriaTexto}>
@@ -53,7 +90,10 @@ export function FraseDetalheScreen({ navigation, route }) {
         </Text>
       </View>
 
+      {/* PRONUNCIAÇÃO */}
+
       <View style={estilos.pronunciacao}>
+
         <Ionicons
           name="play-circle-outline"
           size={22}
@@ -63,81 +103,89 @@ export function FraseDetalheScreen({ navigation, route }) {
         <Text style={estilos.pronunciacaoTexto}>
           Escuchar pronunciación
         </Text>
+
       </View>
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  espacoSuperior: {
-    height: 105,
-  },
+// ============================================================
+// ESTILOS DINÂMICOS
+// ============================================================
 
-  cartao: {
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raios.sm,
-    paddingHorizontal: espacamentos.md,
-    paddingVertical: espacamentos.sm,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    espacoSuperior: {
+      height: 105,
+    },
 
-  portugues: {
-    fontSize: tipografia.subtitulo,
-    fontWeight: '700',
-    color: cores.texto,
-    paddingVertical: espacamentos.xs,
-  },
+    cartao: {
+      backgroundColor: cores.superficie,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      borderRadius: raios.sm,
+      paddingHorizontal: espacamentos.md,
+      paddingVertical: espacamentos.sm,
+    },
 
-  divisor: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: cores.bordaForte,
-    marginVertical: espacamentos.sm,
-  },
+    portugues: {
+      fontSize: tipografia.subtitulo,
+      fontWeight: '700',
+      color: cores.texto,
+      paddingVertical: espacamentos.xs,
+    },
 
-  espanhol: {
-    fontSize: tipografia.subtitulo,
-    color: cores.textoSecundario,
-    paddingBottom: espacamentos.xs,
-  },
+    divisor: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: cores.bordaForte,
+      marginVertical: espacamentos.sm,
+    },
 
-  categoria: {
-    alignSelf: 'flex-start',
-    marginTop: espacamentos.lg,
-    marginLeft: espacamentos.xs,
-    paddingHorizontal: espacamentos.md,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raios.pill,
-    backgroundColor: cores.superficie,
-  },
+    espanhol: {
+      fontSize: tipografia.subtitulo,
+      color: cores.textoSecundario,
+      paddingBottom: espacamentos.xs,
+    },
 
-  categoriaTexto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '600',
-    color: cores.texto,
-  },
+    categoria: {
+      alignSelf: 'flex-start',
+      marginTop: espacamentos.lg,
+      marginLeft: espacamentos.xs,
+      paddingHorizontal: espacamentos.md,
+      paddingVertical: 6,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      borderRadius: raios.pill,
+      backgroundColor: cores.superficie,
+    },
 
-  pronunciacao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: espacamentos.xs,
-    marginTop: espacamentos.lg,
-    paddingVertical: espacamentos.sm,
-    paddingHorizontal: espacamentos.xs,
-  },
+    categoriaTexto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '600',
+      color: cores.texto,
+    },
 
-  pronunciacaoTexto: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
-  },
+    pronunciacao: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: espacamentos.xs,
+      marginTop: espacamentos.lg,
+      paddingVertical: espacamentos.sm,
+      paddingHorizontal: espacamentos.xs,
+    },
 
-  erro: {
-    marginTop: espacamentos.xl,
-    textAlign: 'center',
-    fontSize: tipografia.corpo,
-    color: cores.perigo,
-  },
-});
+    pronunciacaoTexto: {
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
+    },
+
+    erro: {
+      marginTop: espacamentos.xl,
+      textAlign: 'center',
+      fontSize: tipografia.corpo,
+      color: cores.perigo,
+    },
+  });
+}

@@ -1,22 +1,37 @@
-// ATOM — BotaoFlutuante (botão "+" circular; a posição é dada pelo ScreenTemplate)
+// ATOM — BotaoFlutuante
+
 import { Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../../theme';
 
-export function BotaoFlutuante({ aoPressionar, rotulo = 'Adicionar' }) {
+import { useTema } from '../../theme/useTema';
+
+export function BotaoFlutuante({
+  aoPressionar,
+  rotulo = 'Adicionar',
+}) {
+  const { cores } = useTema();
+
   return (
     <Pressable
       onPress={aoPressionar}
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={rotulo}
-      style={({ pressed }) => pressed && estilos.pressionado}
+      style={({ pressed }) =>
+        pressed && estilos.pressionado
+      }
     >
-      <Ionicons name="add-circle-outline" size={38} color={cores.texto} />
+      <Ionicons
+        name="add-circle-outline"
+        size={38}
+        color={cores.texto}
+      />
     </Pressable>
   );
 }
 
 const estilos = StyleSheet.create({
-  pressionado: { opacity: 0.6 },
+  pressionado: {
+    opacity: 0.6,
+  },
 });

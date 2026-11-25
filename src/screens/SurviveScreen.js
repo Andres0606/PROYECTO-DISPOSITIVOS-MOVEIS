@@ -1,5 +1,12 @@
-// SCREEN — Sobrevive em Português (categorias de frases)
-import { useCallback, useEffect, useState } from 'react';
+// SCREEN — Sobrevive em Português
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
 import {
   ActivityIndicator,
   StyleSheet,
@@ -13,16 +20,29 @@ import { Button } from '../components/atoms/Button';
 
 import { obterCategoriasFrases } from '../services/frases';
 
-import {
-  cores,
-  espacamentos,
-  tipografia,
-} from '../theme';
+import { espacamentos, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
 export function SurviveScreen({ navigation }) {
-  const [categorias, setCategorias] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
+  const [categorias, setCategorias] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState('');
+
+  // ==========================================================
+  // CARREGAR CATEGORIAS
+  // ==========================================================
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -32,10 +52,12 @@ export function SurviveScreen({ navigation }) {
       setCategorias(
         await obterCategoriasFrases()
       );
+
     } catch (e) {
       setErro(
         'Não foi possível carregar as categorias. Tente novamente.'
       );
+
     } finally {
       setCarregando(false);
     }
@@ -45,17 +67,26 @@ export function SurviveScreen({ navigation }) {
     carregar();
   }, [carregar]);
 
+  // ==========================================================
+  // ABRIR CATEGORIA
+  // ==========================================================
+
   function abrirCategoria(categoria) {
     navigation.navigate('ListaFrases', {
       categoria,
     });
   }
 
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <ScreenTemplate
       titulo="Sobrevive em Português"
       aoVoltar={() => navigation.goBack()}
     >
+
       {carregando && (
         <ActivityIndicator
           color={cores.primaria}
@@ -65,6 +96,7 @@ export function SurviveScreen({ navigation }) {
 
       {!carregando && !!erro && (
         <View style={estilos.centro}>
+
           <Text style={estilos.erro}>
             {erro}
           </Text>
@@ -74,6 +106,7 @@ export function SurviveScreen({ navigation }) {
             variante="secundario"
             aoPressionar={carregar}
           />
+
         </View>
       )}
 
@@ -83,19 +116,22 @@ export function SurviveScreen({ navigation }) {
           aoAbrirCategoria={abrirCategoria}
         />
       )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  centro: {
-    marginTop: espacamentos.xl,
-    gap: espacamentos.md,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    centro: {
+      marginTop: espacamentos.xl,
+      gap: espacamentos.md,
+    },
 
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
-});
+    erro: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.perigo,
+    },
+  });
+}

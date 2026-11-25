@@ -20,16 +20,18 @@ import { AtividadeDetalheScreen } from '../screens/AtividadeDetalheScreen';
 import { CriarAtividadeScreen } from '../screens/CriarAtividadeScreen';
 import { EditarAtividadeScreen } from '../screens/EditarAtividadeScreen';
 
-import { cores } from '../theme';
+import { useTema } from '../theme/useTema';
 
-const Stack =
-  createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
 
-export function InicioStack({
-  route,
-}) {
-  const usuario =
-    route.params?.usuario;
+// ============================================================
+// NAVEGAÇÃO — INÍCIO
+// ============================================================
+
+export function InicioStack({ route }) {
+  const { cores } = useTema();
+
+  const usuario = route.params?.usuario;
 
   return (
     <Stack.Navigator
@@ -38,18 +40,17 @@ export function InicioStack({
         headerShown: false,
 
         contentStyle: {
-          backgroundColor:
-            cores.fundo,
+          backgroundColor: cores.fundo,
         },
       }}
     >
       <Stack.Screen
         name="InicioHome"
         component={HomeScreen}
-        initialParams={{
-          usuario,
-        }}
+        initialParams={{ usuario }}
       />
+
+      {/* PORTUGUÊS */}
 
       <Stack.Screen
         name="Sobrevive"
@@ -58,73 +59,58 @@ export function InicioStack({
 
       <Stack.Screen
         name="ListaFrases"
-        component={
-          ListaFrasesScreen
-        }
+        component={ListaFrasesScreen}
       />
 
       <Stack.Screen
         name="FraseDetalhe"
-        component={
-          FraseDetalheScreen
-        }
+        component={FraseDetalheScreen}
       />
+
+      {/* CONSELHOS */}
 
       <Stack.Screen
         name="Conselhos"
-        component={
-          ConselhosScreen
-        }
+        component={ConselhosScreen}
       />
 
       <Stack.Screen
         name="ConselhoDetalhe"
-        component={
-          ConselhoDetalheScreen
-        }
+        component={ConselhoDetalheScreen}
       />
 
       <Stack.Screen
         name="CriarConselho"
-        component={
-          CriarConselhoScreen
-        }
+        component={CriarConselhoScreen}
       />
 
       <Stack.Screen
         name="EditarConselho"
-        component={
-          EditarConselhoScreen
-        }
+        component={EditarConselhoScreen}
       />
+
+      {/* ATIVIDADES */}
 
       <Stack.Screen
         name="Atividades"
-        component={
-          AtividadesScreen
-        }
+        component={AtividadesScreen}
       />
 
       <Stack.Screen
         name="AtividadeDetalhe"
-        component={
-          AtividadeDetalheScreen
-        }
+        component={AtividadeDetalheScreen}
       />
 
       <Stack.Screen
         name="CriarAtividade"
-        component={
-          CriarAtividadeScreen
-        }
+        component={CriarAtividadeScreen}
       />
 
       <Stack.Screen
         name="EditarAtividade"
-        component={
-          EditarAtividadeScreen
-        }
+        component={EditarAtividadeScreen}
       />
+
     </Stack.Navigator>
   );
 }

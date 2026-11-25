@@ -1,9 +1,20 @@
-// MOLECULE — FormField (rótulo + Input + mensagem de erro)
-// Se receber "children", mostra o conteúdo no lugar do Input
-// (usado por CampoSelecao).
-import { StyleSheet, Text, View } from 'react-native';
+// MOLECULE — FormField
+// Rótulo, campo de entrada e mensagem de erro.
+
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Input } from '../atoms/Input';
-import { cores, espacamentos, tipografia } from '../../theme';
+
+import {
+  espacamentos,
+  tipografia,
+} from '../../theme';
+
+import { useTema } from '../../theme/useTema';
 
 export function FormField({
   rotulo,
@@ -12,14 +23,48 @@ export function FormField({
   children,
   ...resto
 }) {
+  const { cores } = useTema();
+
   return (
-    <View style={{ marginBottom: margemInferior }}>
-      <Text style={estilos.rotulo}>{rotulo}</Text>
-      {children ?? <Input erro={!!erro} {...resto} />}
-      {!!erro && <Text style={estilos.mensagemErro}>{erro}</Text>}
+    <View
+      style={{
+        marginBottom: margemInferior,
+      }}
+    >
+      <Text
+        style={[
+          estilos.rotulo,
+          { color: cores.texto },
+        ]}
+      >
+        {rotulo}
+      </Text>
+
+      {children ?? (
+        <Input
+          erro={!!erro}
+          {...resto}
+        />
+      )}
+
+      {!!erro && (
+        <Text
+          style={[
+            estilos.mensagemErro,
+            { color: cores.perigo },
+          ]}
+        >
+          {erro}
+        </Text>
+      )}
+
     </View>
   );
 }
+
+// ============================================================
+// ESTILOS
+// ============================================================
 
 const estilos = StyleSheet.create({
   rotulo: {
@@ -27,11 +72,10 @@ const estilos = StyleSheet.create({
     fontSize: tipografia.corpo,
     lineHeight: 21,
     fontWeight: '600',
-    color: cores.texto,
   },
+
   mensagemErro: {
     marginTop: espacamentos.xs,
     fontSize: tipografia.legenda,
-    color: cores.perigo,
   },
 });

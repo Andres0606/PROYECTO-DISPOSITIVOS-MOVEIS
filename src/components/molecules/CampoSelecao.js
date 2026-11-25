@@ -1,10 +1,26 @@
-// MOLECULE — CampoSelecao (rótulo + campo que abre uma lista de opções)
-// opcoes: lista de textos. aoMudar(opcao) é chamado ao escolher.
+// MOLECULE — CampoSelecao
+// Campo com lista de opções.
+
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import { FormField } from './FormField';
-import { cores, espacamentos, raios, tipografia } from '../../theme';
+
+import {
+  espacamentos,
+  raios,
+  tipografia,
+} from '../../theme';
+
+import { useTema } from '../../theme/useTema';
 
 export function CampoSelecao({
   rotulo,
@@ -13,52 +29,122 @@ export function CampoSelecao({
   aoMudar,
   margemInferior,
 }) {
+  const { cores } = useTema();
+
   const [aberto, setAberto] = useState(false);
 
   function escolher(opcao) {
     aoMudar(opcao);
+
     setAberto(false);
   }
 
   return (
-    <FormField rotulo={rotulo} margemInferior={margemInferior}>
+    <FormField
+      rotulo={rotulo}
+      margemInferior={margemInferior}
+    >
       <Pressable
-        onPress={() => setAberto((atual) => !atual)}
+        onPress={() =>
+          setAberto((atual) => !atual)
+        }
+
         accessibilityRole="button"
-        accessibilityState={{ expanded: aberto }}
-        style={[estilos.campo, aberto && estilos.campoAberto]}
+
+        accessibilityState={{
+          expanded: aberto,
+        }}
+
+        style={[
+          estilos.campo,
+
+          {
+            borderColor: cores.borda,
+            backgroundColor: cores.superficie,
+          },
+
+          aberto && {
+            borderColor: cores.bordaFoco,
+          },
+        ]}
       >
-        <Text style={estilos.valor}>{valor}</Text>
+        <Text
+          style={[
+            estilos.valor,
+            { color: cores.texto },
+          ]}
+        >
+          {valor}
+        </Text>
+
         <Ionicons
-          name={aberto ? 'chevron-up' : 'chevron-down'}
+          name={
+            aberto
+              ? 'chevron-up'
+              : 'chevron-down'
+          }
           size={18}
           color={cores.textoSecundario}
         />
       </Pressable>
 
       {aberto && (
-        <View style={estilos.lista}>
+        <View
+          style={[
+            estilos.lista,
+            {
+              borderColor: cores.borda,
+              backgroundColor: cores.superficie,
+            },
+          ]}
+        >
           {opcoes.map((opcao, indice) => {
             const selecionada = opcao === valor;
 
             return (
               <Pressable
                 key={opcao}
+
                 onPress={() => escolher(opcao)}
+
                 accessibilityRole="button"
-                accessibilityState={{ selected: selecionada }}
-                style={[estilos.opcao, indice > 0 && estilos.separador]}
+
+                accessibilityState={{
+                  selected: selecionada,
+                }}
+
+                style={[
+                  estilos.opcao,
+
+                  indice > 0 && [
+                    estilos.separador,
+                    {
+                      borderTopColor: cores.divisor,
+                    },
+                  ],
+                ]}
               >
                 <Text
                   style={[
                     estilos.textoOpcao,
-                    selecionada && estilos.textoSelecionado,
+
+                    {
+                      color: cores.texto,
+                    },
+
+                    selecionada &&
+                      estilos.textoSelecionado,
                   ]}
                 >
                   {opcao}
                 </Text>
+
                 {selecionada && (
-                  <Ionicons name="checkmark" size={16} color={cores.texto} />
+                  <Ionicons
+                    name="checkmark"
+                    size={16}
+                    color={cores.texto}
+                  />
                 )}
               </Pressable>
             );
@@ -69,6 +155,10 @@ export function CampoSelecao({
   );
 }
 
+// ============================================================
+// ESTILOS
+// ============================================================
+
 const estilos = StyleSheet.create({
   campo: {
     minHeight: 40,
@@ -77,23 +167,20 @@ const estilos = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: espacamentos.md,
     borderWidth: 1,
-    borderColor: cores.borda,
     borderRadius: raios.sm,
-    backgroundColor: cores.superficie,
   },
-  campoAberto: { borderColor: cores.bordaFoco },
+
   valor: {
     fontSize: tipografia.corpo,
-    color: cores.texto,
   },
+
   lista: {
     marginTop: espacamentos.xs,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: cores.borda,
     borderRadius: raios.sm,
-    backgroundColor: cores.superficie,
   },
+
   opcao: {
     minHeight: 40,
     flexDirection: 'row',
@@ -101,13 +188,16 @@ const estilos = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: espacamentos.md,
   },
+
   separador: {
     borderTopWidth: 1,
-    borderTopColor: cores.divisor,
   },
+
   textoOpcao: {
     fontSize: tipografia.corpo,
-    color: cores.texto,
   },
-  textoSelecionado: { fontWeight: '600' },
+
+  textoSelecionado: {
+    fontWeight: '600',
+  },
 });

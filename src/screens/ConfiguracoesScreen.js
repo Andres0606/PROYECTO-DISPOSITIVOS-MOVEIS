@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useMemo,
   useState,
 } from 'react';
 
@@ -15,6 +16,7 @@ import {
   View,
 } from 'react-native';
 
+import { usePreferencias } from '../contexts/PreferenciasContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -39,10 +41,11 @@ import {
 } from '../services/auth';
 
 import {
-  cores,
   espacamentos,
   tipografia,
 } from '../theme';
+
+import { useTema } from '../theme/useTema';
 
 // ============================================================
 // RÓTULOS
@@ -92,6 +95,20 @@ function formatarGps(coords) {
 // ============================================================
 
 export function ConfiguracoesScreen({ navigation }) {
+
+  const { cores } = useTema();
+
+const estilos = useMemo(
+  () => criarEstilos(cores),
+  [cores]
+);
+
+  const {
+    alterarIdioma,
+    alterarTema,
+    carregarPreferencias,
+  } = usePreferencias();
+
   const [configuracoes, setConfiguracoes] =
     useState(null);
 
@@ -128,6 +145,8 @@ export function ConfiguracoesScreen({ navigation }) {
       setConfiguracoes(dadosConfiguracoes);
       setPermissoes(permissoesAtuais);
 
+      carregarPreferencias(dadosConfiguracoes);
+
       if (!dadosConfiguracoes.localizacaoPermitida) {
         await removerLocalizacao();
         setLocalizacao(null);
@@ -140,7 +159,7 @@ export function ConfiguracoesScreen({ navigation }) {
           'Não foi possível carregar as configurações.'
       );
     }
-  }, []);
+  }, [carregarPreferencias]);
 
   useFocusEffect(
     useCallback(() => {
@@ -157,8 +176,15 @@ export function ConfiguracoesScreen({ navigation }) {
     setOcupado('configuracoes');
 
     try {
-      const resultado =
-        await atualizarConfiguracoes(dados);
+      let resultado;
+
+      if (dados.idioma !== undefined) {
+        resultado = await alterarIdioma(dados.idioma);
+      } else if (dados.tema !== undefined) {
+        resultado = await alterarTema(dados.tema);
+      } else {
+        resultado = await atualizarConfiguracoes(dados);
+      }
 
       setConfiguracoes(resultado);
 
@@ -552,7 +578,7 @@ export function ConfiguracoesScreen({ navigation }) {
                 <Ionicons
                   name="notifications-outline"
                   size={18}
-                  color="#FFFFFF"
+                  color={cores.textoBotaoPrincipal}
                 />
 
                 <Text style={estilos.botaoPrincipalTexto}>
@@ -617,7 +643,7 @@ export function ConfiguracoesScreen({ navigation }) {
                 <Ionicons
                   name="location-outline"
                   size={18}
-                  color="#FFFFFF"
+                  color={cores.textoBotaoPrincipal}
                 />
 
                 <Text style={estilos.botaoPrincipalTexto}>
@@ -653,6 +679,7 @@ export function ConfiguracoesScreen({ navigation }) {
 
     </ScreenTemplate>
   );
+
 }
 
 // ============================================================
@@ -665,6 +692,15 @@ function OpcaoConfiguracao({
   aoPressionar,
   desabilitado = false,
 }) {
+
+  const { cores } = useTema();
+
+const estilos = useMemo(
+  () => criarEstilos(cores),
+  [cores]
+);
+
+
   return (
     <Pressable
       onPress={aoPressionar}
@@ -709,6 +745,14 @@ function OpcaoInterruptor({
   aoMudar,
   desabilitado = false,
 }) {
+
+  const { cores } = useTema();
+
+const estilos = useMemo(
+  () => criarEstilos(cores),
+  [cores]
+);
+
   return (
     <View style={estilos.opcao}>
 
@@ -721,10 +765,10 @@ function OpcaoInterruptor({
         onValueChange={aoMudar}
         disabled={desabilitado}
         trackColor={{
-          false: '#BDBDBD',
-          true: '#555555',
+        false: cores.interruptorInativo,
+        true: cores.interruptorAtivo,
         }}
-        thumbColor="#FFFFFF"
+        thumbColor={cores.interruptorControle}
       />
 
     </View>
@@ -735,8 +779,8 @@ function OpcaoInterruptor({
 // ESTILOS
 // ============================================================
 
-const estilos = StyleSheet.create({
-  carregando: {
+function criarEstilos(cores) {
+  return StyleSheet.create({  carregando: {
     marginTop: espacamentos.xl,
   },
 
@@ -815,13 +859,13 @@ const estilos = StyleSheet.create({
     gap: 7,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: cores.botaoPrincipal,
   },
 
   botaoPrincipalTexto: {
     fontSize: tipografia.legenda,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: cores.textoBotaoPrincipal,
   },
 
   botaoSecundario: {
@@ -846,4 +890,5 @@ const estilos = StyleSheet.create({
   desabilitado: {
     opacity: 0.5,
   },
-});
+  });
+}

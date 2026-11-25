@@ -1,9 +1,19 @@
-// MOLECULE — ItemTarefa (checkbox + título + lápis, com linha inferior)
-// aoAbrir e aoEditar são opcionais.
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+// MOLECULE — ItemTarefa
+
+import { useMemo } from 'react';
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Checkbox } from '../atoms/Checkbox';
 import { BotaoIcone } from '../atoms/BotaoIcone';
-import { cores, espacamentos, tipografia } from '../../theme';
+
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 
 export function ItemTarefa({
   titulo,
@@ -12,9 +22,20 @@ export function ItemTarefa({
   aoAbrir,
   aoEditar,
 }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   return (
     <View style={estilos.linha}>
-      <Checkbox marcado={concluida} aoAlternar={aoAlternar} />
+
+      <Checkbox
+        marcado={concluida}
+        aoAlternar={aoAlternar}
+      />
 
       <Pressable
         onPress={aoAbrir}
@@ -22,7 +43,10 @@ export function ItemTarefa({
         style={estilos.texto}
       >
         <Text
-          style={[estilos.titulo, concluida && estilos.tituloConcluida]}
+          style={[
+            estilos.titulo,
+            concluida && estilos.tituloConcluida,
+          ]}
           numberOfLines={2}
         >
           {titulo}
@@ -34,24 +58,34 @@ export function ItemTarefa({
         rotulo="Editar tarefa"
         aoPressionar={aoEditar}
       />
+
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
-  linha: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espacamentos.md - 4,
-    paddingVertical: espacamentos.sm - 2,
-    borderBottomWidth: 1,
-    borderBottomColor: cores.bordaForte,
-  },
-  texto: { flex: 1 },
-  titulo: {
-    fontSize: tipografia.subtitulo,
-    lineHeight: 24,
-    color: cores.texto,
-  },
-  tituloConcluida: { color: cores.textoSecundario },
-});
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    linha: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: espacamentos.md - 4,
+      paddingVertical: espacamentos.sm - 2,
+      borderBottomWidth: 1,
+      borderBottomColor: cores.bordaForte,
+    },
+
+    texto: {
+      flex: 1,
+    },
+
+    titulo: {
+      fontSize: tipografia.subtitulo,
+      lineHeight: 24,
+      color: cores.texto,
+    },
+
+    tituloConcluida: {
+      color: cores.textoSecundario,
+    },
+  });
+}

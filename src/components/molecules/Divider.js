@@ -1,17 +1,52 @@
-// MOLECULE — Divider (linha, texto opcional e linha)
-import { StyleSheet, Text, View } from 'react-native';
-import { cores, espacamentos, tipografia } from '../../theme';
+// MOLECULE — Divider
+
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 
 export function Divider({ texto = '' }) {
+  const { cores } = useTema();
+
+  const estiloTraco = [
+    estilos.traco,
+    { backgroundColor: cores.divisor },
+  ];
+
   if (!texto) {
-    return <View style={estilos.traco} />;
+    return <View style={estiloTraco} />;
   }
 
   return (
     <View style={estilos.linha}>
-      <View style={[estilos.traco, estilos.flexivel]} />
-      <Text style={estilos.texto}>{texto}</Text>
-      <View style={[estilos.traco, estilos.flexivel]} />
+
+      <View
+        style={[
+          estiloTraco,
+          estilos.flexivel,
+        ]}
+      />
+
+      <Text
+        style={[
+          estilos.texto,
+          { color: cores.textoSecundario },
+        ]}
+      >
+        {texto}
+      </Text>
+
+      <View
+        style={[
+          estiloTraco,
+          estilos.flexivel,
+        ]}
+      />
+
     </View>
   );
 }
@@ -22,10 +57,16 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: espacamentos.sm,
   },
-  traco: { height: 1, backgroundColor: cores.divisor },
-  flexivel: { flex: 1 },
+
+  traco: {
+    height: 1,
+  },
+
+  flexivel: {
+    flex: 1,
+  },
+
   texto: {
     fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
   },
 });

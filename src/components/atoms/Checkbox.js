@@ -1,18 +1,42 @@
-// ATOM — Checkbox (quadrado de 18 px, preto quando marcado)
+// ATOM — Checkbox
+
 import { Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cores } from '../../theme';
 
-export function Checkbox({ marcado = false, aoAlternar }) {
+import { useTema } from '../../theme/useTema';
+
+export function Checkbox({
+  marcado = false,
+  aoAlternar,
+}) {
+  const { cores } = useTema();
+
   return (
     <Pressable
       onPress={aoAlternar}
       hitSlop={10}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: marcado }}
-      style={[estilos.caixa, marcado && estilos.marcada]}
+      style={[
+        estilos.caixa,
+
+        {
+          borderColor: cores.texto,
+          backgroundColor: cores.superficie,
+        },
+
+        marcado && {
+          backgroundColor: cores.texto,
+        },
+      ]}
     >
-      {marcado && <Ionicons name="checkmark" size={14} color={cores.superficie} />}
+      {marcado && (
+        <Ionicons
+          name="checkmark"
+          size={14}
+          color={cores.superficie}
+        />
+      )}
     </Pressable>
   );
 }
@@ -24,8 +48,5 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: cores.texto,
-    backgroundColor: cores.superficie,
   },
-  marcada: { backgroundColor: cores.texto },
 });

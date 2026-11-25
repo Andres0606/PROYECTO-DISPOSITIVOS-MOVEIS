@@ -1,309 +1,115 @@
 // SCREEN — Conselhos de estudantes de intercâmbio
-
-import {
-  useCallback,
-  useState,
-} from 'react';
-
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
-import {
-  useFocusEffect,
-} from '@react-navigation/native';
-
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { CardConselho } from '../components/molecules/CardConselho';
+import { obterConselhos } from '../services/conselhos';
+import { espacamentos, raios, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
-import {
-  obterConselhos,
-} from '../services/conselhos';
-
-import {
-  cores,
-  espacamentos,
-  raios,
-  tipografia,
-} from '../theme';
-
-export function ConselhosScreen({
-  navigation,
-}) {
-  const [ordenacao, setOrdenacao] =
-    useState('recentes');
-
-  const [conselhos, setConselhos] =
-    useState([]);
-
-  const [curtidos, setCurtidos] =
-    useState([]);
-
-  const [carregando, setCarregando] =
-    useState(true);
-
-  const [erro, setErro] =
-    useState('');
+export function ConselhosScreen({ navigation }) {
+  const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
+  const [ordenacao, setOrdenacao] = useState('recentes');
+  const [conselhos, setConselhos] = useState([]);
+  const [curtidos, setCurtidos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro('');
-
     try {
-      const resultado =
-        await obterConselhos(ordenacao);
-
+      const resultado = await obterConselhos(ordenacao);
       setConselhos(resultado);
     } catch (e) {
-      setErro(
-        'Não foi possível carregar os conselhos.'
-      );
+      setErro('Não foi possível carregar os conselhos.');
     } finally {
       setCarregando(false);
     }
   }, [ordenacao]);
 
-  useFocusEffect(
-    useCallback(() => {
-      carregar();
-    }, [carregar])
-  );
+  useFocusEffect(useCallback(() => { carregar(); }, [carregar]));
 
   function alternarCurtida(id) {
     setCurtidos((atuais) => {
-      if (atuais.includes(id)) {
-        return atuais.filter(
-          (item) => item !== id
-        );
-      }
-
+      if (atuais.includes(id)) return atuais.filter((item) => item !== id);
       return [...atuais, id];
     });
   }
 
   function abrirConselho(conselho) {
-    navigation.navigate(
-      'ConselhoDetalhe',
-      {
-        conselho,
-      }
-    );
+    navigation.navigate('ConselhoDetalhe', { conselho });
   }
 
   function criarConselho() {
-    navigation.navigate(
-      'CriarConselho'
-    );
+    navigation.navigate('CriarConselho');
   }
 
   const botaoFlutuante = (
     <Pressable
       onPress={criarConselho}
-      style={({ pressed }) => [
-        estilos.botaoAdicionar,
-        pressed &&
-          estilos.pressionado,
-      ]}
+      style={({ pressed }) => [estilos.botaoAdicionar, pressed && estilos.pressionado]}
       accessibilityRole="button"
       accessibilityLabel="Adicionar conselho"
     >
-      <Ionicons
-        name="add"
-        size={30}
-        color={cores.texto}
-      />
+      <Ionicons name="add" size={30} color={cores.texto} />
     </Pressable>
   );
 
   return (
     <ScreenTemplate
       titulo="Conselhos de estudantes de intercâmbio"
-      aoVoltar={() =>
-        navigation.goBack()
-      }
+      aoVoltar={() => navigation.goBack()}
       flutuante={botaoFlutuante}
     >
       {/* RECENTES / POPULARES */}
       <View style={estilos.segmentado}>
         <Pressable
-          onPress={() =>
-            setOrdenacao('recentes')
-          }
-          style={[
-            estilos.segmento,
-
-            ordenacao ===
-              'recentes' &&
-              estilos.segmentoAtivo,
-          ]}
+          onPress={() => setOrdenacao('recentes')}
+          style={[estilos.segmento, ordenacao === 'recentes' && estilos.segmentoAtivo]}
         >
-          <Text
-            style={
-              estilos.segmentoTexto
-            }
-          >
-            Recentes
-          </Text>
+          <Text style={estilos.segmentoTexto}>Recentes</Text>
         </Pressable>
-
         <Pressable
-          onPress={() =>
-            setOrdenacao('populares')
-          }
-          style={[
-            estilos.segmento,
-
-            ordenacao ===
-              'populares' &&
-              estilos.segmentoAtivo,
-          ]}
+          onPress={() => setOrdenacao('populares')}
+          style={[estilos.segmento, ordenacao === 'populares' && estilos.segmentoAtivo]}
         >
-          <Text
-            style={
-              estilos.segmentoTexto
-            }
-          >
-            Populares
-          </Text>
+          <Text style={estilos.segmentoTexto}>Populares</Text>
         </Pressable>
       </View>
-
-      {/* CARREGANDO */}
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.carregando}
-        />
+      {carregando && <ActivityIndicator color={cores.primaria} style={estilos.carregando} />}
+      {!carregando && !!erro && <Text style={estilos.erro}>{erro}</Text>}
+      {!carregando && !erro && (
+        <View style={estilos.lista}>
+          {conselhos.map((conselho) => (
+            <CardConselho
+              key={conselho.id}
+              conselho={conselho}
+              curtido={curtidos.includes(conselho.id)}
+              aoAbrir={() => abrirConselho(conselho)}
+              aoCurtir={() => alternarCurtida(conselho.id)}
+            />
+          ))}
+        </View>
       )}
-
-      {/* ERRO */}
-      {!carregando &&
-        !!erro && (
-          <Text style={estilos.erro}>
-            {erro}
-          </Text>
-        )}
-
-      {/* LISTA */}
-      {!carregando &&
-        !erro && (
-          <View style={estilos.lista}>
-            {conselhos.map(
-              (conselho) => (
-                <CardConselho
-                  key={conselho.id}
-
-                  conselho={
-                    conselho
-                  }
-
-                  curtido={curtidos.includes(
-                    conselho.id
-                  )}
-
-                  aoAbrir={() =>
-                    abrirConselho(
-                      conselho
-                    )
-                  }
-
-                  aoCurtir={() =>
-                    alternarCurtida(
-                      conselho.id
-                    )
-                  }
-                />
-              )
-            )}
-          </View>
-        )}
     </ScreenTemplate>
   );
 }
 
-const estilos =
-  StyleSheet.create({
-    segmentado: {
-      height: 38,
-
-      flexDirection: 'row',
-
-      borderWidth: 1,
-      borderColor:
-        cores.segmentoBorda,
-
-      borderRadius: raios.pill,
-
-      overflow: 'hidden',
-
-      marginBottom:
-        espacamentos.md,
-    },
-
-    segmento: {
-      flex: 1,
-
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    segmentoAtivo: {
-      backgroundColor:
-        cores.segmentoSelecionado,
-    },
-
-    segmentoTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      color: cores.texto,
-    },
-
-    lista: {
-      gap: espacamentos.md,
-    },
-
-    carregando: {
-      marginTop:
-        espacamentos.xl,
-    },
-
-    erro: {
-      marginTop:
-        espacamentos.xl,
-
-      textAlign: 'center',
-
-      fontSize:
-        tipografia.corpo,
-
-      color: cores.perigo,
-    },
-
-    botaoAdicionar: {
-      width: 48,
-      height: 48,
-
-      borderRadius: 24,
-
-      backgroundColor:
-        cores.superficie,
-
-      borderWidth: 3,
-      borderColor:
-        cores.texto,
-
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
-    pressionado: {
-      opacity: 0.55,
-    },
+// ESTILOS DINÂMICOS
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    segmentado: { height: 38, flexDirection: 'row', borderWidth: 1, borderColor: cores.segmentoBorda, borderRadius: raios.pill, overflow: 'hidden', marginBottom: espacamentos.md },
+    segmento: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    segmentoAtivo: { backgroundColor: cores.segmentoSelecionado },
+    segmentoTexto: { fontSize: tipografia.legenda, color: cores.texto },
+    lista: { gap: espacamentos.md },
+    carregando: { marginTop: espacamentos.xl },
+    erro: { marginTop: espacamentos.xl, textAlign: 'center', fontSize: tipografia.corpo, color: cores.perigo },
+    botaoAdicionar: { width: 48, height: 48, borderRadius: 24, backgroundColor: cores.superficie, borderWidth: 3, borderColor: cores.texto, alignItems: 'center', justifyContent: 'center' },
+    pressionado: { opacity: 0.55 },
   });
+}

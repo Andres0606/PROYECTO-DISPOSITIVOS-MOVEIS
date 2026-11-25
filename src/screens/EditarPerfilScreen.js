@@ -1,6 +1,6 @@
 // SCREEN — Editar perfil
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   Alert,
@@ -35,13 +35,21 @@ import {
 } from '../services/api';
 
 import {
-  cores,
   espacamentos,
   raios,
   tipografia,
 } from '../theme';
 
+import { useTema } from '../theme/useTema';
+
 export function EditarPerfilScreen({ navigation, route }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+  
   const usuario = route.params?.usuario;
 
   // ==========================================================
@@ -471,11 +479,11 @@ export function EditarPerfilScreen({ navigation, route }) {
               trabalhando && estilos.desabilitado,
             ]}
           >
-            <Ionicons
-              name="camera-outline"
-              size={18}
-              color="#FFFFFF"
-            />
+          <Ionicons
+            name="camera-outline"
+            size={18}
+            color={cores.textoBotaoPrincipal}
+          />
 
             <Text style={estilos.botaoFotoTexto}>
               {ocupado === 'camera'
@@ -640,148 +648,154 @@ export function EditarPerfilScreen({ navigation, route }) {
 // ESTILOS
 // ============================================================
 
-const estilos = StyleSheet.create({
-  areaFoto: {
-    alignItems: 'center',
-    marginTop: espacamentos.lg,
-    marginBottom: espacamentos.lg,
-  },
+// ============================================================
+// ESTILOS DINÂMICOS
+// ============================================================
 
-  fotoPerfil: {
-    width: 105,
-    height: 105,
-    borderRadius: 53,
-    backgroundColor: cores.superficie,
-    marginBottom: espacamentos.sm,
-  },
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    areaFoto: {
+      alignItems: 'center',
+      marginTop: espacamentos.lg,
+      marginBottom: espacamentos.lg,
+    },
 
-  fotoVazia: {
-    width: 105,
-    height: 105,
-    borderRadius: 53,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#D6D4D8',
-    marginBottom: espacamentos.sm,
-  },
+    fotoPerfil: {
+      width: 105,
+      height: 105,
+      borderRadius: 53,
+      backgroundColor: cores.superficie,
+      marginBottom: espacamentos.sm,
+    },
 
-  tituloFoto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: cores.texto,
-    marginBottom: espacamentos.sm,
-  },
+    fotoVazia: {
+      width: 105,
+      height: 105,
+      borderRadius: 53,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: cores.superficieSecundaria,
+      marginBottom: espacamentos.sm,
+    },
 
-  statusFoto: {
-    fontSize: tipografia.legenda,
-    color: cores.textoSecundario,
-    marginBottom: espacamentos.sm,
-  },
+    tituloFoto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.texto,
+      marginBottom: espacamentos.sm,
+    },
 
-  botoesFoto: {
-    flexDirection: 'row',
-    gap: espacamentos.sm,
-    width: '100%',
-  },
+    statusFoto: {
+      fontSize: tipografia.legenda,
+      color: cores.textoSecundario,
+      marginBottom: espacamentos.sm,
+    },
 
-  botaoFoto: {
-    flex: 1,
-    minHeight: 42,
-    flexDirection: 'row',
-    gap: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: raios.sm,
-    backgroundColor: '#000000',
-  },
+    botoesFoto: {
+      flexDirection: 'row',
+      gap: espacamentos.sm,
+      width: '100%',
+    },
 
-  botaoFotoTexto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+    botaoFoto: {
+      flex: 1,
+      minHeight: 42,
+      flexDirection: 'row',
+      gap: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: raios.sm,
+      backgroundColor: cores.botaoPrincipal,
+    },
 
-  botaoGaleria: {
-    flex: 1,
-    minHeight: 42,
-    flexDirection: 'row',
-    gap: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: raios.sm,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    backgroundColor: cores.superficie,
-  },
+    botaoFotoTexto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.textoBotaoPrincipal,
+    },
 
-  botaoGaleriaTexto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: cores.texto,
-  },
+    botaoGaleria: {
+      flex: 1,
+      minHeight: 42,
+      flexDirection: 'row',
+      gap: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: raios.sm,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      backgroundColor: cores.superficie,
+    },
 
-  botaoRemoverFoto: {
-    marginTop: espacamentos.sm,
-    paddingVertical: 6,
-    paddingHorizontal: espacamentos.md,
-  },
+    botaoGaleriaTexto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.texto,
+    },
 
-  botaoRemoverFotoTexto: {
-    fontSize: tipografia.legenda,
-    color: cores.perigo,
-    fontWeight: '600',
-  },
+    botaoRemoverFoto: {
+      marginTop: espacamentos.sm,
+      paddingVertical: 6,
+      paddingHorizontal: espacamentos.md,
+    },
 
-  formulario: {
-    gap: espacamentos.md,
-  },
+    botaoRemoverFotoTexto: {
+      fontSize: tipografia.legenda,
+      color: cores.perigo,
+      fontWeight: '600',
+    },
 
-  campo: {
-    gap: 6,
-  },
+    formulario: {
+      gap: espacamentos.md,
+    },
 
-  rotulo: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: cores.texto,
-  },
+    campo: {
+      gap: 6,
+    },
 
-  input: {
-    minHeight: 46,
-    backgroundColor: cores.superficie,
-    borderWidth: 1,
-    borderColor: cores.borda,
-    borderRadius: raios.sm,
-    paddingHorizontal: espacamentos.md,
-    paddingVertical: espacamentos.sm,
-    fontSize: tipografia.legenda,
-    color: cores.texto,
-  },
+    rotulo: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.texto,
+    },
 
-  areaBotao: {
-    marginTop: espacamentos.xl,
-    marginBottom: espacamentos.md,
-  },
+    input: {
+      minHeight: 46,
+      backgroundColor: cores.superficie,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      borderRadius: raios.sm,
+      paddingHorizontal: espacamentos.md,
+      paddingVertical: espacamentos.sm,
+      fontSize: tipografia.legenda,
+      color: cores.texto,
+    },
 
-  botaoSalvar: {
-    minHeight: 48,
-    backgroundColor: '#000000',
-    borderRadius: raios.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    areaBotao: {
+      marginTop: espacamentos.xl,
+      marginBottom: espacamentos.md,
+    },
 
-  botaoSalvarTexto: {
-    fontSize: tipografia.legenda,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+    botaoSalvar: {
+      minHeight: 48,
+      backgroundColor: cores.botaoPrincipal,
+      borderRadius: raios.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  pressionado: {
-    opacity: 0.6,
-  },
+    botaoSalvarTexto: {
+      fontSize: tipografia.legenda,
+      fontWeight: '700',
+      color: cores.textoBotaoPrincipal,
+    },
 
-  desabilitado: {
-    opacity: 0.5,
-  },
-});
+    pressionado: {
+      opacity: 0.6,
+    },
+
+    desabilitado: {
+      opacity: 0.5,
+    },
+  });
+}

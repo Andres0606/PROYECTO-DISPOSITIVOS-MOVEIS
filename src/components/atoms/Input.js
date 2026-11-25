@@ -1,27 +1,71 @@
 // ATOM — Input
-import { useState } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
-import { cores, espacamentos, raios, tipografia } from '../../theme';
 
-export function Input({ erro = false, variante = 'padrao', ...resto }) {
-  // variante: 'padrao' | 'cartao' (campo dentro do cartão de vidro)
+import { useState } from 'react';
+
+import {
+  StyleSheet,
+  TextInput,
+} from 'react-native';
+
+import {
+  espacamentos,
+  raios,
+  tipografia,
+} from '../../theme';
+
+import { useTema } from '../../theme/useTema';
+
+export function Input({
+  erro = false,
+  variante = 'padrao',
+  ...resto
+}) {
+  const { cores } = useTema();
+
   const [focado, setFocado] = useState(false);
 
   return (
     <TextInput
       placeholderTextColor={cores.textoSecundario}
+
       onFocus={() => setFocado(true)}
+
       onBlur={() => setFocado(false)}
+
       style={[
         estilos.input,
-        variante === 'cartao' && estilos.cartao,
-        focado && estilos.focado,
-        erro && estilos.erro,
+
+        {
+          borderColor: cores.borda,
+          backgroundColor: cores.superficie,
+          color: cores.texto,
+        },
+
+        variante === 'cartao' && [
+          estilos.cartao,
+          {
+            borderColor: cores.bordaCartao,
+            backgroundColor: cores.campoCartao,
+          },
+        ],
+
+        focado && {
+          borderColor: cores.bordaFoco,
+        },
+
+        erro && {
+          borderColor: cores.perigo,
+        },
       ]}
+
       {...resto}
     />
   );
 }
+
+// ============================================================
+// ESTILOS
+// ============================================================
 
 const estilos = StyleSheet.create({
   input: {
@@ -29,20 +73,14 @@ const estilos = StyleSheet.create({
     paddingHorizontal: espacamentos.md,
     paddingVertical: espacamentos.sm,
     borderWidth: 1,
-    borderColor: cores.borda,
     borderRadius: raios.sm,
-    backgroundColor: cores.superficie,
-    color: cores.texto,
     fontSize: tipografia.corpo,
   },
+
   cartao: {
     minHeight: 48,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    borderColor: cores.bordaCartao,
     borderRadius: raios.md,
-    backgroundColor: cores.campoCartao,
   },
-  focado: { borderColor: cores.bordaFoco },
-  erro: { borderColor: cores.perigo },
 });

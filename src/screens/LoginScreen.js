@@ -1,5 +1,7 @@
 // SCREEN — Login
+
 import { useEffect, useState } from 'react';
+
 import {
   ActivityIndicator,
   Alert,
@@ -7,6 +9,9 @@ import {
   Text,
   View,
 } from 'react-native';
+
+import { usePreferencias } from '../contexts/PreferenciasContext';
+import { useTema } from '../theme/useTema';
 
 import { CenteredTemplate } from '../components/templates/CenteredTemplate';
 import { LoginForm } from '../components/organisms/LoginForm';
@@ -19,15 +24,30 @@ import {
 } from '../services/auth';
 
 import {
-  cores,
   espacamentos,
   tipografia,
 } from '../theme';
 
 export function LoginScreen({ navigation }) {
-  const [carregando, setCarregando] = useState(false);
-  const [verificandoSessao, setVerificandoSessao] = useState(true);
-  const [erro, setErro] = useState('');
+  const { cores } = useTema();
+
+  const {
+    carregarPreferencias,
+    restaurarPreferencias,
+  } = usePreferencias();
+
+  const [carregando, setCarregando] =
+    useState(false);
+
+  const [verificandoSessao, setVerificandoSessao] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState('');
+
+  // ==========================================================
+  // VERIFICAR SESSÃO
+  // ==========================================================
 
   useEffect(() => {
     async function verificarSessao() {
@@ -37,40 +57,66 @@ export function LoginScreen({ navigation }) {
         if (ativa) {
           const usuario = await obterSessao();
 
+          carregarPreferencias(usuario);
+
           navigation.replace('Home', {
             usuario,
           });
 
           return;
         }
+
+        restaurarPreferencias();
+
       } catch (e) {
-        console.log('Erro ao verificar sessão:', e);
+        console.log(
+          'Erro ao verificar sessão:',
+          e
+        );
+
       } finally {
         setVerificandoSessao(false);
       }
     }
 
     verificarSessao();
-  }, [navigation]);
+
+  }, [
+    navigation,
+    carregarPreferencias,
+    restaurarPreferencias,
+  ]);
+
+  // ==========================================================
+  // REALIZAR LOGIN
+  // ==========================================================
 
   async function entrar(email, senha) {
     setErro('');
     setCarregando(true);
 
     try {
-      const { usuario } = await fazerLogin(email, senha);
+      const { usuario } =
+        await fazerLogin(email, senha);
+
+      carregarPreferencias(usuario);
 
       navigation.replace('Home', {
         usuario,
       });
+
     } catch (e) {
       setErro(e.message);
+
     } finally {
       setCarregando(false);
     }
   }
 
-  // Provisório: login social ainda não implementado.
+  // ==========================================================
+  // LOGIN SOCIAL — IMPLEMENTAÇÃO FUTURA
+  // ==========================================================
+
   function emBreve() {
     Alert.alert(
       'Em breve',
@@ -78,10 +124,16 @@ export function LoginScreen({ navigation }) {
     );
   }
 
+  // ==========================================================
+  // VERIFICAÇÃO DE SESSÃO
+  // ==========================================================
+
   if (verificandoSessao) {
     return (
       <CenteredTemplate>
+
         <View style={estilos.verificacao}>
+
           <Logo />
 
           <ActivityIndicator
@@ -90,36 +142,63 @@ export function LoginScreen({ navigation }) {
             style={estilos.indicador}
           />
 
-          <Text style={estilos.textoVerificacao}>
+          <Text
+            style={[
+              estilos.textoVerificacao,
+              {
+                color: cores.textoSecundario,
+              },
+            ]}
+          >
             Verificando sessão...
           </Text>
+
         </View>
+
       </CenteredTemplate>
     );
   }
 
+  // ==========================================================
+  // RENDER — LOGIN
+  // ==========================================================
+
   return (
     <CenteredTemplate>
+
       <Logo style={estilos.logo} />
 
       <LoginForm
         aoEnviar={entrar}
-        aoIrParaCadastro={() => navigation.navigate('Cadastro')}
+
+        aoIrParaCadastro={() =>
+          navigation.navigate('Cadastro')
+        }
+
         aoEsquecerSenha={() =>
           navigation.navigate('RecuperarSenha')
         }
+
         aoEntrarComRedeSocial={emBreve}
+
         carregando={carregando}
+
         erroGeral={erro}
       />
+
     </CenteredTemplate>
   );
 }
 
+// ============================================================
+// ESTILOS
+// ============================================================
+
 const estilos = StyleSheet.create({
   logo: {
     alignSelf: 'center',
-    marginBottom: espacamentos.xl + espacamentos.xs,
+    marginBottom:
+      espacamentos.xl + espacamentos.xs,
   },
 
   verificacao: {
@@ -135,6 +214,5 @@ const estilos = StyleSheet.create({
   textoVerificacao: {
     marginTop: espacamentos.md,
     fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
   },
 });

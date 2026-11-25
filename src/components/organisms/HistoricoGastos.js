@@ -1,14 +1,22 @@
-// ORGANISM — HistoricoGastos (busca + lista de gastos)
-// aoAbrirGasto(gasto) é opcional: abre a tela Editar gasto.
+// ORGANISM — HistoricoGastos
+
 import { StyleSheet, Text, View } from 'react-native';
+
 import { BarraBusca } from '../molecules/BarraBusca';
 import { CardGasto } from '../molecules/CardGasto';
+
 import {
   ICONES_CATEGORIA_GASTO,
   ICONE_GASTO_PADRAO,
 } from '../../constants/gastos';
-import { formatarDiaMes, formatarReais } from '../../utils/formatacao';
-import { cores, espacamentos, tipografia } from '../../theme';
+
+import {
+  formatarDiaMes,
+  formatarReais,
+} from '../../utils/formatacao';
+
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 
 export function HistoricoGastos({
   gastos,
@@ -16,10 +24,13 @@ export function HistoricoGastos({
   aoMudarBusca,
   aoAbrirGasto,
 }) {
+  const { cores } = useTema();
+
   const buscando = busca.trim() !== '';
 
   return (
     <View style={estilos.tela}>
+
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
@@ -27,38 +38,54 @@ export function HistoricoGastos({
       />
 
       {gastos.length === 0 ? (
-        <Text style={estilos.vazio}>
+        <Text
+          style={[
+            estilos.vazio,
+            { color: cores.textoSecundario },
+          ]}
+        >
           {buscando
             ? 'Nenhum gasto encontrado.'
             : 'Nenhum gasto registrado ainda.'}
         </Text>
       ) : (
         <View style={estilos.lista}>
+
           {gastos.map((gasto) => (
             <CardGasto
               key={gasto.id}
               conceito={gasto.conceito}
-              detalhe={`${gasto.categoria} · ${formatarDiaMes(gasto.data)}`}
+              detalhe={
+                `${gasto.categoria} · ${formatarDiaMes(gasto.data)}`
+              }
               valor={formatarReais(gasto.valor)}
               icone={
-                ICONES_CATEGORIA_GASTO[gasto.categoria] ?? ICONE_GASTO_PADRAO
+                ICONES_CATEGORIA_GASTO[gasto.categoria]
+                ?? ICONE_GASTO_PADRAO
               }
               aoPressionar={() => aoAbrirGasto?.(gasto)}
             />
           ))}
+
         </View>
       )}
+
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { gap: espacamentos.md },
-  lista: { gap: espacamentos.md },
+  tela: {
+    gap: espacamentos.md,
+  },
+
+  lista: {
+    gap: espacamentos.md,
+  },
+
   vazio: {
     marginTop: espacamentos.md,
     textAlign: 'center',
     fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
   },
 });

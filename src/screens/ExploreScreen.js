@@ -1,16 +1,39 @@
-// SCREEN — Explorar Chapecó (lista de locais com busca e filtros)
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+// SCREEN — Explorar Chapecó
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { FiltrosExplorar } from '../components/organisms/FiltrosExplorar';
 import { ListaLocais } from '../components/organisms/ListaLocais';
 import { Button } from '../components/atoms/Button';
+
 import { obterLocais } from '../services/locais';
 import { filtrarLocais } from '../utils/locais';
 import { CATEGORIA_TODOS } from '../constants/locais';
-import { cores, espacamentos, tipografia } from '../theme';
+
+import { espacamentos, tipografia } from '../theme';
+import { useTema } from '../theme/useTema';
 
 export function ExploreScreen({ navigation }) {
+  const { cores } = useTema();
+
+  const estilos = useMemo(
+    () => criarEstilos(cores),
+    [cores]
+  );
+
   const [locais, setLocais] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -19,13 +42,22 @@ export function ExploreScreen({ navigation }) {
   const [categoria, setCategoria] = useState(CATEGORIA_TODOS);
   const [visao, setVisao] = useState('lista');
 
+  // ==========================================================
+  // CARREGAR LOCAIS
+  // ==========================================================
+
   const carregar = useCallback(async () => {
     setCarregando(true);
     setErro('');
+
     try {
       setLocais(await obterLocais());
+
     } catch (e) {
-      setErro('Não foi possível carregar os locais. Tente novamente.');
+      setErro(
+        'Não foi possível carregar os locais. Tente novamente.'
+      );
+
     } finally {
       setCarregando(false);
     }
@@ -44,12 +76,20 @@ export function ExploreScreen({ navigation }) {
   function abrirFiltros() {}
 
   function abrirLocal(local) {
-    navigation.navigate('DetalheLocal', { localId: local.id });
+    navigation.navigate('DetalheLocal', {
+      localId: local.id,
+    });
   }
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <ScreenTemplate titulo="Explorar Chapecó">
+
       <View style={estilos.filtros}>
+
         <FiltrosExplorar
           busca={busca}
           aoMudarBusca={setBusca}
@@ -59,46 +99,71 @@ export function ExploreScreen({ navigation }) {
           categoria={categoria}
           aoMudarCategoria={setCategoria}
         />
+
       </View>
 
       {carregando && (
-        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+        <ActivityIndicator
+          color={cores.primaria}
+          style={estilos.centro}
+        />
       )}
 
       {!carregando && !!erro && (
         <View style={estilos.centro}>
-          <Text style={estilos.erro}>{erro}</Text>
+
+          <Text style={estilos.erro}>
+            {erro}
+          </Text>
+
           <Button
             titulo="Tentar novamente"
             variante="secundario"
             aoPressionar={carregar}
           />
+
         </View>
       )}
 
       {!carregando && !erro && visao === 'lista' && (
-        <ListaLocais locais={locaisFiltrados} aoAbrirLocal={abrirLocal} />
+        <ListaLocais
+          locais={locaisFiltrados}
+          aoAbrirLocal={abrirLocal}
+        />
       )}
 
       {!carregando && !erro && visao === 'mapa' && (
-        <Text style={estilos.aviso}>O mapa estará disponível em breve.</Text>
+        <Text style={estilos.aviso}>
+          O mapa estará disponível em breve.
+        </Text>
       )}
+
     </ScreenTemplate>
   );
 }
 
-const estilos = StyleSheet.create({
-  filtros: { marginBottom: espacamentos.lg },
-  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
-  erro: {
-    fontSize: tipografia.corpo,
-    textAlign: 'center',
-    color: cores.perigo,
-  },
-  aviso: {
-    marginTop: espacamentos.lg,
-    textAlign: 'center',
-    fontSize: tipografia.corpo,
-    color: cores.textoSecundario,
-  },
-});
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    filtros: {
+      marginBottom: espacamentos.lg,
+    },
+
+    centro: {
+      marginTop: espacamentos.xl,
+      gap: espacamentos.md,
+    },
+
+    erro: {
+      fontSize: tipografia.corpo,
+      textAlign: 'center',
+      color: cores.perigo,
+    },
+
+    aviso: {
+      marginTop: espacamentos.lg,
+      textAlign: 'center',
+      fontSize: tipografia.corpo,
+      color: cores.textoSecundario,
+    },
+  });
+}
