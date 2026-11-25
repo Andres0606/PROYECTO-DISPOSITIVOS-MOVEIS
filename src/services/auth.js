@@ -17,6 +17,8 @@ import {
   removerFotoPerfilApi,
   obterConfiguracoesApi,
   atualizarConfiguracoesApi,
+  recuperarSenhaApi,
+  redefinirSenhaApi,
 } from './api';
 
 // ============================================================
@@ -91,15 +93,30 @@ export async function fazerCadastro({
 
 // ============================================================
 // RECUPERAÇÃO DE SENHA
-// Ainda será conectada ao backend
 // ============================================================
 
-export async function recuperarSenha(
-  email
-) {
-  throw new Error(
-    'Recuperação de senha ainda não conectada ao backend.'
+export async function recuperarSenha(email) {
+  const resultado = await recuperarSenhaApi(
+    email.trim().toLowerCase()
   );
+
+  return resultado;
+}
+
+// ============================================================
+// REDEFINIÇÃO DE SENHA
+// ============================================================
+
+export async function redefinirSenha(
+  token,
+  novaSenha
+) {
+  const resultado = await redefinirSenhaApi(
+    token.trim(),
+    novaSenha
+  );
+
+  return resultado;
 }
 
 // ============================================================

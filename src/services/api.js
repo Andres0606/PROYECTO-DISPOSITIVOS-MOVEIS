@@ -308,3 +308,53 @@ export async function atualizarConfiguracoesApi(
 
   return processarResposta(resposta);
 }
+
+// ============================================================
+// SOLICITAR RECUPERAÇÃO DE SENHA
+// ============================================================
+
+export async function recuperarSenhaApi(email) {
+  const resposta = await fetch(
+    `${API_URL}/auth/recuperar-senha`,
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+      },
+
+      body: JSON.stringify({
+        email,
+      }),
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// REDEFINIR SENHA
+// ============================================================
+
+export async function redefinirSenhaApi(
+  token,
+  novaSenha
+) {
+  const resposta = await fetch(
+    `${API_URL}/auth/redefinir-senha`,
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+      },
+
+      body: JSON.stringify({
+        token,
+        novaSenha,
+      }),
+    }
+  );
+
+  return processarResposta(resposta);
+}
