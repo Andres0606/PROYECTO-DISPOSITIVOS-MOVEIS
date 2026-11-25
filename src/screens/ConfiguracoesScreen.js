@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useState,
 } from 'react';
 
@@ -11,10 +10,12 @@ import {
   Alert,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
@@ -33,10 +34,30 @@ import {
 } from '../services/storage';
 
 import {
+  obterConfiguracoes,
+  atualizarConfiguracoes,
+} from '../services/auth';
+
+import {
   cores,
   espacamentos,
   tipografia,
 } from '../theme';
+
+// ============================================================
+// RÓTULOS
+// ============================================================
+
+const idiomas = {
+  'pt-BR': 'Português',
+  es: 'Español',
+  en: 'English',
+};
+
+const temas = {
+  claro: 'Claro',
+  escuro: 'Escuro',
+};
 
 function rotuloPermissao(status) {
   if (status === 'granted') {
@@ -63,14 +84,17 @@ function formatarGps(coords) {
     return 'Nenhuma localização salva';
   }
 
-  return `${coords.latitude.toFixed(
-    5
-  )}, ${coords.longitude.toFixed(5)}`;
+  return `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
 }
 
-export function ConfiguracoesScreen({
-  navigation,
-}) {
+// ============================================================
+// SCREEN — CONFIGURAÇÕES
+// ============================================================
+
+export function ConfiguracoesScreen({ navigation }) {
+  const [configuracoes, setConfiguracoes] =
+    useState(null);
+
   const [permissoes, setPermissoes] =
     useState(null);
 
@@ -83,98 +107,161 @@ export function ConfiguracoesScreen({
   const [erro, setErro] =
     useState('');
 
-  const carregarDados =
-    useCallback(async () => {
-      setErro('');
+  // ==========================================================
+  // CARREGAR CONFIGURAÇÕES
+  // ==========================================================
 
-      try {
-        const [
-          permissoesAtuais,
-          localizacaoSalva,
-        ] = await Promise.all([
-          statusPermissoes(),
-          obterLocalizacaoSalva(),
-        ]);
-
-        setPermissoes(
-          permissoesAtuais
-        );
-
-        setLocalizacao(
-          localizacaoSalva
-        );
-      } catch (e) {
-        setErro(
-          'Não foi possível carregar as configurações.'
-        );
-      }
-    }, []);
-
-  useEffect(() => {
-    configurarNotificacoes();
-    carregarDados();
-  }, [carregarDados]);
-
-  async function atualizarLocalizacao() {
-    setOcupado('gps');
+  const carregarDados = useCallback(async () => {
     setErro('');
 
     try {
-      const posicao =
-        await obterPosicao();
+      const [
+        dadosConfiguracoes,
+        permissoesAtuais,
+        localizacaoSalva,
+      ] = await Promise.all([
+        obterConfiguracoes(),
+        statusPermissoes(),
+        obterLocalizacaoSalva(),
+      ]);
 
-      setLocalizacao(posicao);
+      setConfiguracoes(dadosConfiguracoes);
+      setPermissoes(permissoesAtuais);
 
-      await salvarLocalizacao(
-        posicao
+      if (!dadosConfiguracoes.localizacaoPermitida) {
+        await removerLocalizacao();
+        setLocalizacao(null);
+      } else {
+        setLocalizacao(localizacaoSalva);
+      }
+    } catch (erro) {
+      setErro(
+        erro?.message ??
+          'Não foi possível carregar as configurações.'
       );
+    }
+  }, []);
 
-      await carregarDados();
-    } catch (e) {
+  useFocusEffect(
+    useCallback(() => {
+      configurarNotificacoes();
+      carregarDados();
+    }, [carregarDados])
+  );
+
+  // ==========================================================
+  // SALVAR CONFIGURAÇÕES
+  // ==========================================================
+
+  async function salvarConfiguracao(dados) {
+    setOcupado('configuracoes');
+
+    try {
+      const resultado =
+        await atualizarConfiguracoes(dados);
+
+      setConfiguracoes(resultado);
+
+      return resultado;
+    } catch (erro) {
       Alert.alert(
-        'Localização',
-        e?.message ??
-          'Não foi possível obter sua localização.'
+        'Erro',
+        erro?.message ??
+          'Não foi possível atualizar as configurações.'
       );
+
+      return null;
     } finally {
       setOcupado('');
     }
   }
 
-  function confirmarRemocaoLocalizacao() {
+  // ==========================================================
+  // IDIOMA
+  // ==========================================================
+
+  function abrirIdioma() {
     Alert.alert(
-      'Remover localização',
-      'Deseja apagar a localização salva?',
+      'Idioma',
+      'Selecione seu idioma de preferência.',
       [
+        {
+          text: 'Português',
+          onPress: () =>
+            salvarConfiguracao({
+              idioma: 'pt-BR',
+            }),
+        },
+        {
+          text: 'Español',
+          onPress: () =>
+            salvarConfiguracao({
+              idioma: 'es',
+            }),
+        },
+        {
+          text: 'English',
+          onPress: () =>
+            salvarConfiguracao({
+              idioma: 'en',
+            }),
+        },
+      ],
+      { cancelable: true }
+    );
+  }
+
+  // ==========================================================
+  // TEMA
+  // ==========================================================
+
+  function abrirTema() {
+    Alert.alert(
+      'Tema',
+      'Selecione o tema de sua preferência.',
+      [
+        {
+          text: 'Claro',
+          onPress: () =>
+            salvarConfiguracao({
+              tema: 'claro',
+            }),
+        },
+        {
+          text: 'Escuro',
+          onPress: () =>
+            salvarConfiguracao({
+              tema: 'escuro',
+            }),
+        },
         {
           text: 'Cancelar',
           style: 'cancel',
-        },
-
-        {
-          text: 'Remover',
-          style: 'destructive',
-          onPress:
-            removerLocalizacaoSalva,
         },
       ]
     );
   }
 
-  async function removerLocalizacaoSalva() {
-    try {
-      await removerLocalizacao();
+  // ==========================================================
+  // NOTIFICAÇÕES
+  // ==========================================================
 
-      setLocalizacao(null);
-    } catch (e) {
-      Alert.alert(
-        'Erro',
-        'Não foi possível remover a localização salva.'
-      );
-    }
+  async function alterarNotificacoes(valor) {
+    await salvarConfiguracao({
+      notificacoesAtivas: valor,
+    });
   }
 
   async function testarNotificacao() {
+    if (!configuracoes?.notificacoesAtivas) {
+      Alert.alert(
+        'Notificações',
+        'Ative as notificações antes de realizar o teste.'
+      );
+
+      return;
+    }
+
     setOcupado('notificacao');
 
     try {
@@ -189,11 +276,13 @@ export function ConfiguracoesScreen({
         'A notificação deverá aparecer em alguns segundos.'
       );
 
-      await carregarDados();
-    } catch (e) {
+      setPermissoes(
+        await statusPermissoes()
+      );
+    } catch (erro) {
       Alert.alert(
         'Notificações',
-        e?.message ??
+        erro?.message ??
           'Não foi possível enviar a notificação.'
       );
     } finally {
@@ -201,26 +290,133 @@ export function ConfiguracoesScreen({
     }
   }
 
-  function abrirIdioma() {
+  // ==========================================================
+  // PREFERÊNCIA DE LOCALIZAÇÃO
+  // ==========================================================
+
+  async function alterarPermissaoLocalizacao(valor) {
+    setOcupado('configuracoes');
+
+    try {
+      const resultado =
+        await atualizarConfiguracoes({
+          localizacaoPermitida: valor,
+        });
+
+      setConfiguracoes(resultado);
+
+      if (!valor) {
+        await removerLocalizacao();
+        setLocalizacao(null);
+      }
+    } catch (erro) {
+      Alert.alert(
+        'Erro',
+        erro?.message ??
+          'Não foi possível atualizar a localização.'
+      );
+    } finally {
+      setOcupado('');
+    }
+  }
+
+  // ==========================================================
+  // LOCALIZAÇÃO GPS
+  // ==========================================================
+
+  async function atualizarLocalizacao() {
+    if (!configuracoes?.localizacaoPermitida) {
+      Alert.alert(
+        'Localização',
+        'Ative a localização nas configurações.'
+      );
+
+      return;
+    }
+
+    setOcupado('gps');
+    setErro('');
+
+    try {
+      const posicao =
+        await obterPosicao();
+
+      await salvarLocalizacao(posicao);
+
+      setLocalizacao(posicao);
+
+      setPermissoes(
+        await statusPermissoes()
+      );
+    } catch (erro) {
+      Alert.alert(
+        'Localização',
+        erro?.message ??
+          'Não foi possível obter sua localização.'
+      );
+    } finally {
+      setOcupado('');
+    }
+  }
+
+  // ==========================================================
+  // REMOVER LOCALIZAÇÃO
+  // ==========================================================
+
+  function confirmarRemocaoLocalizacao() {
     Alert.alert(
-      'Idioma',
-      'A seleção de idioma será implementada posteriormente.'
+      'Remover localização',
+      'Deseja apagar a localização salva?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Remover',
+          style: 'destructive',
+          onPress: removerLocalizacaoSalva,
+        },
+      ]
     );
   }
+
+  async function removerLocalizacaoSalva() {
+    try {
+      await removerLocalizacao();
+
+      setLocalizacao(null);
+    } catch (erro) {
+      Alert.alert(
+        'Erro',
+        'Não foi possível remover a localização salva.'
+      );
+    }
+  }
+
+  // ==========================================================
+  // PRIVACIDADE
+  // ==========================================================
 
   function abrirPrivacidade() {
     Alert.alert(
       'Privacidade',
-      'As opções de privacidade serão implementadas posteriormente.'
+      'Suas preferências são vinculadas à sua conta. ' +
+        'A localização GPS é armazenada apenas neste dispositivo. ' +
+        'Você pode removê-la a qualquer momento. ' +
+        'As fotos de perfil são armazenadas no servidor e podem ' +
+        'ser acessadas por quem possuir o endereço da imagem.',
+      [
+        {
+          text: 'OK',
+        },
+      ]
     );
   }
 
-  function abrirTema() {
-    Alert.alert(
-      'Tema',
-      'A seleção de tema será implementada posteriormente.'
-    );
-  }
+  // ==========================================================
+  // SOBRE O APP
+  // ==========================================================
 
   function abrirSobre() {
     Alert.alert(
@@ -229,233 +425,265 @@ export function ConfiguracoesScreen({
     );
   }
 
+  const trabalhando = !!ocupado;
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <ScreenTemplate
       titulo="Configurações"
-      aoVoltar={() =>
-        navigation.goBack()
-      }
+      aoVoltar={() => navigation.goBack()}
     >
+
       {!!erro && (
-        <Text style={estilos.erro}>
-          {erro}
-        </Text>
-      )}
-
-      {!permissoes ? (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={
-            estilos.carregando
-          }
-        />
-      ) : (
-        <View style={estilos.menu}>
-          <OpcaoConfiguracao
-            titulo="Idioma"
-            valor="Português"
-            aoPressionar={
-              abrirIdioma
-            }
-          />
-
-          <OpcaoConfiguracao
-            titulo="Notificações"
-            valor={rotuloPermissao(
-              permissoes.notificacoes
-            )}
-            aoPressionar={
-              testarNotificacao
-            }
-          />
-
-          <OpcaoConfiguracao
-            titulo="Localização"
-            valor={rotuloPermissao(
-              permissoes.localizacao
-            )}
-            aoPressionar={
-              atualizarLocalizacao
-            }
-            carregando={
-              ocupado === 'gps'
-            }
-          />
-
-          <OpcaoConfiguracao
-            titulo="Privacidade"
-            aoPressionar={
-              abrirPrivacidade
-            }
-          />
-
-          <OpcaoConfiguracao
-            titulo="Tema"
-            valor="Claro"
-            aoPressionar={
-              abrirTema
-            }
-          />
-
-          <OpcaoConfiguracao
-            titulo="Sobre o app"
-            valor="v1.0"
-            aoPressionar={
-              abrirSobre
-            }
-          />
-        </View>
-      )}
-
-      <View
-        style={
-          estilos.secaoLocalizacao
-        }
-      >
-        <Text
-          style={
-            estilos.tituloSecao
-          }
-        >
-          Localização salva
-        </Text>
-
-        <Text
-          style={
-            estilos.localizacaoTexto
-          }
-        >
-          {formatarGps(
-            localizacao
-          )}
-        </Text>
-
-        {!!localizacao?.precisao && (
-          <Text
-            style={
-              estilos.textoSecundario
-            }
-          >
-            Precisão aproximada:{' '}
-            {Math.round(
-              localizacao.precisao
-            )}{' '}
-            metros
+        <View>
+          <Text style={estilos.erro}>
+            {erro}
           </Text>
-        )}
 
-        <View
-          style={
-            estilos.acoesLocalizacao
-          }
-        >
           <Pressable
-            onPress={
-              atualizarLocalizacao
-            }
-            disabled={
-              !!ocupado
-            }
-            style={({
-              pressed,
-            }) => [
-              estilos.botaoPrincipal,
-
-              pressed &&
-                estilos.pressionado,
-
-              !!ocupado &&
-                estilos.desabilitado,
-            ]}
+            onPress={carregarDados}
+            style={estilos.botaoSecundario}
           >
-            <Ionicons
-              name="location-outline"
-              size={18}
-              color="#FFFFFF"
-            />
-
-            <Text
-              style={
-                estilos.botaoPrincipalTexto
-              }
-            >
-              {ocupado === 'gps'
-                ? 'Obtendo...'
-                : 'Atualizar localização'}
+            <Text style={estilos.botaoSecundarioTexto}>
+              Tentar novamente
             </Text>
           </Pressable>
-
-          {!!localizacao && (
-            <Pressable
-              onPress={
-                confirmarRemocaoLocalizacao
-              }
-              disabled={
-                !!ocupado
-              }
-              style={({
-                pressed,
-              }) => [
-                estilos.botaoSecundario,
-
-                pressed &&
-                  estilos.pressionado,
-              ]}
-            >
-              <Text
-                style={
-                  estilos.botaoSecundarioTexto
-                }
-              >
-                Remover
-              </Text>
-            </Pressable>
-          )}
         </View>
-      </View>
+      )}
+
+      {!configuracoes || !permissoes ? (
+        !erro && (
+          <ActivityIndicator
+            color={cores.primaria}
+            style={estilos.carregando}
+          />
+        )
+      ) : (
+        <>
+          <View style={estilos.menu}>
+
+            <OpcaoConfiguracao
+              titulo="Idioma"
+              valor={
+                idiomas[configuracoes.idioma] ??
+                'Português'
+              }
+              aoPressionar={abrirIdioma}
+              desabilitado={trabalhando}
+            />
+
+            <OpcaoInterruptor
+              titulo="Notificações"
+              valor={configuracoes.notificacoesAtivas}
+              aoMudar={alterarNotificacoes}
+              desabilitado={trabalhando}
+            />
+
+            <OpcaoInterruptor
+              titulo="Localização"
+              valor={configuracoes.localizacaoPermitida}
+              aoMudar={alterarPermissaoLocalizacao}
+              desabilitado={trabalhando}
+            />
+
+            <OpcaoConfiguracao
+              titulo="Privacidade"
+              aoPressionar={abrirPrivacidade}
+              desabilitado={trabalhando}
+            />
+
+            <OpcaoConfiguracao
+              titulo="Tema"
+              valor={
+                temas[configuracoes.tema] ??
+                'Claro'
+              }
+              aoPressionar={abrirTema}
+              desabilitado={trabalhando}
+            />
+
+            <OpcaoConfiguracao
+              titulo="Sobre o app"
+              valor="v1.0"
+              aoPressionar={abrirSobre}
+              desabilitado={trabalhando}
+            />
+
+          </View>
+
+          {/* NOTIFICAÇÕES */}
+
+          <View style={estilos.secaoLocalizacao}>
+
+            <Text style={estilos.tituloSecao}>
+              Notificações
+            </Text>
+
+            <Text style={estilos.textoSecundario}>
+              Permissão do dispositivo:{' '}
+              {rotuloPermissao(
+                permissoes.notificacoes
+              )}
+            </Text>
+
+            <View style={estilos.acoesLocalizacao}>
+
+              <Pressable
+                onPress={testarNotificacao}
+                disabled={
+                  trabalhando ||
+                  !configuracoes.notificacoesAtivas
+                }
+                style={({ pressed }) => [
+                  estilos.botaoPrincipal,
+
+                  pressed &&
+                    estilos.pressionado,
+
+                  (
+                    trabalhando ||
+                    !configuracoes.notificacoesAtivas
+                  ) && estilos.desabilitado,
+                ]}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={18}
+                  color="#FFFFFF"
+                />
+
+                <Text style={estilos.botaoPrincipalTexto}>
+                  {ocupado === 'notificacao'
+                    ? 'Enviando...'
+                    : 'Testar notificação'}
+                </Text>
+
+              </Pressable>
+
+            </View>
+
+          </View>
+
+          {/* LOCALIZAÇÃO */}
+
+          <View style={estilos.secaoLocalizacao}>
+
+            <Text style={estilos.tituloSecao}>
+              Localização salva
+            </Text>
+
+            <Text style={estilos.textoSecundario}>
+              Permissão do dispositivo:{' '}
+              {rotuloPermissao(
+                permissoes.localizacao
+              )}
+            </Text>
+
+            <Text style={estilos.localizacaoTexto}>
+              {formatarGps(localizacao)}
+            </Text>
+
+            {localizacao?.precisao != null && (
+              <Text style={estilos.textoSecundario}>
+                Precisão aproximada:{' '}
+                {Math.round(localizacao.precisao)}{' '}
+                metros
+              </Text>
+            )}
+
+            <View style={estilos.acoesLocalizacao}>
+
+              <Pressable
+                onPress={atualizarLocalizacao}
+                disabled={
+                  trabalhando ||
+                  !configuracoes.localizacaoPermitida
+                }
+                style={({ pressed }) => [
+                  estilos.botaoPrincipal,
+
+                  pressed &&
+                    estilos.pressionado,
+
+                  (
+                    trabalhando ||
+                    !configuracoes.localizacaoPermitida
+                  ) && estilos.desabilitado,
+                ]}
+              >
+                <Ionicons
+                  name="location-outline"
+                  size={18}
+                  color="#FFFFFF"
+                />
+
+                <Text style={estilos.botaoPrincipalTexto}>
+                  {ocupado === 'gps'
+                    ? 'Obtendo...'
+                    : 'Atualizar localização'}
+                </Text>
+
+              </Pressable>
+
+              {!!localizacao && (
+                <Pressable
+                  onPress={confirmarRemocaoLocalizacao}
+                  disabled={trabalhando}
+                  style={({ pressed }) => [
+                    estilos.botaoSecundario,
+
+                    pressed &&
+                      estilos.pressionado,
+                  ]}
+                >
+                  <Text style={estilos.botaoSecundarioTexto}>
+                    Remover
+                  </Text>
+                </Pressable>
+              )}
+
+            </View>
+
+          </View>
+        </>
+      )}
+
     </ScreenTemplate>
   );
 }
+
+// ============================================================
+// OPÇÃO DE CONFIGURAÇÃO
+// ============================================================
 
 function OpcaoConfiguracao({
   titulo,
   valor,
   aoPressionar,
-  carregando = false,
+  desabilitado = false,
 }) {
   return (
     <Pressable
       onPress={aoPressionar}
-      disabled={carregando}
+      disabled={desabilitado}
       style={({ pressed }) => [
         estilos.opcao,
-
-        pressed &&
-          estilos.pressionado,
+        pressed && estilos.pressionado,
+        desabilitado && estilos.desabilitado,
       ]}
     >
-      <Text
-        style={
-          estilos.opcaoTitulo
-        }
-      >
+      <Text style={estilos.opcaoTitulo}>
         {titulo}
       </Text>
 
-      <View
-        style={
-          estilos.opcaoDireita
-        }
-      >
+      <View style={estilos.opcaoDireita}>
+
         {!!valor && (
-          <Text
-            style={
-              estilos.opcaoValor
-            }
-          >
-            {carregando
-              ? 'Carregando...'
-              : valor}
+          <Text style={estilos.opcaoValor}>
+            {valor}
           </Text>
         )}
 
@@ -464,204 +692,158 @@ function OpcaoConfiguracao({
           size={19}
           color={cores.texto}
         />
+
       </View>
+
     </Pressable>
   );
 }
 
-const estilos =
-  StyleSheet.create({
-    carregando: {
-      marginTop:
-        espacamentos.xl,
-    },
+// ============================================================
+// INTERRUPTOR
+// ============================================================
 
-    erro: {
-      color:
-        cores.perigo,
+function OpcaoInterruptor({
+  titulo,
+  valor,
+  aoMudar,
+  desabilitado = false,
+}) {
+  return (
+    <View style={estilos.opcao}>
 
-      marginBottom:
-        espacamentos.md,
+      <Text style={estilos.opcaoTitulo}>
+        {titulo}
+      </Text>
 
-      fontSize:
-        tipografia.legenda,
-    },
+      <Switch
+        value={valor}
+        onValueChange={aoMudar}
+        disabled={desabilitado}
+        trackColor={{
+          false: '#BDBDBD',
+          true: '#555555',
+        }}
+        thumbColor="#FFFFFF"
+      />
 
-    menu: {
-      marginTop:
-        espacamentos.lg,
-    },
+    </View>
+  );
+}
 
-    opcao: {
-      minHeight: 52,
+// ============================================================
+// ESTILOS
+// ============================================================
 
-      flexDirection:
-        'row',
+const estilos = StyleSheet.create({
+  carregando: {
+    marginTop: espacamentos.xl,
+  },
 
-      alignItems:
-        'center',
+  erro: {
+    color: cores.perigo,
+    marginBottom: espacamentos.md,
+    fontSize: tipografia.legenda,
+  },
 
-      justifyContent:
-        'space-between',
+  menu: {
+    marginTop: espacamentos.lg,
+  },
 
-      borderBottomWidth: 1,
+  opcao: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: cores.borda,
+    paddingHorizontal: 2,
+  },
 
-      borderBottomColor:
-        cores.borda,
+  opcaoTitulo: {
+    fontSize: tipografia.corpo,
+    fontWeight: '600',
+    color: cores.texto,
+  },
 
-      paddingHorizontal: 2,
-    },
+  opcaoDireita: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacamentos.sm,
+  },
 
-    opcaoTitulo: {
-      fontSize:
-        tipografia.corpo,
+  opcaoValor: {
+    fontSize: tipografia.legenda,
+    color: cores.textoSecundario,
+  },
 
-      fontWeight:
-        '600',
+  secaoLocalizacao: {
+    marginTop: espacamentos.xl,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    backgroundColor: cores.superficie,
+    padding: espacamentos.md,
+  },
 
-      color:
-        cores.texto,
-    },
+  tituloSecao: {
+    fontSize: tipografia.subtitulo,
+    fontWeight: '700',
+    color: cores.texto,
+    marginBottom: espacamentos.sm,
+  },
 
-    opcaoDireita: {
-      flexDirection:
-        'row',
+  localizacaoTexto: {
+    fontSize: tipografia.corpo,
+    color: cores.texto,
+    marginTop: espacamentos.sm,
+    marginBottom: espacamentos.xs,
+  },
 
-      alignItems:
-        'center',
+  textoSecundario: {
+    fontSize: tipografia.legenda,
+    color: cores.textoSecundario,
+  },
 
-      gap:
-        espacamentos.sm,
-    },
+  acoesLocalizacao: {
+    marginTop: espacamentos.md,
+    gap: espacamentos.sm,
+  },
 
-    opcaoValor: {
-      fontSize:
-        tipografia.legenda,
+  botaoPrincipal: {
+    minHeight: 44,
+    flexDirection: 'row',
+    gap: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+  },
 
-      color:
-        cores.textoSecundario,
-    },
+  botaoPrincipalTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
 
-    secaoLocalizacao: {
-      marginTop:
-        espacamentos.xl,
+  botaoSecundario: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: cores.borda,
+    backgroundColor: cores.superficie,
+  },
 
-      borderWidth: 1,
+  botaoSecundarioTexto: {
+    fontSize: tipografia.legenda,
+    fontWeight: '600',
+    color: cores.perigo,
+  },
 
-      borderColor:
-        cores.borda,
+  pressionado: {
+    opacity: 0.6,
+  },
 
-      backgroundColor:
-        cores.superficie,
-
-      padding:
-        espacamentos.md,
-    },
-
-    tituloSecao: {
-      fontSize:
-        tipografia.subtitulo,
-
-      fontWeight:
-        '700',
-
-      color:
-        cores.texto,
-
-      marginBottom:
-        espacamentos.sm,
-    },
-
-    localizacaoTexto: {
-      fontSize:
-        tipografia.corpo,
-
-      color:
-        cores.texto,
-
-      marginBottom:
-        espacamentos.xs,
-    },
-
-    textoSecundario: {
-      fontSize:
-        tipografia.legenda,
-
-      color:
-        cores.textoSecundario,
-    },
-
-    acoesLocalizacao: {
-      marginTop:
-        espacamentos.md,
-
-      gap:
-        espacamentos.sm,
-    },
-
-    botaoPrincipal: {
-      minHeight: 44,
-
-      flexDirection:
-        'row',
-
-      gap: 7,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
-      backgroundColor:
-        '#000000',
-    },
-
-    botaoPrincipalTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight:
-        '700',
-
-      color:
-        '#FFFFFF',
-    },
-
-    botaoSecundario: {
-      minHeight: 44,
-
-      alignItems:
-        'center',
-
-      justifyContent:
-        'center',
-
-      borderWidth: 1,
-
-      borderColor:
-        cores.borda,
-
-      backgroundColor:
-        cores.superficie,
-    },
-
-    botaoSecundarioTexto: {
-      fontSize:
-        tipografia.legenda,
-
-      fontWeight:
-        '600',
-
-      color:
-        cores.perigo,
-    },
-
-    pressionado: {
-      opacity: 0.6,
-    },
-
-    desabilitado: {
-      opacity: 0.5,
-    },
-  });
+  desabilitado: {
+    opacity: 0.5,
+  },
+});

@@ -15,6 +15,8 @@ import {
   atualizarPerfilApi,
   atualizarFotoPerfilApi,
   removerFotoPerfilApi,
+  obterConfiguracoesApi,
+  atualizarConfiguracoesApi,
 } from './api';
 
 // ============================================================
@@ -214,4 +216,55 @@ export async function removerFotoPerfil() {
   await salvarUsuario(dados.usuario);
 
   return null;
+}
+
+// ============================================================
+// CONSULTAR CONFIGURAÇÕES
+// ============================================================
+
+export async function obterConfiguracoes() {
+  const token = await obterToken();
+
+  if (!token) {
+    throw new Error('Sessão não encontrada.');
+  }
+
+  const resultado =
+    await obterConfiguracoesApi(token);
+
+  return resultado.configuracoes;
+}
+
+// ============================================================
+// ATUALIZAR CONFIGURAÇÕES
+// ============================================================
+
+export async function atualizarConfiguracoes(dados) {
+  const token = await obterToken();
+
+  if (!token) {
+    throw new Error('Sessão não encontrada.');
+  }
+
+  const resultado =
+    await atualizarConfiguracoesApi(
+      token,
+      dados
+    );
+
+  const usuario = await obterUsuario();
+
+  if (usuario) {
+    await salvarUsuario({
+      ...usuario,
+
+      idioma:
+        resultado.configuracoes.idioma,
+
+      tema:
+        resultado.configuracoes.tema,
+    });
+  }
+
+  return resultado.configuracoes;
 }

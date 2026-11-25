@@ -264,3 +264,47 @@ export async function removerFotoPerfilApi(token) {
 
   return processarResposta(resposta);
 }
+
+// ============================================================
+// CONSULTAR CONFIGURAÇÕES DO USUÁRIO
+// ============================================================
+
+export async function obterConfiguracoesApi(token) {
+  const resposta = await fetch(
+    `${API_URL}/configuracoes/me`,
+    {
+      method: 'GET',
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// ATUALIZAR CONFIGURAÇÕES DO USUÁRIO
+// ============================================================
+
+export async function atualizarConfiguracoesApi(
+  token,
+  dados
+) {
+  const resposta = await fetch(
+    `${API_URL}/configuracoes/me`,
+    {
+      method: 'PUT',
+
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+
+      body: JSON.stringify(dados),
+    }
+  );
+
+  return processarResposta(resposta);
+}

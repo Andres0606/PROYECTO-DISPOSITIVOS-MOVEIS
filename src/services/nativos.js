@@ -170,6 +170,8 @@ export async function escolherImagem() {
 
 // GEOLOCALIZAÇÃO
 
+// GEOLOCALIZAÇÃO
+
 export async function obterPosicao() {
   recusarSeWeb();
 
@@ -182,10 +184,41 @@ export async function obterPosicao() {
     );
   }
 
-  const posicao =
-    await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
+  const servicosAtivos =
+    await Location.hasServicesEnabledAsync();
+
+  if (!servicosAtivos) {
+    throw new Error(
+      'Ative os serviços de localização do dispositivo.'
+    );
+  }
+
+  const provedores =
+    await Location.getProviderStatusAsync();
+
+  console.log('Provedores GPS:', provedores);
+
+  let posicao;
+
+  try {
+    posicao = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+      mayShowUserSettingsDialog: false,
     });
+  } catch (erro) {
+    console.log('Erro GPS:', erro.message);
+
+    posicao = await Location.getLastKnownPositionAsync({
+      maxAge: 60000,
+      requiredAccuracy: 100,
+    });
+
+    if (!posicao) {
+      throw new Error(
+        'Não foi possível obter a localização. Verifique o GPS do dispositivo.'
+      );
+    }
+  }
 
   return {
     latitude: posicao.coords.latitude,
