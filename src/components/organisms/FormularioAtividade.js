@@ -43,6 +43,13 @@ import {
   useTema,
 } from '../../theme/useTema';
 
+import { SeletorImagem } from '../molecules/SeletorImagem';
+
+import {
+  capturarFoto,
+  escolherImagem,
+} from '../../services/nativos';
+
 export function FormularioAtividade({
   valoresIniciais,
   rotuloEnviar = 'Criar atividade',
@@ -89,8 +96,14 @@ export function FormularioAtividade({
 
   const [erros, setErros] = useState({});
 
-  const ocupado = carregando || excluindo;
+  const [imagem, setImagem] = useState(undefined);
+  const [selecionandoImagem, setSelecionandoImagem] = useState(false);
 
+  const imagemUri = imagem === undefined
+    ? valoresIniciais?.imagem
+    : imagem?.uri;
+
+  const ocupado = carregando || excluindo || selecionandoImagem;
   // ==========================================================
   // ESTADOS DAS CATEGORIAS
   // ==========================================================
@@ -198,6 +211,30 @@ export function FormularioAtividade({
     }
   }
 
+  // Selecionar fotografia
+async function selecionarImagem(origem) {
+  if (ocupado) return;
+
+  setSelecionandoImagem(true);
+
+  try {
+    const resultado = origem === 'camera'
+      ? await capturarFoto()
+      : await escolherImagem();
+
+    if (resultado?.uri) {
+      setImagem(resultado);
+    }
+  } catch (erro) {
+    Alert.alert(
+      'Erro',
+      erro.message || 'Não foi possível selecionar a imagem.'
+    );
+  } finally {
+    setSelecionandoImagem(false);
+  }
+}
+
   // ==========================================================
   // VALIDAR FORMULÁRIO
   // ==========================================================
@@ -265,18 +302,14 @@ export function FormularioAtividade({
     if (!validar()) return;
 
     aoEnviar({
-      nome: nome.trim(),
-
-      descricao: descricao.trim(),
-
-      categoriaId,
-
-      data: data.trim(),
-
-      hora: hora.trim(),
-
-      local: local.trim(),
-    });
+  nome: nome.trim(),
+  descricao: descricao.trim(),
+  categoriaId,
+  data: data.trim(),
+  hora: hora.trim(),
+  local: local.trim(),
+  imagem,
+  });
   }
 
   // ==========================================================
@@ -285,6 +318,14 @@ export function FormularioAtividade({
 
   return (
     <View style={estilos.formulario}>
+
+      <SeletorImagem
+  uri={imagemUri}
+  aoCapturar={() => selecionarImagem('camera')}
+  aoEscolher={() => selecionarImagem('galeria')}
+  aoRemover={() => setImagem(null)}
+  desabilitado={ocupado}
+  />
 
       {/* Nome */}
 

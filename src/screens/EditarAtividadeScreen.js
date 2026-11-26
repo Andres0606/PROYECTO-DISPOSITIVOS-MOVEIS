@@ -20,6 +20,8 @@ import {
 import {
   atualizarAtividade,
   excluirAtividade,
+  atualizarFotoAtividade,
+  removerFotoAtividade,
 } from '../services/atividades';
 
 import {
@@ -62,7 +64,9 @@ export function EditarAtividadeScreen({
     return (
       <ScreenTemplate
         titulo="Editar atividade"
-        aoVoltar={() => navigation.goBack()}
+        aoVoltar={() => {
+          if (!salvando && !excluindo) navigation.goBack();
+        }}
       >
 
         <Text
@@ -84,29 +88,36 @@ export function EditarAtividadeScreen({
   // ATUALIZAR ATIVIDADE
   // ==========================================================
 
-  async function salvarAlteracoes(dados) {
-    if (salvando || excluindo) return;
+  async function salvarAlteracoes({ imagem, ...dados }) {
+      if (salvando || excluindo) return;
+
+  try {
+    setSalvando(true);
+    setErro('');
+
+    await atualizarAtividade(atividade.id, dados);
 
     try {
-      setSalvando(true);
-      setErro('');
-
-      await atualizarAtividade(
-        atividade.id,
-        dados
-      );
-
-      navigation.goBack();
-
+      if (imagem?.uri) {
+        await atualizarFotoAtividade(atividade.id, imagem);
+      } else if (imagem === null) {
+        await removerFotoAtividade(atividade.id);
+      }
     } catch (erro) {
       setErro(
-        'Não foi possível atualizar a atividade. Tente novamente.'
+        'Os dados foram salvos, mas não foi possível atualizar a foto. Tente novamente.'
       );
-
-    } finally {
-      setSalvando(false);
+      return;
     }
+
+    navigation.goBack();
+  } catch (erro) {
+    setErro('Não foi possível atualizar a atividade. Tente novamente.');
+  } finally {
+    setSalvando(false);
   }
+}
+
 
   // ==========================================================
   // CONFIRMAR EXCLUSÃO
