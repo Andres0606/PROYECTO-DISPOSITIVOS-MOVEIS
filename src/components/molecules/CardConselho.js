@@ -1,45 +1,80 @@
+
 // MOLECULE — CardConselho
-import { useMemo } from 'react';
+
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AvatarIcone } from '../atoms/AvatarIcone';
+import { Etiqueta } from '../atoms/Etiqueta';
 import { espacamentos, raios, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
-export function CardConselho({ conselho, curtido = false, aoCurtir, aoAbrir }) {
+export function CardConselho({
+  conselho, aoCurtir, aoAbrir, desabilitado = false,
+}) {
   const { cores } = useTema();
-  const estilos = useMemo(() => criarEstilos(cores), [cores]);
 
   return (
-    <View style={estilos.cartao}>
-      <Pressable
-        onPress={aoAbrir}
-        style={({ pressed }) => [estilos.conteudo, pressed && estilos.pressionado]}
-        accessibilityRole="button"
-      >
+    <View style={[
+      estilos.cartao,
+      { backgroundColor: cores.superficie, borderColor: cores.borda },
+    ]}>
+      <Pressable onPress={aoAbrir}
+        style={({ pressed }) => pressed && estilos.pressionado}
+        accessibilityRole="button">
+
         <View style={estilos.cabecalho}>
-          <View style={estilos.avatar}>
-            <Ionicons name="person-outline" size={21} color={cores.texto} />
+          <AvatarIcone icone="person-outline" tamanho={40}
+            uri={conselho.fotoAutor} />
+
+          <View style={estilos.dadosAutor}>
+            <Text style={[estilos.autor, { color: cores.texto }]}>
+              {conselho.autor}
+            </Text>
+
+            <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
+              {[conselho.pais, conselho.tempo].filter(Boolean).join(' · ')}
+            </Text>
           </View>
-          <Text style={estilos.autor}>{conselho.autor}</Text>
-          <Text style={estilos.pais}>{conselho.pais}</Text>
         </View>
-        <Text style={estilos.texto}>{conselho.texto}</Text>
+
+        <Text style={[estilos.titulo, { color: cores.texto }]}>
+          {conselho.texto}
+        </Text>
+
         <View style={estilos.categoria}>
-          <Text style={estilos.categoriaTexto}>{conselho.categoria}</Text>
+          <Etiqueta titulo={conselho.categoria} />
         </View>
       </Pressable>
+
       <View style={estilos.rodape}>
-        <View />
         <Pressable
-          onPress={() => { if (aoCurtir) aoCurtir(); }}
+          onPress={aoCurtir}
+          disabled={desabilitado}
           hitSlop={10}
-          style={({ pressed }) => [estilos.curtidas, pressed && estilos.pressionado]}
           accessibilityRole="button"
-          accessibilityLabel="Curtir conselho"
-        >
-          <Ionicons name={curtido ? 'heart' : 'heart-outline'} size={20} color={cores.texto} />
-          <Text style={estilos.numeroCurtidas}>
-            {conselho.curtidas + (curtido ? 1 : 0)}
+          accessibilityLabel={conselho.curtido ? 'Remover curtida' : 'Curtir conselho'}
+          accessibilityState={{ selected: conselho.curtido, disabled: desabilitado }}
+          style={({ pressed }) => [
+            estilos.interacao,
+            (pressed || desabilitado) && estilos.pressionado,
+          ]}>
+
+          <Ionicons
+            name={conselho.curtido ? 'heart' : 'heart-outline'}
+            size={21}
+            color={conselho.curtido ? cores.perigo : cores.texto}
+          />
+
+          <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
+            {conselho.curtidas}
+          </Text>
+        </Pressable>
+
+        <Pressable onPress={aoAbrir} style={estilos.interacao}
+          accessibilityRole="button" accessibilityLabel="Ver comentários">
+          <Ionicons name="chatbubble-outline" size={19} color={cores.texto} />
+          <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
+            {conselho.comentarios}
           </Text>
         </Pressable>
       </View>
@@ -47,51 +82,38 @@ export function CardConselho({ conselho, curtido = false, aoCurtir, aoAbrir }) {
   );
 }
 
-// ESTILOS DINÂMICOS
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    cartao: {
-      backgroundColor: cores.superficie,
-      borderWidth: 1,
-      borderColor: cores.borda,
-      borderRadius: raios.sm,
-      padding: espacamentos.sm,
-    },
-    conteudo: { flex: 1 },
-    cabecalho: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: espacamentos.sm,
-    },
-    avatar: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      backgroundColor: cores.decoracaoClara,
-      borderWidth: 1,
-      borderColor: cores.texto,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: espacamentos.md,
-    },
-    autor: { fontSize: tipografia.subtitulo, fontWeight: '600', color: cores.texto },
-    pais: { marginLeft: espacamentos.md, fontSize: tipografia.legenda, color: cores.textoSecundario },
-    texto: { fontSize: tipografia.legenda, fontWeight: '600', color: cores.texto, marginBottom: espacamentos.sm },
-    rodape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: espacamentos.xs },
-    categoria: {
-      alignSelf: 'flex-start',
-      minWidth: 94,
-      height: 27,
-      paddingHorizontal: espacamentos.md,
-      borderRadius: raios.pill,
-      borderWidth: 1,
-      borderColor: cores.borda,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    categoriaTexto: { fontSize: 11, color: cores.texto },
-    curtidas: { flexDirection: 'row', alignItems: 'center', gap: espacamentos.xs, paddingHorizontal: espacamentos.sm, paddingVertical: espacamentos.xs, zIndex: 10 },
-    numeroCurtidas: { fontSize: tipografia.legenda, color: cores.textoSecundario },
-    pressionado: { opacity: 0.5 },
-  });
-}
+const estilos = StyleSheet.create({
+  cartao: {
+    borderWidth: 1,
+    borderRadius: raios.sm,
+    padding: espacamentos.md,
+  },
+  cabecalho: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacamentos.sm,
+    marginBottom: espacamentos.md,
+  },
+  dadosAutor: { flex: 1 },
+  autor: { fontSize: tipografia.subtitulo, fontWeight: '600' },
+  legenda: { fontSize: tipografia.legenda },
+  titulo: {
+    fontSize: tipografia.corpo,
+    fontWeight: '600',
+    marginBottom: espacamentos.sm,
+  },
+  categoria: { alignSelf: 'flex-start' },
+  rodape: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: espacamentos.lg,
+    marginTop: espacamentos.md,
+  },
+  interacao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacamentos.xs,
+    paddingVertical: espacamentos.xs,
+  },
+  pressionado: { opacity: 0.5 },
+});
