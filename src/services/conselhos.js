@@ -32,22 +32,7 @@ async function obterTokenSessao() {
   return token;
 }
 
-// Compatibilidade temporária com os formulários atuais
-async function resolverCategoria(token, categoriaId, categoria) {
-  if (categoriaId) return categoriaId;
 
-  if (typeof categoria === 'string' && categoria.trim()) {
-    const categorias = await obterCategoriasConselhoApi(token);
-
-    const encontrada = categorias.find(
-      (item) => item.nome.toLowerCase() === categoria.trim().toLowerCase()
-    );
-
-    if (encontrada) return encontrada.id;
-  }
-
-  throw new Error('Selecione uma categoria válida.');
-}
 
 // ============================================================
 // CONSELHOS E CATEGORIAS
@@ -74,21 +59,22 @@ export async function obterConselhoPorId(id) {
   return formatarConselho(conselho);
 }
 
-export async function criarConselho({
-  titulo, categoria, categoriaId, conteudo,
-}) {
+export async function criarConselho({ titulo, categoriaId, conteudo }) {
   const token = await obterTokenSessao();
-  const idCategoria = await resolverCategoria(token, categoriaId, categoria);
+
+  if (!categoriaId) {
+    throw new Error('Selecione uma categoria válida.');
+  }
 
   const conselho = await criarConselhoApi(token, {
-    titulo, categoriaId: idCategoria, conteudo,
+    titulo, categoriaId, conteudo,
   });
 
   return formatarConselho(conselho);
 }
 
 export async function atualizarConselho(
-  id, { titulo, categoria, categoriaId, conteudo }
+  id, { titulo, categoriaId, conteudo }
 ) {
   const token = await obterTokenSessao();
   const dados = {};
@@ -96,8 +82,12 @@ export async function atualizarConselho(
   if (titulo !== undefined) dados.titulo = titulo;
   if (conteudo !== undefined) dados.conteudo = conteudo;
 
-  if (categoriaId !== undefined || categoria !== undefined) {
-    dados.categoriaId = await resolverCategoria(token, categoriaId, categoria);
+  if (categoriaId !== undefined) {
+    if (!categoriaId) {
+      throw new Error('Selecione uma categoria válida.');
+    }
+
+    dados.categoriaId = categoriaId;
   }
 
   const conselho = await atualizarConselhoApi(token, id, dados);

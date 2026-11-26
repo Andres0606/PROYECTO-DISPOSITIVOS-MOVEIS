@@ -1,4 +1,3 @@
-
 // MOLECULE — SeletorImagem
 
 import { StyleSheet, Text, View } from 'react-native';
@@ -15,13 +14,14 @@ export function SeletorImagem({
   aoEscolher,
   aoRemover,
   desabilitado = false,
+  rotulo = 'Foto da atividade (opcional)',
 }) {
   const { cores } = useTema();
 
   return (
     <View style={estilos.container}>
       <Text style={[estilos.rotulo, { color: cores.texto }]}>
-        Foto da atividade (opcional)
+        {rotulo}
       </Text>
 
       <FotoLocal

@@ -1,0 +1,204 @@
+
+// ORGANISM — FormularioConselho
+
+import { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Button } from '../atoms/Button';
+import { FormField } from '../molecules/FormField';
+import { CampoSelecao } from '../molecules/CampoSelecao';
+import { SeletorImagem } from '../molecules/SeletorImagem';
+import { obterCategoriasConselho } from '../../services/conselhos';
+import { capturarFoto, escolherImagem } from '../../services/nativos';
+import { campoObrigatorio } from '../../utils/validacao';
+import { espacamentos, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
+
+export function FormularioConselho({
+  valoresIniciais, rotuloEnviar = 'Publicar conselho',
+  aoEnviar, aoExcluir, carregando = false,
+  excluindo = false, erroGeral = '',
+}) {
+  const { cores } = useTema();
+  const [titulo, setTitulo] = useState(valoresIniciais?.texto ?? '');
+  const [conteudo, setConteudo] = useState(valoresIniciais?.descricao ?? '');
+  const [categoriaId, setCategoriaId] = useState(valoresIniciais?.categoriaId ?? '');
+  const [categorias, setCategorias] = useState([]);
+  const [carregandoCategorias, setCarregandoCategorias] = useState(true);
+  const [erroCategorias, setErroCategorias] = useState('');
+  const [tentativa, setTentativa] = useState(0);
+  const [erros, setErros] = useState({});
+  const [imagem, setImagem] = useState(undefined);
+  const [selecionandoImagem, setSelecionandoImagem] = useState(false);
+
+  const ocupado = carregando || excluindo || selecionandoImagem;
+  const categoriaSelecionada = categorias.find(item => item.id === categoriaId);
+  const imagemUri = imagem === undefined ? valoresIniciais?.imagem : imagem?.uri;
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarCategorias() {
+      setCarregandoCategorias(true);
+      setErroCategorias('');
+
+      try {
+        const resultado = await obterCategoriasConselho();
+        if (!ativo) return;
+
+        setCategorias(resultado);
+        setCategoriaId(atual => resultado.some(item => item.id === atual) ? atual : '');
+
+        if (!resultado.length) {
+          setErroCategorias('Nenhuma categoria disponível.');
+        }
+      } catch (erro) {
+        if (!ativo) return;
+        setCategorias([]);
+        setErroCategorias('Não foi possível carregar as categorias.');
+      } finally {
+        if (ativo) setCarregandoCategorias(false);
+      }
+    }
+
+    carregarCategorias();
+    return () => { ativo = false; };
+  }, [tentativa]);
+
+  function selecionarCategoria(nome) {
+    if (ocupado || carregandoCategorias) return;
+
+    const categoria = categorias.find(item => item.nome === nome);
+
+    if (categoria) {
+      setCategoriaId(categoria.id);
+      setErros(atual => ({ ...atual, categoria: '' }));
+    }
+  }
+
+  async function selecionarImagem(origem) {
+    if (ocupado) return;
+
+    setSelecionandoImagem(true);
+    try {
+      const resultado = origem === 'camera'
+        ? await capturarFoto()
+        : await escolherImagem();
+
+      if (resultado?.uri) setImagem(resultado);
+    } catch (erro) {
+      Alert.alert('Erro', erro.message || 'Não foi possível selecionar a imagem.');
+    } finally {
+      setSelecionandoImagem(false);
+    }
+  }
+
+  function validar() {
+    const novosErros = {};
+
+    if (!campoObrigatorio(titulo)) {
+      novosErros.titulo = 'Informe um título.';
+    } else if (titulo.trim().length > 150) {
+      novosErros.titulo = 'O título deve ter no máximo 150 caracteres.';
+    }
+
+    if (!categoriaSelecionada) {
+      novosErros.categoria = 'Selecione uma categoria.';
+    }
+
+    if (!campoObrigatorio(conteudo)) {
+      novosErros.conteudo = 'Informe o conteúdo do conselho.';
+    } else if (conteudo.trim().length > 5000) {
+      novosErros.conteudo = 'O conteúdo deve ter no máximo 5000 caracteres.';
+    }
+
+    setErros(novosErros);
+    return Object.keys(novosErros).length === 0;
+  }
+
+  function enviar() {
+    if (ocupado || carregandoCategorias || erroCategorias || !validar()) return;
+
+    aoEnviar({
+      titulo: titulo.trim(),
+      categoriaId,
+      conteudo: conteudo.trim(),
+      imagem,
+    });
+  }
+
+  return (
+    <View style={estilos.formulario}>
+      <FormField rotulo="Título" placeholder="Ex: Leve roupa de frio."
+        value={titulo} onChangeText={setTitulo} maxLength={150}
+        editable={!ocupado} erro={erros.titulo}
+        margemInferior={espacamentos.md} />
+
+      {erroCategorias ? (
+        <FormField rotulo="Categoria" erro={erroCategorias}
+          margemInferior={espacamentos.md}>
+          <Button titulo="Tentar novamente" variante="contorno"
+            aoPressionar={() => setTentativa(atual => atual + 1)}
+            desabilitado={ocupado} />
+        </FormField>
+      ) : (
+        <>
+          <CampoSelecao rotulo="Categoria"
+            opcoes={carregandoCategorias || ocupado ? [] : categorias.map(item => item.nome)}
+            valor={carregandoCategorias ? 'Carregando categorias...' : categoriaSelecionada?.nome ?? 'Selecione uma categoria'}
+            aoMudar={selecionarCategoria}
+            margemInferior={espacamentos.md} />
+
+          {!!erros.categoria && (
+            <Text style={[estilos.erroCategoria, { color: cores.perigo }]}>
+              {erros.categoria}
+            </Text>
+          )}
+        </>
+      )}
+
+      <FormField rotulo="Conteúdo" placeholder="Escreva seu conselho..."
+        value={conteudo} onChangeText={setConteudo}
+        multiline numberOfLines={5} textAlignVertical="top"
+        maxLength={5000} editable={!ocupado}
+        erro={erros.conteudo} margemInferior={espacamentos.md} />
+
+      <SeletorImagem rotulo="Foto do conselho (opcional)"
+        uri={imagemUri}
+        aoCapturar={() => selecionarImagem('camera')}
+        aoEscolher={() => selecionarImagem('galeria')}
+        aoRemover={() => setImagem(null)}
+        desabilitado={ocupado} />
+
+      {!!erroGeral && (
+        <Text style={[estilos.erroGeral, { color: cores.perigo }]}>
+          {erroGeral}
+        </Text>
+      )}
+
+      <View style={aoExcluir ? estilos.linhaBotoes : estilos.areaBotao}>
+        <View style={aoExcluir ? estilos.botao : undefined}>
+          <Button titulo={rotuloEnviar} variante="escuro"
+            aoPressionar={enviar} carregando={carregando}
+            desabilitado={ocupado || carregandoCategorias || !!erroCategorias} />
+        </View>
+
+        {aoExcluir && (
+          <View style={estilos.botao}>
+            <Button titulo="Excluir" variante="secundario"
+              aoPressionar={aoExcluir} carregando={excluindo}
+              desabilitado={ocupado} />
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const estilos = StyleSheet.create({
+  formulario: { marginTop: espacamentos.lg },
+  erroCategoria: { marginTop: -espacamentos.sm, marginBottom: espacamentos.sm, fontSize: tipografia.legenda },
+  erroGeral: { marginBottom: espacamentos.md, fontSize: tipografia.legenda, textAlign: 'center' },
+  areaBotao: { marginTop: espacamentos.md, marginBottom: espacamentos.md },
+  linhaBotoes: { flexDirection: 'row', gap: espacamentos.md, marginTop: espacamentos.md, marginBottom: espacamentos.md },
+  botao: { flex: 1 },
+});

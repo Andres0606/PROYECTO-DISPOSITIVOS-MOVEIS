@@ -77,14 +77,16 @@ export function ConselhoDetalheScreen({ navigation, route }) {
         <Image source={{ uri: conselho.imagem }} style={estilos.imagem} resizeMode="cover" />
       )}
       {/* EDITAR */}
-      <View style={estilos.areaEditar}>
-        <Pressable
-          onPress={editarConselho}
-          style={({ pressed }) => [estilos.botaoEditar, pressed && estilos.pressionado]}
-        >
-          <Text style={estilos.botaoEditarTexto}>Editar</Text>
-        </Pressable>
-      </View>
+      {conselho.meuConselho && (
+        <View style={estilos.areaEditar}>
+          <Pressable
+            onPress={editarConselho}
+            style={({ pressed }) => [estilos.botaoEditar, pressed && estilos.pressionado]}
+          >
+            <Text style={estilos.botaoEditarTexto}>Editar</Text>
+          </Pressable>
+        </View>
+      )}
       {/* INTERAÇÕES */}
       <View style={estilos.rodape}>
         <Pressable

@@ -1,128 +1,121 @@
+
 // SCREEN — Editar conselho
-import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+
+import { useRef, useState } from 'react';
+import { Alert, StyleSheet, Text } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
-import { atualizarConselho } from '../services/conselhos';
-import { espacamentos, raios, tipografia } from '../theme';
+import { FormularioConselho } from '../components/organisms/FormularioConselho';
+import {
+  atualizarConselho, excluirConselho,
+  atualizarFotoConselho, removerFotoConselho,
+} from '../services/conselhos';
+import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function EditarConselhoScreen({ navigation, route }) {
   const { cores } = useTema();
-  const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const conselho = route.params?.conselho;
-  const [titulo, setTitulo] = useState(conselho?.texto ?? '');
-  const [categoria, setCategoria] = useState(conselho?.categoria ?? '');
-  const [conteudo, setConteudo] = useState(conselho?.descricao ?? '');
   const [salvando, setSalvando] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
+  const [erro, setErro] = useState('');
+  const bloqueio = useRef(false);
 
-  if (!conselho) {
+  if (!conselho || !conselho.meuConselho) {
     return (
       <ScreenTemplate titulo="Editar conselho" aoVoltar={() => navigation.goBack()}>
-        <Text style={estilos.erro}>Conselho não encontrado.</Text>
+        <Text style={[estilos.erro, { color: cores.perigo }]}>
+          {!conselho
+            ? 'Conselho não encontrado.'
+            : 'Você não tem permissão para editar este conselho.'}
+        </Text>
       </ScreenTemplate>
     );
   }
 
-  async function salvarAlteracoes() {
-    const tituloLimpo = titulo.trim();
-    const categoriaLimpa = categoria.trim();
-    const conteudoLimpo = conteudo.trim();
+  async function salvarAlteracoes({ imagem, ...dados }) {
+    if (bloqueio.current) return;
 
-    if (!tituloLimpo) {
-      Alert.alert('Título obrigatório', 'Informe um título para o conselho.');
-      return;
-    }
-    if (!categoriaLimpa) {
-      Alert.alert('Categoria obrigatória', 'Informe uma categoria.');
-      return;
-    }
-    if (!conteudoLimpo) {
-      Alert.alert('Conteúdo obrigatório', 'Informe o conteúdo do conselho.');
-      return;
-    }
+    bloqueio.current = true;
+    setSalvando(true);
+    setErro('');
+
     try {
-      setSalvando(true);
-      await atualizarConselho(conselho.id, {
-        titulo: tituloLimpo,
-        categoria: categoriaLimpa,
-        conteudo: conteudoLimpo,
-      });
+      await atualizarConselho(conselho.id, dados);
+
+      try {
+        if (imagem?.uri) {
+          await atualizarFotoConselho(conselho.id, imagem);
+        } else if (imagem === null) {
+          await removerFotoConselho(conselho.id);
+        }
+      } catch (erro) {
+        setErro('Os dados foram salvos, mas não foi possível atualizar a foto. Tente novamente.');
+        return;
+      }
+
       navigation.goBack();
     } catch (erro) {
-      Alert.alert('Erro', 'Não foi possível editar o conselho.');
+      setErro(erro.message || 'Não foi possível atualizar o conselho.');
     } finally {
+      bloqueio.current = false;
       setSalvando(false);
     }
   }
 
+  function confirmarExclusao() {
+    if (bloqueio.current) return;
+
+    Alert.alert(
+      'Excluir conselho',
+      'Tem certeza que deseja excluir este conselho?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Excluir', style: 'destructive', onPress: excluirConselhoAtual },
+      ]
+    );
+  }
+
+  async function excluirConselhoAtual() {
+    if (bloqueio.current) return;
+
+    bloqueio.current = true;
+    setExcluindo(true);
+    setErro('');
+
+    try {
+      await excluirConselho(conselho.id);
+      navigation.pop(2);
+    } catch (erro) {
+      setErro(erro.message || 'Não foi possível excluir o conselho.');
+    } finally {
+      bloqueio.current = false;
+      setExcluindo(false);
+    }
+  }
+
   return (
-    <ScreenTemplate titulo="Editar conselho" aoVoltar={() => navigation.goBack()}>
-      <View style={estilos.formulario}>
-        {/* TÍTULO */}
-        <View style={estilos.campo}>
-          <Text style={estilos.rotulo}>Título</Text>
-          <TextInput
-            value={titulo}
-            onChangeText={setTitulo}
-            placeholder="Ex: Leve roupa de frio."
-            placeholderTextColor={cores.textoSecundario}
-            style={estilos.input}
-            maxLength={80}
-          />
-        </View>
-        {/* CATEGORIA */}
-        <View style={estilos.campo}>
-          <Text style={estilos.rotulo}>Categoria</Text>
-          <TextInput
-            value={categoria}
-            onChangeText={setCategoria}
-            placeholder="Adaptação"
-            placeholderTextColor={cores.textoSecundario}
-            style={estilos.input}
-            maxLength={40}
-          />
-        </View>
-        {/* CONTEÚDO */}
-        <View style={estilos.campo}>
-          <Text style={estilos.rotulo}>Conteúdo</Text>
-          <TextInput
-            value={conteudo}
-            onChangeText={setConteudo}
-            placeholder="Escreva o conteúdo..."
-            placeholderTextColor={cores.textoSecundario}
-            style={[estilos.input, estilos.inputConteudo]}
-            multiline
-            textAlignVertical="top"
-            maxLength={500}
-          />
-        </View>
-      </View>
-      <View style={estilos.areaBotao}>
-        <Pressable
-          onPress={salvarAlteracoes}
-          disabled={salvando}
-          style={({ pressed }) => [estilos.botaoSalvar, pressed && estilos.pressionado, salvando && estilos.desabilitado]}
-        >
-          <Text style={estilos.botaoSalvarTexto}>{salvando ? 'Salvando...' : 'Editar conselho'}</Text>
-        </Pressable>
-      </View>
+    <ScreenTemplate titulo="Editar conselho"
+      aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
+
+      <FormularioConselho
+        key={conselho.id}
+        valoresIniciais={conselho}
+        rotuloEnviar="Guardar alterações"
+        aoEnviar={salvarAlteracoes}
+        aoExcluir={confirmarExclusao}
+        carregando={salvando}
+        excluindo={excluindo}
+        erroGeral={erro}
+      />
+
     </ScreenTemplate>
   );
 }
 
-// ESTILOS DINÂMICOS
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    formulario: { marginTop: espacamentos.lg, gap: espacamentos.md },
-    campo: { gap: 6 },
-    rotulo: { fontSize: tipografia.legenda, fontWeight: '700', color: cores.texto },
-    input: { minHeight: 44, backgroundColor: cores.superficie, borderWidth: 1, borderColor: cores.borda, borderRadius: raios.sm, paddingHorizontal: espacamentos.md, paddingVertical: espacamentos.sm, fontSize: tipografia.legenda, color: cores.texto },
-    inputConteudo: { minHeight: 65 },
-    areaBotao: { marginTop: 170, marginBottom: espacamentos.md },
-    botaoSalvar: { minHeight: 48, backgroundColor: cores.botaoPrincipal, borderRadius: raios.sm, alignItems: 'center', justifyContent: 'center' },
-    botaoSalvarTexto: { fontSize: tipografia.legenda, fontWeight: '700', color: cores.textoBotaoPrincipal },
-    pressionado: { opacity: 0.6 },
-    desabilitado: { opacity: 0.5 },
-    erro: { marginTop: espacamentos.xl, textAlign: 'center', fontSize: tipografia.corpo, color: cores.perigo },
-  });
-}
+const estilos = StyleSheet.create({
+  erro: {
+    marginTop: espacamentos.xl,
+    textAlign: 'center',
+    fontSize: tipografia.corpo,
+  },
+});
