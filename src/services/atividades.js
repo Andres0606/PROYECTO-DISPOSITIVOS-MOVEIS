@@ -26,6 +26,8 @@ import {
   verificarFavoritoAtividadeApi,
   adicionarFavoritoAtividadeApi,
   removerFavoritoAtividadeApi,
+  atualizarFotoAtividadeApi,
+  removerFotoAtividadeApi,
 } from './api';
 
 // ============================================================
@@ -331,4 +333,26 @@ export async function removerFavoritoAtividade(id) {
     );
 
   return resultado.guardado;
+}
+
+
+
+// Atualizar fotografia da atividade
+export async function atualizarFotoAtividade(id, imagem) {
+  const token = await obterTokenSessao();
+
+  const resultado = await atualizarFotoAtividadeApi(
+    token, id, imagem
+  );
+
+  return resultado.imagemUrl;
+}
+
+// Remover fotografia da atividade
+export async function removerFotoAtividade(id) {
+  const token = await obterTokenSessao();
+
+  const resultado = await removerFotoAtividadeApi(token, id);
+
+  return resultado.imagemUrl;
 }

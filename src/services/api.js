@@ -206,10 +206,9 @@ export async function atualizarPerfilApi(
 // ATUALIZAR FOTO DO PERFIL
 // ============================================================
 
-export async function atualizarFotoPerfilApi(
-  token,
-  imagem
-) {
+
+// Enviar fotografia para a API
+async function enviarFotoApi(token, rota, imagem) {
   if (!imagem?.uri) {
     throw new Error('Nenhuma imagem selecionada.');
   }
@@ -221,30 +220,28 @@ export async function atualizarFotoPerfilApi(
   }
 
   if (arquivo.size > 5 * 1024 * 1024) {
-    throw new Error(
-      'A imagem deve ter no máximo 5 MB.'
-    );
+    throw new Error('A imagem deve ter no máximo 5 MB.');
   }
 
   const formulario = new FormData();
-
   formulario.append('foto', arquivo);
 
-  const resposta = await expoFetch(
-    `${API_URL}/auth/me/foto`,
-    {
-      method: 'PUT',
-
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: formulario,
-    }
-  );
+  const resposta = await expoFetch(`${API_URL}${rota}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formulario,
+  });
 
   return processarResposta(resposta);
 }
+
+// Atualizar foto do perfil
+export async function atualizarFotoPerfilApi(token, imagem) {
+  return enviarFotoApi(token, '/auth/me/foto', imagem);
+}
+
 
 // ============================================================
 // REMOVER FOTO DO PERFIL
@@ -704,6 +701,25 @@ export async function removerFavoritoAtividadeApi(
   return requisicaoAtividades(
     token,
     `/favoritos/atividades/${encodeURIComponent(id)}`,
+    'DELETE'
+  );
+}
+
+
+// Atualizar foto da atividade
+export async function atualizarFotoAtividadeApi(token, id, imagem) {
+  return enviarFotoApi(
+    token,
+    `/atividades/${encodeURIComponent(id)}/foto`,
+    imagem
+  );
+}
+
+// Remover foto da atividade
+export async function removerFotoAtividadeApi(token, id) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}/foto`,
     'DELETE'
   );
 }
