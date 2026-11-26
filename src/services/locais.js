@@ -1,40 +1,167 @@
 // SERVICE — Locais
-// ETAPA FRONT: dados estáticos. Depois, o corpo destas funções será trocado
-// por chamadas HTTP reais, sem alterar as screens.
-// Só o Unochapecó tem endereço e horário (vêm do Figma); os demais campos
-// opcionais ficam vazios até o backend/CRUD de Locais existir.
 
-const LOCAIS = [
-  {
-    id: 'unochapeco',
-    nome: 'Unochapecó',
-    categoria: 'Universidade',
-    distanciaKm: 1.2,
-    horario: 'Aberto até 22:00',
-    endereco: 'Rua Senador Attílio Fontana, 591E',
-    bairro: 'Bairro Efapi · Chapecó, SC',
-  },
-  { id: 'ecoparque', nome: 'Ecoparque Chapecó', categoria: 'Lazer', distanciaKm: 2.4 },
-  { id: 'shopping-patio', nome: 'Shopping Pátio Chapecó', categoria: 'Shopping', distanciaKm: 3.1 },
-  { id: 'mercado-sao-jose', nome: 'Mercado São José', categoria: 'Mercados', distanciaKm: 3.4 },
-  { id: 'restaurante-sabor', nome: 'Restaurante Sabor', categoria: 'Restaurantes', distanciaKm: 3.8 },
-];
+import { obterToken } from './storage';
 
-function esperar(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+import {
+  obterLocaisApi,
+  obterLocalApi,
+  obterCategoriasLugarApi,
+  obterLocaisFavoritosApi,
+  verificarFavoritoLocalApi,
+  adicionarFavoritoLocalApi,
+  removerFavoritoLocalApi,
+} from './api';
+
+// ============================================================
+// OBTER TOKEN DA SESSÃO
+// ============================================================
+
+async function obterTokenSessao() {
+  const token = await obterToken();
+
+  if (!token) {
+    throw new Error(
+      'Sessão não encontrada.'
+    );
+  }
+
+  return token;
 }
 
-export async function obterLocais() {
-  await esperar(400); // simula o tempo de uma requisição
-  return LOCAIS;
+// ============================================================
+// FORMATAR LOCAL
+// ============================================================
+
+function formatarLocal(local) {
+  return {
+    ...local,
+
+    categoriaId:
+      local.categoriaId ?? null,
+
+    categoria:
+      local.categoria?.nome ??
+      'Sem categoria',
+
+    bairro: [
+      local.cidade,
+      local.estado,
+    ].filter(Boolean).join(', '),
+
+    imagemUrl:
+      local.imagemUrl ?? null,
+
+    latitude:
+      local.latitude != null
+        ? Number(local.latitude)
+        : null,
+
+    longitude:
+      local.longitude != null
+        ? Number(local.longitude)
+        : null,
+
+    distanciaKm: null,
+  };
 }
+
+// ============================================================
+// LISTAR LOCAIS
+// ============================================================
+
+export async function obterLocais(filtros = {}) {
+  const token = await obterTokenSessao();
+
+  const locais = await obterLocaisApi(
+    token,
+    filtros
+  );
+
+  return locais.map(formatarLocal);
+}
+
+// ============================================================
+// OBTER LOCAL POR ID
+// ============================================================
 
 export async function obterLocal(id) {
-  await esperar(300);
+  const token = await obterTokenSessao();
 
-  const local = LOCAIS.find((item) => item.id === id);
-  if (!local) {
-    throw new Error('Local não encontrado.');
-  }
-  return local;
+  const local = await obterLocalApi(
+    token,
+    id
+  );
+
+  return formatarLocal(local);
+}
+
+// ============================================================
+// LISTAR CATEGORIAS
+// ============================================================
+
+export async function obterCategoriasLugar() {
+  const token = await obterTokenSessao();
+
+  return obterCategoriasLugarApi(token);
+}
+
+// ============================================================
+// LISTAR LOCAIS FAVORITOS
+// ============================================================
+
+export async function obterLocaisFavoritos() {
+  const token = await obterTokenSessao();
+
+  const locais =
+    await obterLocaisFavoritosApi(token);
+
+  return locais.map(formatarLocal);
+}
+
+// ============================================================
+// VERIFICAR FAVORITO
+// ============================================================
+
+export async function verificarFavoritoLocal(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await verificarFavoritoLocalApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
+}
+
+// ============================================================
+// ADICIONAR FAVORITO
+// ============================================================
+
+export async function adicionarFavoritoLocal(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await adicionarFavoritoLocalApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
+}
+
+// ============================================================
+// REMOVER FAVORITO
+// ============================================================
+
+export async function removerFavoritoLocal(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await removerFavoritoLocalApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
 }

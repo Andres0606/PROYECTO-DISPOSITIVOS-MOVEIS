@@ -358,3 +358,135 @@ export async function redefinirSenhaApi(
 
   return processarResposta(resposta);
 }
+
+// ============================================================
+// EXPLORAR CHAPECÓ — REQUISIÇÕES AUTENTICADAS
+// ============================================================
+
+async function requisicaoExplorar(
+  token,
+  rota,
+  metodo = 'GET'
+) {
+  const resposta = await fetch(
+    `${API_URL}${rota}`,
+    {
+      method: metodo,
+
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// LISTAR LUGARES
+// ============================================================
+
+export async function obterLocaisApi(
+  token,
+  filtros = {}
+) {
+  const parametros = [];
+
+  if (filtros.busca) {
+    parametros.push(
+      `busca=${encodeURIComponent(filtros.busca)}`
+    );
+  }
+
+  if (filtros.categoriaId) {
+    parametros.push(
+      `categoriaId=${encodeURIComponent(filtros.categoriaId)}`
+    );
+  }
+
+  const consulta = parametros.length
+    ? `?${parametros.join('&')}`
+    : '';
+
+  return requisicaoExplorar(
+    token,
+    `/lugares${consulta}`
+  );
+}
+
+// ============================================================
+// OBTER LUGAR POR ID
+// ============================================================
+
+export async function obterLocalApi(token, id) {
+  return requisicaoExplorar(
+    token,
+    `/lugares/${encodeURIComponent(id)}`
+  );
+}
+
+// ============================================================
+// LISTAR CATEGORIAS
+// ============================================================
+
+export async function obterCategoriasLugarApi(token) {
+  return requisicaoExplorar(
+    token,
+    '/categorias-lugar'
+  );
+}
+
+// ============================================================
+// LISTAR FAVORITOS
+// ============================================================
+
+export async function obterLocaisFavoritosApi(token) {
+  return requisicaoExplorar(
+    token,
+    '/favoritos/lugares'
+  );
+}
+
+// ============================================================
+// VERIFICAR FAVORITO
+// ============================================================
+
+export async function verificarFavoritoLocalApi(
+  token,
+  id
+) {
+  return requisicaoExplorar(
+    token,
+    `/favoritos/lugares/${encodeURIComponent(id)}`
+  );
+}
+
+// ============================================================
+// ADICIONAR FAVORITO
+// ============================================================
+
+export async function adicionarFavoritoLocalApi(
+  token,
+  id
+) {
+  return requisicaoExplorar(
+    token,
+    `/favoritos/lugares/${encodeURIComponent(id)}`,
+    'POST'
+  );
+}
+
+// ============================================================
+// REMOVER FAVORITO
+// ============================================================
+
+export async function removerFavoritoLocalApi(
+  token,
+  id
+) {
+  return requisicaoExplorar(
+    token,
+    `/favoritos/lugares/${encodeURIComponent(id)}`,
+    'DELETE'
+  );
+}

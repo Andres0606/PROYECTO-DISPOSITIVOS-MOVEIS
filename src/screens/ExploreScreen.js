@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -14,16 +13,26 @@ import {
   View,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { FiltrosExplorar } from '../components/organisms/FiltrosExplorar';
 import { ListaLocais } from '../components/organisms/ListaLocais';
 import { Button } from '../components/atoms/Button';
 
-import { obterLocais } from '../services/locais';
+import {
+  obterLocais,
+  obterCategoriasLugar,
+} from '../services/locais';
+
 import { filtrarLocais } from '../utils/locais';
 import { CATEGORIA_TODOS } from '../constants/locais';
 
-import { espacamentos, tipografia } from '../theme';
+import {
+  espacamentos,
+  tipografia,
+} from '../theme';
+
 import { useTema } from '../theme/useTema';
 
 export function ExploreScreen({ navigation }) {
@@ -35,15 +44,23 @@ export function ExploreScreen({ navigation }) {
   );
 
   const [locais, setLocais] = useState([]);
-  const [carregando, setCarregando] = useState(true);
+  const [categorias, setCategorias] = useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
   const [erro, setErro] = useState('');
 
   const [busca, setBusca] = useState('');
-  const [categoria, setCategoria] = useState(CATEGORIA_TODOS);
-  const [visao, setVisao] = useState('lista');
+
+  const [categoria, setCategoria] =
+    useState(CATEGORIA_TODOS);
+
+  const [visao, setVisao] =
+    useState('lista');
 
   // ==========================================================
-  // CARREGAR LOCAIS
+  // CARREGAR LOCAIS E CATEGORIAS
   // ==========================================================
 
   const carregar = useCallback(async () => {
@@ -51,11 +68,37 @@ export function ExploreScreen({ navigation }) {
     setErro('');
 
     try {
-      setLocais(await obterLocais());
+      const [
+        dadosLocais,
+        dadosCategorias,
+      ] = await Promise.all([
+        obterLocais(),
+        obterCategoriasLugar(),
+      ]);
+
+      setLocais(dadosLocais);
+
+      setCategorias(dadosCategorias);
+
+      // Verificar se a categoria selecionada ainda existe.
+
+      setCategoria((atual) => {
+        if (
+          atual === CATEGORIA_TODOS ||
+          dadosCategorias.some(
+            (item) => item.id === atual
+          )
+        ) {
+          return atual;
+        }
+
+        return CATEGORIA_TODOS;
+      });
 
     } catch (e) {
       setErro(
-        'Não foi possível carregar os locais. Tente novamente.'
+        e.message ||
+        'Não foi possível carregar os locais.'
       );
 
     } finally {
@@ -63,17 +106,36 @@ export function ExploreScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  // Atualizar dados ao retornar à tela.
+
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar])
+  );
+
+  // ==========================================================
+  // FILTRAR LOCAIS
+  // ==========================================================
 
   const locaisFiltrados = useMemo(
-    () => filtrarLocais(locais, busca, categoria),
+    () =>
+      filtrarLocais(
+        locais,
+        busca,
+        categoria
+      ),
+
     [locais, busca, categoria]
   );
 
-  // TODO: abrir a tela Filtros quando ela existir.
-  function abrirFiltros() {}
+  // ==========================================================
+  // NAVEGAÇÃO
+  // ==========================================================
+
+  function abrirFiltros() {
+    // Implementação futura dos filtros avançados.
+  }
 
   function abrirLocal(local) {
     navigation.navigate('DetalheLocal', {
@@ -98,6 +160,7 @@ export function ExploreScreen({ navigation }) {
           aoMudarVisao={setVisao}
           categoria={categoria}
           aoMudarCategoria={setCategoria}
+          categorias={categorias}
         />
 
       </View>
@@ -125,22 +188,32 @@ export function ExploreScreen({ navigation }) {
         </View>
       )}
 
-      {!carregando && !erro && visao === 'lista' && (
-        <ListaLocais
-          locais={locaisFiltrados}
-          aoAbrirLocal={abrirLocal}
-        />
+      {!carregando &&
+        !erro &&
+        visao === 'lista' && (
+
+          <ListaLocais
+            locais={locaisFiltrados}
+            aoAbrirLocal={abrirLocal}
+          />
       )}
 
-      {!carregando && !erro && visao === 'mapa' && (
-        <Text style={estilos.aviso}>
-          O mapa estará disponível em breve.
-        </Text>
+      {!carregando &&
+        !erro &&
+        visao === 'mapa' && (
+
+          <Text style={estilos.aviso}>
+            O mapa estará disponível em breve.
+          </Text>
       )}
 
     </ScreenTemplate>
   );
 }
+
+// ============================================================
+// ESTILOS
+// ============================================================
 
 function criarEstilos(cores) {
   return StyleSheet.create({

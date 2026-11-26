@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -20,9 +21,18 @@ import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { DetalheLocal } from '../components/organisms/DetalheLocal';
 import { Button } from '../components/atoms/Button';
 
-import { obterLocal } from '../services/locais';
+import {
+  obterLocal,
+  verificarFavoritoLocal,
+  adicionarFavoritoLocal,
+  removerFavoritoLocal,
+} from '../services/locais';
 
-import { espacamentos, tipografia } from '../theme';
+import {
+  espacamentos,
+  tipografia,
+} from '../theme';
+
 import { useTema } from '../theme/useTema';
 
 export function PlaceDetailScreen({
@@ -38,15 +48,25 @@ export function PlaceDetailScreen({
 
   const { localId } = route.params;
 
-  const [local, setLocal] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
+  const [local, setLocal] =
+    useState(null);
 
-  // TODO: integrar a persistência dos favoritos.
-  const [guardado, setGuardado] = useState(false);
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState('');
+
+  const [guardado, setGuardado] =
+    useState(false);
+
+  const [salvando, setSalvando] =
+    useState(false);
+
+  const bloqueio = useRef(false);
 
   // ==========================================================
-  // CARREGAR LOCAL
+  // CARREGAR LOCAL E ESTADO DO FAVORITO
   // ==========================================================
 
   const carregar = useCallback(async () => {
@@ -54,11 +74,22 @@ export function PlaceDetailScreen({
     setErro('');
 
     try {
-      setLocal(await obterLocal(localId));
+      const [
+        dadosLocal,
+        favorito,
+      ] = await Promise.all([
+        obterLocal(localId),
+        verificarFavoritoLocal(localId),
+      ]);
+
+      setLocal(dadosLocal);
+
+      setGuardado(favorito);
 
     } catch (e) {
       setErro(
-        'Não foi possível carregar este local. Tente novamente.'
+        e.message ||
+        'Não foi possível carregar este local.'
       );
 
     } finally {
@@ -71,15 +102,60 @@ export function PlaceDetailScreen({
   }, [carregar]);
 
   // ==========================================================
+  // ADICIONAR OU REMOVER FAVORITO
+  // ==========================================================
+
+  async function alternarGuardado() {
+    if (bloqueio.current) {
+      return;
+    }
+
+    bloqueio.current = true;
+
+    setSalvando(true);
+
+    try {
+      const resultado = guardado
+        ? await removerFavoritoLocal(localId)
+        : await adicionarFavoritoLocal(localId);
+
+      setGuardado(resultado);
+
+    } catch (e) {
+      Alert.alert(
+        'Favoritos',
+        e.message ||
+        'Não foi possível atualizar o favorito.'
+      );
+
+    } finally {
+      bloqueio.current = false;
+
+      setSalvando(false);
+    }
+  }
+
+  // ==========================================================
   // ABRIR MAPA
   // ==========================================================
 
   function verNoMapa() {
-    const consulta = [
-      local.nome,
-      local.endereco,
-      'Chapecó, SC',
-    ].filter(Boolean).join(', ');
+    if (!local) {
+      return;
+    }
+
+    const temCoordenadas =
+      Number.isFinite(local.latitude) &&
+      Number.isFinite(local.longitude);
+
+    const consulta = temCoordenadas
+      ? `${local.latitude},${local.longitude}`
+      : [
+          local.nome,
+          local.endereco,
+          local.cidade,
+          local.estado,
+        ].filter(Boolean).join(', ');
 
     const url =
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consulta)}`;
@@ -129,9 +205,8 @@ export function PlaceDetailScreen({
         <DetalheLocal
           local={local}
           guardado={guardado}
-          aoAlternarGuardado={() =>
-            setGuardado((atual) => !atual)
-          }
+          salvando={salvando}
+          aoAlternarGuardado={alternarGuardado}
           aoVerMapa={verNoMapa}
         />
       )}
@@ -139,6 +214,10 @@ export function PlaceDetailScreen({
     </ScreenTemplate>
   );
 }
+
+// ============================================================
+// ESTILOS
+// ============================================================
 
 function criarEstilos(cores) {
   return StyleSheet.create({

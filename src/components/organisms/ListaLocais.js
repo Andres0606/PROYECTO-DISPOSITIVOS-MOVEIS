@@ -1,12 +1,22 @@
 // ORGANISM — ListaLocais
 
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { CardLocal } from '../molecules/CardLocal';
-import { imagensLocais } from '../../constants/locais';
-import { formatarDistancia } from '../../utils/formatacao';
 
-import { espacamentos, tipografia } from '../../theme';
+import {
+  formatarDistancia,
+} from '../../utils/formatacao';
+
+import {
+  espacamentos,
+  tipografia,
+} from '../../theme';
+
 import { useTema } from '../../theme/useTema';
 
 export function ListaLocais({
@@ -20,7 +30,9 @@ export function ListaLocais({
       <Text
         style={[
           estilos.vazio,
-          { color: cores.textoSecundario },
+          {
+            color: cores.textoSecundario,
+          },
         ]}
       >
         Nenhum local encontrado.
@@ -31,15 +43,39 @@ export function ListaLocais({
   return (
     <View style={estilos.lista}>
 
-      {locais.map((local) => (
-        <CardLocal
-          key={local.id}
-          nome={local.nome}
-          detalhe={`${local.categoria} · ${formatarDistancia(local.distanciaKm)}`}
-          imagem={imagensLocais[local.id]}
-          aoPressionar={() => aoAbrirLocal?.(local)}
-        />
-      ))}
+      {locais.map((local) => {
+
+        const detalhe = [
+          local.categoria,
+
+          local.distanciaKm != null
+            ? formatarDistancia(
+                local.distanciaKm
+              )
+            : null,
+
+        ].filter(Boolean).join(' · ');
+
+        return (
+          <CardLocal
+            key={local.id}
+
+            nome={local.nome}
+
+            detalhe={detalhe}
+
+            imagem={
+              local.imagemUrl
+                ? { uri: local.imagemUrl }
+                : undefined
+            }
+
+            aoPressionar={() =>
+              aoAbrirLocal?.(local)
+            }
+          />
+        );
+      })}
 
     </View>
   );

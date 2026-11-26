@@ -1,9 +1,12 @@
-// ORGANISM — FiltrosExplorar (busca + Lista/Mapa + pills de categoria)
+// ORGANISM — FiltrosExplorar
+
 import { StyleSheet, View } from 'react-native';
+
 import { Pill } from '../atoms/Pill';
 import { BarraBusca } from '../molecules/BarraBusca';
 import { BotaoSegmentado } from '../molecules/BotaoSegmentado';
-import { CATEGORIAS_EXPLORAR } from '../../constants/locais';
+
+import { CATEGORIA_TODOS } from '../../constants/locais';
 import { espacamentos } from '../../theme';
 
 const VISOES = [
@@ -19,9 +22,19 @@ export function FiltrosExplorar({
   aoMudarVisao,
   categoria,
   aoMudarCategoria,
+  categorias = [],
 }) {
+  const opcoes = [
+    {
+      id: CATEGORIA_TODOS,
+      nome: 'Todos',
+    },
+    ...categorias,
+  ];
+
   return (
     <View style={estilos.bloco}>
+
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
@@ -29,24 +42,36 @@ export function FiltrosExplorar({
         aoFiltrar={aoFiltrar}
       />
 
-      <BotaoSegmentado opcoes={VISOES} valor={visao} aoMudar={aoMudarVisao} />
+      <BotaoSegmentado
+        opcoes={VISOES}
+        valor={visao}
+        aoMudar={aoMudarVisao}
+      />
 
       <View style={estilos.pills}>
-        {CATEGORIAS_EXPLORAR.map((nome) => (
+
+        {opcoes.map((item) => (
           <Pill
-            key={nome}
-            titulo={nome}
-            selecionado={nome === categoria}
-            aoPressionar={() => aoMudarCategoria(nome)}
+            key={item.id}
+            titulo={item.nome}
+            selecionado={item.id === categoria}
+            aoPressionar={() =>
+              aoMudarCategoria(item.id)
+            }
           />
         ))}
+
       </View>
+
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  bloco: { gap: espacamentos.md },
+  bloco: {
+    gap: espacamentos.md,
+  },
+
   pills: {
     flexDirection: 'row',
     flexWrap: 'wrap',
