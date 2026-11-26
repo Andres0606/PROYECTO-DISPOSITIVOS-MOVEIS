@@ -19,6 +19,7 @@ import { useTema } from '../theme/useTema';
 const OPCOES_ORDENACAO = [
   { titulo: 'Próximas', valor: 'recentes' },
   { titulo: 'Populares', valor: 'populares' },
+  { titulo: 'Minhas atividades', valor: 'minhas' },
 ];
 
 export function AtividadesScreen({ navigation }) {
@@ -118,7 +119,9 @@ export function AtividadesScreen({ navigation }) {
           <Ionicons name="calendar-outline" size={48} color={cores.textoSecundario} />
 
           <Text style={estilos.tituloVazio}>
-            Nenhuma atividade disponível
+            {ordenacao === 'minhas'
+              ? 'Você ainda não criou atividades'
+              : 'Nenhuma atividade disponível'}
           </Text>
 
           <Text style={estilos.textoVazio}>
@@ -137,6 +140,7 @@ export function AtividadesScreen({ navigation }) {
             <CardAtividade
               key={atividade.id}
               atividade={atividade}
+              mostrarEstado={ordenacao === 'minhas'}
               aoAbrir={() => abrirAtividade(atividade)}
             />
           ))}

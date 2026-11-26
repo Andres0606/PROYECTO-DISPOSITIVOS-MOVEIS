@@ -42,7 +42,12 @@ export function BotaoSegmentado({
               selecionado && estilos.selecionado,
             ]}
           >
-            <Text style={estilos.titulo}>
+            <Text
+              style={estilos.titulo}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
               {opcao.titulo}
             </Text>
           </Pressable>
@@ -68,6 +73,7 @@ function criarEstilos(cores) {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
+      paddingHorizontal: 4,
     },
 
     separador: {
@@ -83,6 +89,7 @@ function criarEstilos(cores) {
       fontSize: tipografia.corpo,
       fontWeight: '500',
       color: cores.chipTexto,
+      textAlign: 'center',
     },
   });
 }

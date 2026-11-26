@@ -21,14 +21,30 @@ export function DetalheAtividade({
 
   return (
     <View>
-      {!atividade.vencida && (
+      {(!atividade.vencida || ordenacao === 'minhas') && (
         <View style={estilos.segmentado}>
-          <View style={[estilos.segmento, ordenacao === 'recentes' && estilos.segmentoAtivo]}>
-            <Text style={estilos.segmentoTexto}>Próximas</Text>
-          </View>
-          <View style={[estilos.segmento, ordenacao === 'populares' && estilos.segmentoAtivo]}>
-            <Text style={estilos.segmentoTexto}>Populares</Text>
-          </View>
+          {[
+            { titulo: 'Próximas', valor: 'recentes' },
+            { titulo: 'Populares', valor: 'populares' },
+            { titulo: 'Minhas atividades', valor: 'minhas' },
+          ].map((opcao) => (
+            <View
+              key={opcao.valor}
+              style={[
+                estilos.segmento,
+                ordenacao === opcao.valor && estilos.segmentoAtivo,
+              ]}
+            >
+              <Text
+                style={estilos.segmentoTexto}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
+                {opcao.titulo}
+              </Text>
+            </View>
+          ))}
         </View>
       )}
       <FotoLocal imagem={atividade.imagem ? { uri: atividade.imagem } : undefined} style={estilos.imagem} />
@@ -68,19 +84,23 @@ export function DetalheAtividade({
 
 function criarEstilos(cores) {
   return StyleSheet.create({
-    segmentado: { height: 38, flexDirection: 'row', borderWidth: 1, borderColor: cores.segmentoBorda,
-      borderRadius: raios.pill, overflow: 'hidden', marginBottom: espacamentos.lg },
-    segmento: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    segmentado: {
+      height: 38, flexDirection: 'row', borderWidth: 1, borderColor: cores.segmentoBorda,
+      borderRadius: raios.pill, overflow: 'hidden', marginBottom: espacamentos.lg
+    },
+    segmento: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, },
     segmentoAtivo: { backgroundColor: cores.segmentoSelecionado },
-    segmentoTexto: { fontSize: tipografia.legenda, color: cores.texto },
+    segmentoTexto: { fontSize: tipografia.legenda, color: cores.texto, textAlign: 'center', },
     imagem: { width: '100%', height: 180, borderRadius: raios.md },
     titulo: { marginTop: espacamentos.md, marginBottom: espacamentos.sm, fontSize: 19, fontWeight: '700', color: cores.texto },
     categoria: { alignSelf: 'flex-start', marginBottom: espacamentos.md },
     estado: { alignSelf: 'flex-start', marginBottom: espacamentos.md },
     informacao: { marginBottom: espacamentos.sm, fontSize: tipografia.corpo, color: cores.textoSecundario },
     interessados: { marginTop: espacamentos.xs, marginBottom: espacamentos.sm, fontSize: tipografia.corpo, fontWeight: '700', color: cores.texto },
-    descricaoBox: { minHeight: 90, borderWidth: 1, borderColor: cores.borda, borderRadius: raios.sm,
-      padding: espacamentos.md, backgroundColor: cores.superficie, marginBottom: espacamentos.md },
+    descricaoBox: {
+      minHeight: 90, borderWidth: 1, borderColor: cores.borda, borderRadius: raios.sm,
+      padding: espacamentos.md, backgroundColor: cores.superficie, marginBottom: espacamentos.md
+    },
     descricao: { fontSize: tipografia.legenda, lineHeight: 20, color: cores.texto },
     botoes: { flexDirection: 'row', gap: espacamentos.md, marginTop: espacamentos.sm },
     botao: { flex: 1 },
