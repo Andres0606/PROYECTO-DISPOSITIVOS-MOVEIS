@@ -8,6 +8,7 @@ import {
 
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -54,18 +55,28 @@ export function FavoritosScreen({ navigation }) {
   const [carregando, setCarregando] =
     useState(true);
 
+  const [erro, setErro] =
+    useState('');
   // ==========================================================
   // CARREGAR FAVORITOS
   // ==========================================================
 
   const carregar = useCallback(async () => {
     setCarregando(true);
+    setErro('');
 
     try {
       const resultado =
         await obterFavoritos(tipo);
 
       setFavoritos(resultado);
+
+    } catch (e) {
+      setFavoritos([]);
+
+      setErro(
+  'Não foi possível carregar os favoritos. Tente novamente.'
+);a
 
     } finally {
       setCarregando(false);
@@ -83,15 +94,23 @@ export function FavoritosScreen({ navigation }) {
   // ==========================================================
 
   async function remover(item) {
-    await removerFavorito(tipo, item.id);
+    try {
+      await removerFavorito(tipo, item.id);
 
-    setFavoritos(
-      (atuais) =>
-        atuais.filter(
-          (favorito) =>
-            favorito.id !== item.id
-        )
-    );
+      setFavoritos(
+        (atuais) =>
+          atuais.filter(
+            (favorito) =>
+              favorito.id !== item.id
+          )
+      );
+
+    } catch (e) {
+     Alert.alert(
+  'Favoritos',
+  'Não foi possível remover o favorito. Tente novamente.'
+);
+    }
   }
 
   // ==========================================================
@@ -113,7 +132,7 @@ export function FavoritosScreen({ navigation }) {
           style={[
             estilos.segmento,
             tipo === 'lugares' &&
-              estilos.segmentoAtivo,
+            estilos.segmentoAtivo,
           ]}
         >
           <Text style={estilos.segmentoTexto}>
@@ -126,7 +145,7 @@ export function FavoritosScreen({ navigation }) {
           style={[
             estilos.segmento,
             tipo === 'frases' &&
-              estilos.segmentoAtivo,
+            estilos.segmentoAtivo,
           ]}
         >
           <Text style={estilos.segmentoTexto}>
@@ -139,7 +158,7 @@ export function FavoritosScreen({ navigation }) {
           style={[
             estilos.segmento,
             tipo === 'atividades' &&
-              estilos.segmentoAtivo,
+            estilos.segmentoAtivo,
           ]}
         >
           <Text style={estilos.segmentoTexto}>
@@ -156,6 +175,26 @@ export function FavoritosScreen({ navigation }) {
           color={cores.primaria}
           style={estilos.carregando}
         />
+      ) : erro ? (
+        <View style={estilos.vazio}>
+
+          <Ionicons
+            name="alert-circle-outline"
+            size={34}
+            color={cores.perigo}
+          />
+
+          <Text style={estilos.vazioTexto}>
+            {erro}
+          </Text>
+
+          <Pressable onPress={carregar}>
+            <Text style={estilos.tentarNovamente}>
+              Tentar novamente
+            </Text>
+          </Pressable>
+
+        </View>
       ) : (
         <>
           {favoritos.length === 0 ? (
@@ -400,6 +439,12 @@ function criarEstilos(cores) {
 
     pressionado: {
       opacity: 0.5,
+    },
+    tentarNovamente: {
+      color: cores.primaria,
+      fontSize: tipografia.corpo,
+      fontWeight: '700',
+      marginTop: espacamentos.sm,
     },
   });
 }
