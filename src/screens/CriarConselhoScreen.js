@@ -60,7 +60,8 @@ export function CriarConselhoScreen({ navigation }) {
       await criarConselho({ titulo: tituloLimpo, categoria: categoriaLimpa, conteudo: conteudoLimpo, imagem });
       navigation.goBack();
     } catch (erro) {
-      Alert.alert('Erro', 'Não foi possível publicar o conselho.');
+      console.error('Erro ao publicar conselho:', erro);
+      Alert.alert('Erro', erro.message || 'Não foi possível publicar o conselho.');
     } finally {
       setPublicando(false);
     }

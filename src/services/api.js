@@ -494,7 +494,7 @@ export async function removerFavoritoLocalApi(
 // ATIVIDADES — REQUISIÇÕES AUTENTICADAS
 // ============================================================
 
-async function requisicaoAtividades(
+async function requisicaoAutenticada(
   token,
   rota,
   metodo = 'GET',
@@ -504,12 +504,10 @@ async function requisicaoAtividades(
     `${API_URL}${rota}`,
     {
       method: metodo,
-
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-
       ...(dados !== undefined
         ? { body: JSON.stringify(dados) }
         : {}),
@@ -524,7 +522,7 @@ async function requisicaoAtividades(
 // ============================================================
 
 export async function obterCategoriasAtividadeApi(token) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     '/categorias-atividade'
   );
@@ -538,7 +536,7 @@ export async function obterAtividadesApi(
   token,
   ordenacao = 'recentes'
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades?ordenacao=${encodeURIComponent(ordenacao)}`
   );
@@ -552,7 +550,7 @@ export async function obterAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}`
   );
@@ -566,7 +564,7 @@ export async function criarAtividadeApi(
   token,
   dados
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     '/atividades',
     'POST',
@@ -583,7 +581,7 @@ export async function atualizarAtividadeApi(
   id,
   dados
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}`,
     'PUT',
@@ -599,7 +597,7 @@ export async function excluirAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}`,
     'DELETE'
@@ -614,7 +612,7 @@ export async function verificarInteresseAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}/interesse`
   );
@@ -628,7 +626,7 @@ export async function adicionarInteresseAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}/interesse`,
     'POST'
@@ -643,7 +641,7 @@ export async function removerInteresseAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}/interesse`,
     'DELETE'
@@ -655,7 +653,7 @@ export async function removerInteresseAtividadeApi(
 // ============================================================
 
 export async function obterAtividadesFavoritasApi(token) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     '/favoritos/atividades'
   );
@@ -669,7 +667,7 @@ export async function verificarFavoritoAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/favoritos/atividades/${encodeURIComponent(id)}`
   );
@@ -683,7 +681,7 @@ export async function adicionarFavoritoAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/favoritos/atividades/${encodeURIComponent(id)}`,
     'POST'
@@ -698,7 +696,7 @@ export async function removerFavoritoAtividadeApi(
   token,
   id
 ) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/favoritos/atividades/${encodeURIComponent(id)}`,
     'DELETE'
@@ -717,9 +715,139 @@ export async function atualizarFotoAtividadeApi(token, id, imagem) {
 
 // Remover foto da atividade
 export async function removerFotoAtividadeApi(token, id) {
-  return requisicaoAtividades(
+  return requisicaoAutenticada(
     token,
     `/atividades/${encodeURIComponent(id)}/foto`,
     'DELETE'
+  );
+}
+
+
+
+// ============================================================
+// CONSELHOS DE INTERCAMBISTAS
+// ============================================================
+
+// Categorias
+export async function obterCategoriasConselhoApi(token) {
+  return requisicaoAutenticada(token, '/categorias-conselho');
+}
+
+// Listar conselhos
+export async function obterConselhosApi(
+  token, ordenacao = 'recentes', categoriaId
+) {
+  const parametros = [
+    `ordenacao=${encodeURIComponent(ordenacao)}`,
+  ];
+
+  if (categoriaId) {
+    parametros.push(`categoriaId=${encodeURIComponent(categoriaId)}`);
+  }
+
+  return requisicaoAutenticada(
+    token, `/conselhos?${parametros.join('&')}`
+  );
+}
+
+// Obter conselho
+export async function obterConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}`
+  );
+}
+
+// Criar conselho
+export async function criarConselhoApi(token, dados) {
+  return requisicaoAutenticada(
+    token, '/conselhos', 'POST', dados
+  );
+}
+
+// Atualizar conselho
+export async function atualizarConselhoApi(token, id, dados) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}`, 'PUT', dados
+  );
+}
+
+// Excluir conselho
+export async function excluirConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}`, 'DELETE'
+  );
+}
+
+// ============================================================
+// CURTIDAS
+// ============================================================
+
+export async function verificarCurtidaConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/curtida`
+  );
+}
+
+export async function adicionarCurtidaConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/curtida`, 'POST'
+  );
+}
+
+export async function removerCurtidaConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/curtida`, 'DELETE'
+  );
+}
+
+// ============================================================
+// COMENTÁRIOS
+// ============================================================
+
+export async function obterComentariosConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/comentarios`
+  );
+}
+
+export async function criarComentarioConselhoApi(token, id, dados) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/comentarios`, 'POST', dados
+  );
+}
+
+export async function atualizarComentarioConselhoApi(
+  token, id, comentarioId, dados
+) {
+  return requisicaoAutenticada(
+    token,
+    `/conselhos/${encodeURIComponent(id)}/comentarios/${encodeURIComponent(comentarioId)}`,
+    'PUT', dados
+  );
+}
+
+export async function excluirComentarioConselhoApi(
+  token, id, comentarioId
+) {
+  return requisicaoAutenticada(
+    token,
+    `/conselhos/${encodeURIComponent(id)}/comentarios/${encodeURIComponent(comentarioId)}`,
+    'DELETE'
+  );
+}
+
+// ============================================================
+// FOTOGRAFIAS
+// ============================================================
+
+export async function atualizarFotoConselhoApi(token, id, imagem) {
+  return enviarFotoApi(
+    token, `/conselhos/${encodeURIComponent(id)}/foto`, imagem
+  );
+}
+
+export async function removerFotoConselhoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/conselhos/${encodeURIComponent(id)}/foto`, 'DELETE'
   );
 }

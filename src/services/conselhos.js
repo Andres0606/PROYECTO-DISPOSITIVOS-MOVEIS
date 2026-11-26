@@ -1,199 +1,191 @@
+
 // SERVICE — Conselhos de intercambistas
 
-let CONSELHOS = [
-  {
-    id: '1',
+import { obterToken } from './storage';
+import { formatarConselho, formatarComentario } from '../utils/conselhos';
 
-    autor: 'Laura',
-    pais: 'Colômbia',
+import {
+  obterCategoriasConselhoApi,
+  obterConselhosApi,
+  obterConselhoApi,
+  criarConselhoApi,
+  atualizarConselhoApi,
+  excluirConselhoApi,
+  verificarCurtidaConselhoApi,
+  adicionarCurtidaConselhoApi,
+  removerCurtidaConselhoApi,
+  obterComentariosConselhoApi,
+  criarComentarioConselhoApi,
+  atualizarComentarioConselhoApi,
+  excluirComentarioConselhoApi,
+  atualizarFotoConselhoApi,
+  removerFotoConselhoApi,
+} from './api';
 
-    texto:
-      'Leve roupa de frio.',
+async function obterTokenSessao() {
+  const token = await obterToken();
 
-    descricao:
-      'Chapecó pode ser bastante fria no inverno. Recomendo levar uma boa jaqueta e se vestir por camadas, já que a diferença de temperatura entre o dia e a noite é considerável.',
+  if (!token) {
+    throw new Error('Sessão não encontrada.');
+  }
 
-    categoria: 'Adaptação',
-    tag: 'Clima',
+  return token;
+}
 
-    imagem: null,
+// Compatibilidade temporária com os formulários atuais
+async function resolverCategoria(token, categoriaId, categoria) {
+  if (categoriaId) return categoriaId;
 
-    curtidas: 27,
-    comentarios: 6,
+  if (typeof categoria === 'string' && categoria.trim()) {
+    const categorias = await obterCategoriasConselhoApi(token);
 
-    data: '2026-08-27',
-    tempo: '27 ago',
-  },
+    const encontrada = categorias.find(
+      (item) => item.nome.toLowerCase() === categoria.trim().toLowerCase()
+    );
 
-  {
-    id: '2',
+    if (encontrada) return encontrada.id;
+  }
 
-    autor: 'Laura',
-    pais: 'Colômbia',
+  throw new Error('Selecione uma categoria válida.');
+}
 
-    texto:
-      'Como obter o CPF rapidamente.',
+// ============================================================
+// CONSELHOS E CATEGORIAS
+// ============================================================
 
-    descricao:
-      'O CPF é necessário para vários serviços no Brasil. É recomendável realizar o processo o quanto antes para facilitar cadastros e outras atividades durante o intercâmbio.',
-
-    categoria: 'Adaptação',
-    tag: 'Documentos',
-
-    imagem: null,
-
-    curtidas: 27,
-    comentarios: 4,
-
-    data: '2026-08-26',
-    tempo: '26 ago',
-  },
-
-  {
-    id: '3',
-
-    autor: 'Laura',
-    pais: 'Colômbia',
-
-    texto:
-      'Melhores restaurantes perto de casa.',
-
-    descricao:
-      'Chapecó possui diferentes opções de restaurantes. Vale a pena explorar lugares próximos, comparar preços e conhecer novas opções durante o intercâmbio.',
-
-    categoria: 'Adaptação',
-    tag: 'Alimentação',
-
-    imagem: null,
-
-    curtidas: 27,
-    comentarios: 8,
-
-    data: '2026-08-25',
-    tempo: '25 ago',
-  },
-];
-
-function esperar(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+export async function obterCategoriasConselho() {
+  const token = await obterTokenSessao();
+  return obterCategoriasConselhoApi(token);
 }
 
 export async function obterConselhos(
-  ordenacao = 'recentes'
+  ordenacao = 'recentes', categoriaId
 ) {
-  await esperar(300);
+  const token = await obterTokenSessao();
+  const conselhos = await obterConselhosApi(token, ordenacao, categoriaId);
 
-  const lista = [
-    ...CONSELHOS,
-  ];
-
-  if (
-    ordenacao === 'populares'
-  ) {
-    return lista.sort(
-      (a, b) =>
-        b.curtidas -
-        a.curtidas
-    );
-  }
-
-  return lista.sort(
-    (a, b) =>
-      new Date(b.data) -
-      new Date(a.data)
-  );
+  return conselhos.map(formatarConselho);
 }
 
-export async function obterConselhoPorId(
-  id
-) {
-  await esperar(100);
+export async function obterConselhoPorId(id) {
+  const token = await obterTokenSessao();
+  const conselho = await obterConselhoApi(token, id);
 
-  return (
-    CONSELHOS.find(
-      (conselho) =>
-        conselho.id === id
-    ) ?? null
-  );
+  return formatarConselho(conselho);
 }
 
 export async function criarConselho({
-  titulo,
-  categoria,
-  conteudo,
-  imagem = null,
+  titulo, categoria, categoriaId, conteudo,
 }) {
-  await esperar(300);
+  const token = await obterTokenSessao();
+  const idCategoria = await resolverCategoria(token, categoriaId, categoria);
 
-  const agora =
-    new Date();
+  const conselho = await criarConselhoApi(token, {
+    titulo, categoriaId: idCategoria, conteudo,
+  });
 
-  const novoConselho = {
-    id: Date.now().toString(),
-
-    autor: 'Laura',
-    pais: 'Colômbia',
-
-    texto: titulo,
-    descricao: conteudo,
-
-    categoria,
-
-    tag: null,
-
-    imagem,
-
-    curtidas: 0,
-    comentarios: 0,
-
-    data:
-      agora.toISOString(),
-
-    tempo: 'agora',
-  };
-
-  CONSELHOS = [
-    novoConselho,
-    ...CONSELHOS,
-  ];
-
-  return novoConselho;
+  return formatarConselho(conselho);
 }
 
 export async function atualizarConselho(
-  id,
-  {
-    titulo,
-    categoria,
-    conteudo,
-  }
+  id, { titulo, categoria, categoriaId, conteudo }
 ) {
-  await esperar(300);
+  const token = await obterTokenSessao();
+  const dados = {};
 
-  const indice =
-    CONSELHOS.findIndex(
-      (conselho) =>
-        conselho.id === id
-    );
+  if (titulo !== undefined) dados.titulo = titulo;
+  if (conteudo !== undefined) dados.conteudo = conteudo;
 
-  if (indice === -1) {
-    throw new Error(
-      'Conselho não encontrado.'
-    );
+  if (categoriaId !== undefined || categoria !== undefined) {
+    dados.categoriaId = await resolverCategoria(token, categoriaId, categoria);
   }
 
-  const conselhoAtualizado = {
-    ...CONSELHOS[indice],
+  const conselho = await atualizarConselhoApi(token, id, dados);
 
-    texto: titulo,
-    categoria,
-    descricao: conteudo,
+  return formatarConselho(conselho);
+}
+
+export async function excluirConselho(id) {
+  const token = await obterTokenSessao();
+  await excluirConselhoApi(token, id);
+
+  return true;
+}
+
+// ============================================================
+// CURTIDAS
+// ============================================================
+
+export async function verificarCurtidaConselho(id) {
+  const token = await obterTokenSessao();
+  return verificarCurtidaConselhoApi(token, id);
+}
+
+export async function adicionarCurtidaConselho(id) {
+  const token = await obterTokenSessao();
+  return adicionarCurtidaConselhoApi(token, id);
+}
+
+export async function removerCurtidaConselho(id) {
+  const token = await obterTokenSessao();
+  return removerCurtidaConselhoApi(token, id);
+}
+
+// ============================================================
+// COMENTÁRIOS
+// ============================================================
+
+export async function obterComentariosConselho(id) {
+  const token = await obterTokenSessao();
+  const comentarios = await obterComentariosConselhoApi(token, id);
+
+  return comentarios.map(formatarComentario);
+}
+
+export async function criarComentarioConselho(id, conteudo) {
+  const token = await obterTokenSessao();
+  const resultado = await criarComentarioConselhoApi(token, id, { conteudo });
+
+  return {
+    ...resultado,
+    comentario: formatarComentario(resultado.comentario),
   };
+}
 
-  CONSELHOS[indice] =
-    conselhoAtualizado;
+export async function atualizarComentarioConselho(
+  id, comentarioId, conteudo
+) {
+  const token = await obterTokenSessao();
 
-  return conselhoAtualizado;
+  const resultado = await atualizarComentarioConselhoApi(
+    token, id, comentarioId, { conteudo }
+  );
+
+  return {
+    ...resultado,
+    comentario: formatarComentario(resultado.comentario),
+  };
+}
+
+export async function excluirComentarioConselho(id, comentarioId) {
+  const token = await obterTokenSessao();
+  return excluirComentarioConselhoApi(token, id, comentarioId);
+}
+
+// ============================================================
+// FOTOGRAFIAS
+// ============================================================
+
+export async function atualizarFotoConselho(id, imagem) {
+  const token = await obterTokenSessao();
+  const resultado = await atualizarFotoConselhoApi(token, id, imagem);
+
+  return resultado.imagemUrl;
+}
+
+export async function removerFotoConselho(id) {
+  const token = await obterTokenSessao();
+  const resultado = await removerFotoConselhoApi(token, id);
+
+  return resultado.imagemUrl;
 }
