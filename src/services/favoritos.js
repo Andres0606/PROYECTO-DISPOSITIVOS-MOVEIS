@@ -6,10 +6,12 @@ import {
   removerFavoritoLocal,
 } from './locais';
 
-// ============================================================
-// DADOS TEMPORÁRIOS — FRASES E ATIVIDADES
-// ============================================================
+import {
+  obterAtividadesFavoritas,
+  removerFavoritoAtividade,
+} from './atividades';
 
+// Dados temporários — frases
 let FAVORITOS = {
   frases: [
     {
@@ -28,19 +30,6 @@ let FAVORITOS = {
       descricao: '¿Dónde queda?',
     },
   ],
-
-  atividades: [
-    {
-      id: 'atividade-1',
-      titulo: 'Piquenique no Ecoparque',
-      descricao: '14/11/2026 · 15:00',
-    },
-    {
-      id: 'atividade-2',
-      titulo: 'Partida de futebol',
-      descricao: '15/11/2026 · 17:00',
-    },
-  ],
 };
 
 function esperar(ms) {
@@ -49,10 +38,7 @@ function esperar(ms) {
   });
 }
 
-// ============================================================
-// LISTAR FAVORITOS
-// ============================================================
-
+// Listar favoritos
 export async function obterFavoritos(tipo) {
   if (tipo === 'lugares') {
     const locais = await obterLocaisFavoritos();
@@ -63,30 +49,32 @@ export async function obterFavoritos(tipo) {
     }));
   }
 
+  if (tipo === 'atividades') {
+    return obterAtividadesFavoritas();
+  }
+
   await esperar(150);
 
-  return [
-    ...(FAVORITOS[tipo] ?? []),
-  ];
+  return [...(FAVORITOS[tipo] ?? [])];
 }
 
-// ============================================================
-// REMOVER FAVORITO
-// ============================================================
-
+// Remover favorito
 export async function removerFavorito(tipo, id) {
   if (tipo === 'lugares') {
     await removerFavoritoLocal(id);
+    return true;
+  }
 
+  if (tipo === 'atividades') {
+    await removerFavoritoAtividade(id);
     return true;
   }
 
   await esperar(150);
 
-  FAVORITOS[tipo] =
-    (FAVORITOS[tipo] ?? []).filter(
-      (item) => item.id !== id
-    );
+  FAVORITOS[tipo] = (FAVORITOS[tipo] ?? []).filter(
+    (item) => item.id !== id
+  );
 
   return true;
 }
