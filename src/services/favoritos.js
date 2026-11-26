@@ -1,27 +1,16 @@
+
 // SERVICE — Favoritos
 
-let FAVORITOS = {
-  lugares: [
-    {
-      id: 'lugar-1',
-      nome: 'Unochapecó',
-      imagem:
-        'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'lugar-2',
-      nome: 'Ecoparque Chapecó',
-      imagem:
-        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      id: 'lugar-3',
-      nome: 'Shopping Pátio Chapecó',
-      imagem:
-        'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=400&q=80',
-    },
-  ],
+import {
+  obterLocaisFavoritos,
+  removerFavoritoLocal,
+} from './locais';
 
+// ============================================================
+// DADOS TEMPORÁRIOS — FRASES E ATIVIDADES
+// ============================================================
+
+let FAVORITOS = {
   frases: [
     {
       id: 'frase-1',
@@ -60,9 +49,20 @@ function esperar(ms) {
   });
 }
 
-export async function obterFavoritos(
-  tipo
-) {
+// ============================================================
+// LISTAR FAVORITOS
+// ============================================================
+
+export async function obterFavoritos(tipo) {
+  if (tipo === 'lugares') {
+    const locais = await obterLocaisFavoritos();
+
+    return locais.map((local) => ({
+      ...local,
+      imagem: local.imagemUrl ?? null,
+    }));
+  }
+
   await esperar(150);
 
   return [
@@ -70,16 +70,22 @@ export async function obterFavoritos(
   ];
 }
 
-export async function removerFavorito(
-  tipo,
-  id
-) {
+// ============================================================
+// REMOVER FAVORITO
+// ============================================================
+
+export async function removerFavorito(tipo, id) {
+  if (tipo === 'lugares') {
+    await removerFavoritoLocal(id);
+
+    return true;
+  }
+
   await esperar(150);
 
   FAVORITOS[tipo] =
     (FAVORITOS[tipo] ?? []).filter(
-      (item) =>
-        item.id !== id
+      (item) => item.id !== id
     );
 
   return true;

@@ -2,11 +2,12 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
+
+import { useFocusEffect } from '@react-navigation/native';
 
 import {
   ActivityIndicator,
@@ -97,9 +98,11 @@ export function PlaceDetailScreen({
     }
   }, [localId]);
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     carregar();
-  }, [carregar]);
+  }, [carregar])
+);
 
   // ==========================================================
   // ADICIONAR OU REMOVER FAVORITO
