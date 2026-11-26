@@ -11,3 +11,11 @@ export function emailValido(email) {
 export function senhaValida(senha) {
   return senha.length >= 6;
 }
+
+// ============================================================
+// VALIDAR PRESENÇA DE LETRAS
+// ============================================================
+
+export function contemLetras(valor) {
+  return /[A-Za-zÀ-ÿ]/.test(valor);
+}

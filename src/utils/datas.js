@@ -46,3 +46,62 @@ export function hojeBr() {
 
   return `${dia}/${mes}/${agora.getFullYear()}`;
 }
+
+
+// ============================================================
+// MÁSCARA DE HORÁRIO
+// ============================================================
+
+export function mascaraHora(texto) {
+  const digitos = String(texto)
+    .replace(/\D/g, '')
+    .slice(0, 4);
+
+  if (digitos.length <= 2) {
+    return digitos;
+  }
+
+  return `${digitos.slice(0, 2)}:${digitos.slice(2)}`;
+}
+
+// ============================================================
+// VALIDAR HORÁRIO
+// ============================================================
+
+export function horaValida(texto) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(texto);
+}
+
+// ============================================================
+// VALIDAR DATA FUTURA
+// ============================================================
+
+export function dataFuturaValida(
+  texto,
+  limiteAnos = 5
+) {
+  if (!dataValida(texto)) {
+    return false;
+  }
+
+  const [dia, mes, ano] =
+    texto.split('/').map(Number);
+
+  const dataInformada =
+    new Date(ano, mes - 1, dia);
+
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+
+  const dataMaxima = new Date(hoje);
+
+  dataMaxima.setFullYear(
+    hoje.getFullYear() + limiteAnos
+  );
+
+  return (
+    dataInformada >= hoje &&
+    dataInformada <= dataMaxima
+  );
+}
