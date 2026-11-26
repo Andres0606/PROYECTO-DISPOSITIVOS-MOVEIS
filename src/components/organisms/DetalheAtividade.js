@@ -58,7 +58,7 @@ export function DetalheAtividade({
           ]}
         >
           <Text style={estilos.segmentoTexto}>
-            Recentes
+            Próximas
           </Text>
         </View>
 
