@@ -1,271 +1,334 @@
+
 // SERVICE — Atividades e planos
 
-let ATIVIDADES = [
-  {
-    id: '1',
+import { obterToken } from './storage';
 
-    titulo:
-      'Piquenique no Ecoparque',
+import {
+  brParaIso,
+  dataValida,
+} from '../utils/datas';
 
-    categoria:
-      'Social',
+import {
+  formatarAtividade,
+} from '../utils/atividades';
 
-    data:
-      '14/11/2026',
+import {
+  obterCategoriasAtividadeApi,
+  obterAtividadesApi,
+  obterAtividadeApi,
+  criarAtividadeApi,
+  atualizarAtividadeApi,
+  excluirAtividadeApi,
+  verificarInteresseAtividadeApi,
+  adicionarInteresseAtividadeApi,
+  removerInteresseAtividadeApi,
+  obterAtividadesFavoritasApi,
+  verificarFavoritoAtividadeApi,
+  adicionarFavoritoAtividadeApi,
+  removerFavoritoAtividadeApi,
+} from './api';
 
-    dataOriginal:
-      '14/11/2026',
+// ============================================================
+// OBTER TOKEN DA SESSÃO
+// ============================================================
 
-    dataCompleta:
-      '14 de novembro',
+async function obterTokenSessao() {
+  const token = await obterToken();
 
-    horario:
-      '15:00',
+  if (!token) {
+    throw new Error(
+      'Sessão não encontrada.'
+    );
+  }
 
-    local:
-      'Ecoparque Chapecó',
-
-    interessados: 12,
-
-    descricao:
-      'Encontro informal para estudantes de intercâmbio que queiram conhecer gente e passar a tarde no parque.',
-
-    imagem:
-      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80',
-
-    dataOrdenacao:
-      '2026-11-14T15:00:00',
-  },
-
-  {
-    id: '2',
-
-    titulo:
-      'Partida de futebol',
-
-    categoria:
-      'Social',
-
-    data:
-      '15/11/2026',
-
-    dataOriginal:
-      '15/11/2026',
-
-    dataCompleta:
-      '15 de novembro',
-
-    horario:
-      '17:00',
-
-    local:
-      'Campo universitário',
-
-    interessados: 8,
-
-    descricao:
-      'Partida amistosa de futebol entre estudantes para socializar, praticar esporte e conhecer novas pessoas.',
-
-    imagem:
-      'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80',
-
-    dataOrdenacao:
-      '2026-11-15T17:00:00',
-  },
-];
-
-function esperar(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+  return token;
 }
 
-function converterDataParaISO(
-  data,
-  hora
-) {
-  const [
-    dia,
-    mes,
-    ano,
-  ] = data.split('/');
+// ============================================================
+// LISTAR CATEGORIAS
+// ============================================================
 
-  return `${ano}-${mes}-${dia}T${hora}:00`;
+export async function obterCategoriasAtividade() {
+  const token = await obterTokenSessao();
+
+  return obterCategoriasAtividadeApi(token);
 }
+
+// ============================================================
+// LISTAR ATIVIDADES
+// ============================================================
 
 export async function obterAtividades(
   ordenacao = 'recentes'
 ) {
-  await esperar(300);
+  const token = await obterTokenSessao();
 
-  const lista = [
-    ...ATIVIDADES,
-  ];
-
-  if (
-    ordenacao === 'populares'
-  ) {
-    return lista.sort(
-      (a, b) =>
-        b.interessados -
-        a.interessados
+  const atividades =
+    await obterAtividadesApi(
+      token,
+      ordenacao
     );
-  }
 
-  return lista.sort(
-    (a, b) =>
-      new Date(
-        a.dataOrdenacao
-      ) -
-      new Date(
-        b.dataOrdenacao
-      )
+  return atividades.map(
+    formatarAtividade
   );
 }
 
-export async function obterAtividadePorId(
-  id
-) {
-  await esperar(100);
+// ============================================================
+// OBTER ATIVIDADE POR ID
+// ============================================================
 
-  return (
-    ATIVIDADES.find(
-      (atividade) =>
-        atividade.id === id
-    ) ?? null
-  );
+export async function obterAtividadePorId(id) {
+  const token = await obterTokenSessao();
+
+  const atividade =
+    await obterAtividadeApi(
+      token,
+      id
+    );
+
+  return formatarAtividade(atividade);
 }
+
+// ============================================================
+// CRIAR ATIVIDADE
+// ============================================================
 
 export async function criarAtividade({
   nome,
   descricao,
   categoria,
+  categoriaId,
   data,
   hora,
   local,
 }) {
-  await esperar(300);
+  const token = await obterTokenSessao();
 
-  const novaAtividade = {
-    id:
-      Date.now().toString(),
+  if (!dataValida(data)) {
+    throw new Error('Data inválida.');
+  }
 
-    titulo:
-      nome,
+  let idCategoria = categoriaId;
 
-    categoria,
+  // Compatibilidade temporária com o formulário atual
 
-    data,
+  if (!idCategoria && categoria) {
+    const categorias =
+      await obterCategoriasAtividadeApi(token);
 
-    dataOriginal:
-      data,
+    const encontrada =
+      categorias.find(
+        (item) =>
+          item.nome.toLowerCase() ===
+          categoria.trim().toLowerCase()
+      );
 
-    dataCompleta:
-      data,
+    if (!encontrada) {
+      throw new Error(
+        'Categoria inválida.'
+      );
+    }
 
-    horario:
-      hora,
+    idCategoria = encontrada.id;
+  }
 
-    local,
+  const atividade =
+    await criarAtividadeApi(
+      token,
+      {
+        nome,
+        descricao,
 
-    interessados: 0,
+        categoriaId:
+          idCategoria ?? null,
 
-    descricao,
+        dataAtividade:
+          brParaIso(data),
 
-    imagem: null,
+        horaInicio:
+          hora,
 
-    dataOrdenacao:
-      converterDataParaISO(
-        data,
-        hora
-      ),
-  };
+        local,
+      }
+    );
 
-  ATIVIDADES = [
-    novaAtividade,
-    ...ATIVIDADES,
-  ];
-
-  return novaAtividade;
+  return formatarAtividade(atividade);
 }
+
+// ============================================================
+// ATUALIZAR ATIVIDADE
+// ============================================================
 
 export async function atualizarAtividade(
   id,
   {
     nome,
+    descricao,
+    categoriaId,
     data,
     hora,
     local,
   }
 ) {
-  await esperar(300);
+  const token = await obterTokenSessao();
 
-  const indice =
-    ATIVIDADES.findIndex(
-      (atividade) =>
-        atividade.id === id
-    );
+  const dados = {};
 
-  if (indice === -1) {
-    throw new Error(
-      'Atividade não encontrada.'
-    );
+  if (nome !== undefined) {
+    dados.nome = nome;
   }
 
-  const atividadeAtualizada = {
-    ...ATIVIDADES[indice],
+  if (descricao !== undefined) {
+    dados.descricao = descricao;
+  }
 
-    titulo:
-      nome,
+  if (categoriaId !== undefined) {
+    dados.categoriaId = categoriaId;
+  }
 
-    data,
+  if (data !== undefined) {
+    if (!dataValida(data)) {
+      throw new Error(
+        'Data inválida.'
+      );
+    }
 
-    dataOriginal:
-      data,
+    dados.dataAtividade =
+      brParaIso(data);
+  }
 
-    dataCompleta:
-      data,
+  if (hora !== undefined) {
+    dados.horaInicio = hora;
+  }
 
-    horario:
-      hora,
+  if (local !== undefined) {
+    dados.local = local;
+  }
 
-    local,
+  const atividade =
+    await atualizarAtividadeApi(
+      token,
+      id,
+      dados
+    );
 
-    dataOrdenacao:
-      converterDataParaISO(
-        data,
-        hora
-      ),
-  };
-
-  ATIVIDADES[indice] =
-    atividadeAtualizada;
-
-  return atividadeAtualizada;
+  return formatarAtividade(atividade);
 }
 
-export async function excluirAtividade(
-  id
-) {
-  await esperar(300);
+// ============================================================
+// EXCLUIR ATIVIDADE
+// ============================================================
 
-  const existe =
-    ATIVIDADES.some(
-      (atividade) =>
-        atividade.id === id
-    );
+export async function excluirAtividade(id) {
+  const token = await obterTokenSessao();
 
-  if (!existe) {
-    throw new Error(
-      'Atividade não encontrada.'
-    );
-  }
-
-  ATIVIDADES =
-    ATIVIDADES.filter(
-      (atividade) =>
-        atividade.id !== id
-    );
+  await excluirAtividadeApi(
+    token,
+    id
+  );
 
   return true;
+}
+
+// ============================================================
+// VERIFICAR INTERESSE
+// ============================================================
+
+export async function verificarInteresseAtividade(id) {
+  const token = await obterTokenSessao();
+
+  return verificarInteresseAtividadeApi(
+    token,
+    id
+  );
+}
+
+// ============================================================
+// ADICIONAR INTERESSE
+// ============================================================
+
+export async function adicionarInteresseAtividade(id) {
+  const token = await obterTokenSessao();
+
+  return adicionarInteresseAtividadeApi(
+    token,
+    id
+  );
+}
+
+// ============================================================
+// REMOVER INTERESSE
+// ============================================================
+
+export async function removerInteresseAtividade(id) {
+  const token = await obterTokenSessao();
+
+  return removerInteresseAtividadeApi(
+    token,
+    id
+  );
+}
+
+// ============================================================
+// LISTAR ATIVIDADES FAVORITAS
+// ============================================================
+
+export async function obterAtividadesFavoritas() {
+  const token = await obterTokenSessao();
+
+  const atividades =
+    await obterAtividadesFavoritasApi(token);
+
+  return atividades.map(
+    formatarAtividade
+  );
+}
+
+// ============================================================
+// VERIFICAR FAVORITO
+// ============================================================
+
+export async function verificarFavoritoAtividade(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await verificarFavoritoAtividadeApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
+}
+
+// ============================================================
+// ADICIONAR FAVORITO
+// ============================================================
+
+export async function adicionarFavoritoAtividade(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await adicionarFavoritoAtividadeApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
+}
+
+// ============================================================
+// REMOVER FAVORITO
+// ============================================================
+
+export async function removerFavoritoAtividade(id) {
+  const token = await obterTokenSessao();
+
+  const resultado =
+    await removerFavoritoAtividadeApi(
+      token,
+      id
+    );
+
+  return resultado.guardado;
 }

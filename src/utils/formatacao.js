@@ -48,3 +48,40 @@ export function formatarDiaMes(iso) {
   const mesCurto = MESES_CURTOS[mes - 1].replace('.', '');
   return `${String(dia).padStart(2, '0')} ${mesCurto}`;
 }
+
+
+// ============================================================
+// FORMATAR DATA COMPLETA
+// ============================================================
+
+const MESES_COMPLETOS = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+export function formatarDataCompleta(iso) {
+  const [ano, mes, dia] =
+    String(iso).split('-').map(Number);
+
+  if (
+    !ano ||
+    !dia ||
+    !mes ||
+    mes < 1 ||
+    mes > 12
+  ) {
+    return '';
+  }
+
+  return `${dia} de ${MESES_COMPLETOS[mes - 1]}`;
+}

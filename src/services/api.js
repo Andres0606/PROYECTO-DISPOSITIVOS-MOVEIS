@@ -490,3 +490,220 @@ export async function removerFavoritoLocalApi(
     'DELETE'
   );
 }
+
+
+
+// ============================================================
+// ATIVIDADES — REQUISIÇÕES AUTENTICADAS
+// ============================================================
+
+async function requisicaoAtividades(
+  token,
+  rota,
+  metodo = 'GET',
+  dados
+) {
+  const resposta = await fetch(
+    `${API_URL}${rota}`,
+    {
+      method: metodo,
+
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+
+      ...(dados !== undefined
+        ? { body: JSON.stringify(dados) }
+        : {}),
+    }
+  );
+
+  return processarResposta(resposta);
+}
+
+// ============================================================
+// LISTAR CATEGORIAS DE ATIVIDADES
+// ============================================================
+
+export async function obterCategoriasAtividadeApi(token) {
+  return requisicaoAtividades(
+    token,
+    '/categorias-atividade'
+  );
+}
+
+// ============================================================
+// LISTAR ATIVIDADES
+// ============================================================
+
+export async function obterAtividadesApi(
+  token,
+  ordenacao = 'recentes'
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades?ordenacao=${encodeURIComponent(ordenacao)}`
+  );
+}
+
+// ============================================================
+// OBTER ATIVIDADE POR ID
+// ============================================================
+
+export async function obterAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}`
+  );
+}
+
+// ============================================================
+// CRIAR ATIVIDADE
+// ============================================================
+
+export async function criarAtividadeApi(
+  token,
+  dados
+) {
+  return requisicaoAtividades(
+    token,
+    '/atividades',
+    'POST',
+    dados
+  );
+}
+
+// ============================================================
+// ATUALIZAR ATIVIDADE
+// ============================================================
+
+export async function atualizarAtividadeApi(
+  token,
+  id,
+  dados
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}`,
+    'PUT',
+    dados
+  );
+}
+
+// ============================================================
+// EXCLUIR ATIVIDADE
+// ============================================================
+
+export async function excluirAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}`,
+    'DELETE'
+  );
+}
+
+// ============================================================
+// VERIFICAR INTERESSE
+// ============================================================
+
+export async function verificarInteresseAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}/interesse`
+  );
+}
+
+// ============================================================
+// ADICIONAR INTERESSE
+// ============================================================
+
+export async function adicionarInteresseAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}/interesse`,
+    'POST'
+  );
+}
+
+// ============================================================
+// REMOVER INTERESSE
+// ============================================================
+
+export async function removerInteresseAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/atividades/${encodeURIComponent(id)}/interesse`,
+    'DELETE'
+  );
+}
+
+// ============================================================
+// LISTAR ATIVIDADES FAVORITAS
+// ============================================================
+
+export async function obterAtividadesFavoritasApi(token) {
+  return requisicaoAtividades(
+    token,
+    '/favoritos/atividades'
+  );
+}
+
+// ============================================================
+// VERIFICAR FAVORITO
+// ============================================================
+
+export async function verificarFavoritoAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/favoritos/atividades/${encodeURIComponent(id)}`
+  );
+}
+
+// ============================================================
+// ADICIONAR FAVORITO
+// ============================================================
+
+export async function adicionarFavoritoAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/favoritos/atividades/${encodeURIComponent(id)}`,
+    'POST'
+  );
+}
+
+// ============================================================
+// REMOVER FAVORITO
+// ============================================================
+
+export async function removerFavoritoAtividadeApi(
+  token,
+  id
+) {
+  return requisicaoAtividades(
+    token,
+    `/favoritos/atividades/${encodeURIComponent(id)}`,
+    'DELETE'
+  );
+}
