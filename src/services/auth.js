@@ -49,6 +49,7 @@ export async function fazerCadastro({
   universidadeDestinoId,
   email,
   senha,
+  idioma = 'pt-BR',
 }) {
   const resultado = await cadastroApi({
     nome: nome.trim(),
@@ -62,6 +63,8 @@ export async function fazerCadastro({
     email: email.trim().toLowerCase(),
 
     senha,
+
+    idioma,
   });
 
   const { token, usuario } = resultado;

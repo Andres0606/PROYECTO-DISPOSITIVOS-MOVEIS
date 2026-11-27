@@ -131,6 +131,7 @@ export async function cadastroApi({
   universidadeDestinoId,
   email,
   senha,
+  idioma = 'pt-BR',
 }) {
   const resposta = await fetch(
     `${API_URL}/auth/cadastro`,
@@ -149,6 +150,7 @@ export async function cadastroApi({
         universidadeDestinoId,
         email,
         senha,
+        idioma,
       }),
     }
   );

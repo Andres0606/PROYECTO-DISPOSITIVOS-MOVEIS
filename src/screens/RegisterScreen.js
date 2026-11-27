@@ -17,7 +17,11 @@ export function RegisterScreen({ navigation }) {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
 
-  const { carregarPreferencias, t } = usePreferencias();
+  const {
+    carregarPreferencias,
+    t,
+    idioma,
+  } = usePreferencias();
 
   // ==========================================================
   // CADASTRAR USUÁRIO
@@ -28,7 +32,10 @@ export function RegisterScreen({ navigation }) {
     setCarregando(true);
 
     try {
-      const { usuario } = await fazerCadastro(dados);
+      const { usuario } = await fazerCadastro({
+        ...dados,
+        idioma,
+      });
 
       carregarPreferencias(usuario);
 
@@ -37,7 +44,11 @@ export function RegisterScreen({ navigation }) {
       });
 
     } catch (e) {
-      setErro(t('mensagens.servidor', { mensagem: e.message }));
+      setErro(
+        t('mensagens.servidor', {
+          mensagem: e.message,
+        })
+      );
     } finally {
       setCarregando(false);
     }
