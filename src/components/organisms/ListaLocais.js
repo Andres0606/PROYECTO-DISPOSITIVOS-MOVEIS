@@ -1,6 +1,6 @@
-/* grupo5.1 */
-import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — ListaLocais
+
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 import {
   StyleSheet,
@@ -13,6 +13,10 @@ import { CardLocal } from '../molecules/CardLocal';
 import {
   formatarDistancia,
 } from '../../utils/formatacao';
+
+import {
+  traduzirCategoriaLocal,
+} from '../../i18n/catalogosLocais';
 
 import {
   espacamentos,
@@ -49,7 +53,7 @@ export function ListaLocais({
       {locais.map((local) => {
 
         const detalhe = [
-          local.categoria,
+          traduzirCategoriaLocal(local.categoria, idioma),
 
           local.distanciaKm != null
             ? formatarDistancia(

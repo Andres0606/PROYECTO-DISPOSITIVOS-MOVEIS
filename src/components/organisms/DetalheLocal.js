@@ -1,4 +1,13 @@
-import { usePreferencias } from '../../contexts/PreferenciasContext';
+
+import { formatarDistancia } from '../../utils/formatacao';
+
+import {
+  textosGeolocalizacao,
+} from '../../i18n/catalogosGeolocalizacao';
+
+import {
+  traduzirCategoriaLocal,
+} from '../../i18n/catalogosLocais'; import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — DetalheLocal
 
@@ -15,12 +24,14 @@ import { useTema } from '../../theme/useTema';
 
 export function DetalheLocal({
   local,
+  posicaoUsuario = null,
   guardado,
   salvando = false,
   aoAlternarGuardado,
   aoVerMapa,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
+  const textos = textosGeolocalizacao(idioma);
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const locaisMapa = useMemo(() => [local], [local]);
@@ -54,8 +65,15 @@ export function DetalheLocal({
       <Text style={estilos.nome}>{local.nome}</Text>
 
       <Text style={estilos.subtitulo}>
-        {local.categoria}
+        {traduzirCategoriaLocal(local.categoria, idioma)}
       </Text>
+
+      {local.distanciaKm != null && (
+        <Text style={estilos.informacao}>
+          {textos.distancia}: {' '}
+          {formatarDistancia(local.distanciaKm, idioma)}
+        </Text>
+      )}
 
       {!!local.descricao && (
         <Text style={estilos.descricao}>
@@ -117,6 +135,7 @@ export function DetalheLocal({
         {temCoordenadas ? (
           <MapaLocais
             locais={locaisMapa}
+            posicaoUsuario={posicaoUsuario}
             altura={210}
           />
         ) : (

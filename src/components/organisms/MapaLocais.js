@@ -1,3 +1,10 @@
+import {
+  coordenadasValidas,
+} from '../../utils/geolocalizacao';
+
+import {
+  textosGeolocalizacao,
+} from '../../i18n/catalogosGeolocalizacao';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — MapaLocais
@@ -12,10 +19,12 @@ import { useTema } from '../../theme/useTema';
 
 export function MapaLocais({
   locais = [],
+  posicaoUsuario = null,
   aoAbrirLocal,
   altura = 350,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
+  const textos = textosGeolocalizacao(idioma);
   const { cores } = useTema();
   const mapa = useRef(null);
   const [pronto, setPronto] = useState(false);
@@ -81,6 +90,16 @@ export function MapaLocais({
           showsScale
           toolbarEnabled={false}
         >
+          {coordenadasValidas(posicaoUsuario) && (
+            <Marker
+              coordinate={{
+                latitude: posicaoUsuario.latitude,
+                longitude: posicaoUsuario.longitude,
+              }}
+              title={textos.suaLocalizacao}
+              pinColor="#2563EB"
+            />
+          )}
           {pontos.map(local => (
             <Marker
               key={local.id}

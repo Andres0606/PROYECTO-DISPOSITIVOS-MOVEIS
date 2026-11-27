@@ -1,3 +1,8 @@
+import { usePosicaoExplorar } from '../hooks/usePosicaoExplorar';
+
+import {
+  adicionarDistanciaLocal,
+} from '../utils/geolocalizacao';
 import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Detalhe do lugar
 
@@ -42,6 +47,7 @@ export function PlaceDetailScreen({
   route,
 }) {
   const { t } = usePreferencias();
+  const { posicao } = usePosicaoExplorar();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -54,6 +60,12 @@ export function PlaceDetailScreen({
   const [local, setLocal] =
     useState(null);
 
+  const localComDistancia = useMemo(
+    () => local
+      ? adicionarDistanciaLocal(local, posicao)
+      : null,
+    [local, posicao]
+  );
   const [carregando, setCarregando] =
     useState(true);
 
@@ -100,11 +112,11 @@ export function PlaceDetailScreen({
     }
   }, [t, localId]);
 
-useFocusEffect(
-  useCallback(() => {
-    carregar();
-  }, [carregar])
-);
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar])
+  );
 
   // ==========================================================
   // ADICIONAR OU REMOVER FAVORITO
@@ -156,11 +168,11 @@ useFocusEffect(
     const consulta = temCoordenadas
       ? `${local.latitude},${local.longitude}`
       : [
-          local.nome,
-          local.endereco,
-          local.cidade,
-          local.estado,
-        ].filter(Boolean).join(', ');
+        local.nome,
+        local.endereco,
+        local.cidade,
+        local.estado,
+      ].filter(Boolean).join(', ');
 
     const url =
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consulta)}`;
@@ -208,7 +220,8 @@ useFocusEffect(
 
       {!carregando && !erro && local && (
         <DetalheLocal
-          local={local}
+          local={localComDistancia}
+          posicaoUsuario={posicao}
           guardado={guardado}
           salvando={salvando}
           aoAlternarGuardado={alternarGuardado}
