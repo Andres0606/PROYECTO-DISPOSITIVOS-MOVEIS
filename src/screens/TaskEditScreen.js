@@ -1,213 +1,125 @@
+
 // SCREEN — Editar tarefa
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { FormularioTarefa } from '../components/organisms/FormularioTarefa';
 import { Button } from '../components/atoms/Button';
-
 import {
-  atualizarTarefa,
-  excluirTarefa,
-  obterTarefa,
+  atualizarTarefa, excluirTarefa, obterTarefa,
 } from '../services/tarefas';
-
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function TaskEditScreen({
-  navigation,
-  route,
-}) {
+export function TaskEditScreen({ navigation, route }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
   const { tarefaId } = route.params;
+  const [tarefa, setTarefa] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erroCarga, setErroCarga] = useState('');
+  const [ocupado, setOcupado] = useState('');
+  const [erro, setErro] = useState('');
 
-  const [tarefa, setTarefa] =
-    useState(null);
-
-  const [carregando, setCarregando] =
-    useState(true);
-
-  const [erroCarga, setErroCarga] =
-    useState('');
-
-  const [salvando, setSalvando] =
-    useState(false);
-
-  const [excluindo, setExcluindo] =
-    useState(false);
-
-  const [erro, setErro] =
-    useState('');
-
-  // ==========================================================
-  // CARREGAR TAREFA
-  // ==========================================================
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
 
   const carregar = useCallback(async () => {
-    setCarregando(true);
+    const consulta = ++consultaAtual.current;
 
+    setCarregando(true);
     setErroCarga('');
 
     try {
-      setTarefa(await obterTarefa(tarefaId));
+      const resultado = await obterTarefa(tarefaId);
 
-    } catch (e) {
-      setErroCarga(
-        'Não foi possível carregar esta tarefa. Tente novamente.'
-      );
-
+      if (consulta === consultaAtual.current) setTarefa(resultado);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErroCarga('Não foi possível carregar esta tarefa.');
+      }
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
   }, [tarefaId]);
 
   useEffect(() => {
     carregar();
+    return () => { consultaAtual.current += 1; };
   }, [carregar]);
 
-  // ==========================================================
-  // SALVAR
-  // ==========================================================
+  async function executar(acao, operacao) {
+    if (bloqueio.current || carregando) return;
 
-  async function salvar(dados) {
+    bloqueio.current = true;
+    setOcupado(operacao);
     setErro('');
 
-    setSalvando(true);
-
     try {
-      await atualizarTarefa(tarefaId, dados);
+      await acao();
 
-      navigation.goBack();
-
+      if (navigation.isFocused()) {
+        if (operacao === 'excluir') navigation.popToTop();
+        else navigation.goBack();
+      }
     } catch (e) {
-      setErro(
-        'Não foi possível salvar as alterações. Tente novamente.'
-      );
-
-      setSalvando(false);
+      setErro(e.message || 'Não foi possível concluir a operação.');
+    } finally {
+      bloqueio.current = false;
+      setOcupado('');
     }
   }
 
-  // ==========================================================
-  // EXCLUIR
-  // ==========================================================
-
-  async function excluir() {
-    setExcluindo(true);
-
-    try {
-      await excluirTarefa(tarefaId);
-
-      navigation.popToTop();
-
-    } catch (e) {
-      setExcluindo(false);
-
-      Alert.alert(
-        'Tarefa',
-        'Não foi possível excluir a tarefa.'
-      );
-    }
+  function salvar(dados) {
+    executar(() => atualizarTarefa(tarefaId, dados), 'salvar');
   }
 
   function confirmarExclusao() {
+    if (bloqueio.current) return;
+
     Alert.alert(
       'Excluir tarefa',
       'Esta ação não pode ser desfeita. Deseja continuar?',
       [
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: excluir,
+          text: 'Excluir', style: 'destructive',
+          onPress: () => executar(() => excluirTarefa(tarefaId), 'excluir'),
         },
       ]
     );
   }
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
-
   return (
-    <ScreenTemplate
-      titulo="Editar tarefa"
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo="Editar tarefa"
+      aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
-
-      {!carregando && !!erroCarga && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erroCarga || !tarefa ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erroCarga}
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erroCarga || 'Tarefa não encontrada.'}
           </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erroCarga && tarefa && (
+      ) : (
         <FormularioTarefa
           valoresIniciais={tarefa}
           rotuloEnviar="Guardar alterações"
           aoEnviar={salvar}
           aoExcluir={confirmarExclusao}
-          carregando={salvando}
-          excluindo={excluindo}
+          carregando={ocupado === 'salvar'}
+          excluindo={ocupado === 'excluir'}
           erroGeral={erro}
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

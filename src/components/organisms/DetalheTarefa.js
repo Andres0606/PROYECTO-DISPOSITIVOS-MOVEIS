@@ -11,10 +11,13 @@ import { formatarDataCurta } from '../../utils/formatacao';
 
 import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
+import { CampoSelecao } from '../molecules/CampoSelecao';
 
 export function DetalheTarefa({
   tarefa,
+  estados,
   ocupado,
+  aoMudarEstado,
   aoAlternar,
   aoExcluir,
 }) {
@@ -75,6 +78,21 @@ export function DetalheTarefa({
       </View>
 
       <View style={estilos.acoes}>
+
+        <CampoSelecao
+  rotulo="Estado da tarefa"
+  opcoes={estados.map(item => item.nome)}
+  valor={tarefa.estado}
+  aoMudar={nome => {
+    const estado = estados.find(item => item.nome === nome);
+
+    if (estado && estado.id !== tarefa.estadoId) {
+      aoMudarEstado(estado.id);
+    }
+  }}
+  desabilitado={!!ocupado}
+  margemInferior={espacamentos.md}
+/>  
 
         <Button
           titulo={

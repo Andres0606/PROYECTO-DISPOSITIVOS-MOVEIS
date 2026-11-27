@@ -2,31 +2,36 @@
 
 import { Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import { useTema } from '../../theme/useTema';
 
 export function Checkbox({
   marcado = false,
   aoAlternar,
+  desabilitado = false,
 }) {
   const { cores } = useTema();
 
   return (
     <Pressable
       onPress={aoAlternar}
+      disabled={desabilitado}
       hitSlop={10}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: marcado }}
+      accessibilityState={{
+        checked: marcado,
+        disabled: desabilitado,
+      }}
       style={[
         estilos.caixa,
-
         {
           borderColor: cores.texto,
           backgroundColor: cores.superficie,
         },
-
         marcado && {
           backgroundColor: cores.texto,
+        },
+        desabilitado && {
+          opacity: 0.5,
         },
       ]}
     >

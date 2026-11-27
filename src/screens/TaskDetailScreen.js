@@ -1,237 +1,160 @@
+
 // SCREEN — Detalhe da tarefa
 
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-
+import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { DetalheTarefa } from '../components/organisms/DetalheTarefa';
 import { BotaoIcone } from '../components/atoms/BotaoIcone';
 import { Button } from '../components/atoms/Button';
-
 import {
-  alternarTarefa,
-  excluirTarefa,
-  obterTarefa,
+  alternarTarefa, excluirTarefa, obterTarefa,
+  obterEstadosTarefa, atualizarEstadoTarefa,
 } from '../services/tarefas';
-
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function TaskDetailScreen({
-  navigation,
-  route,
-}) {
+export function TaskDetailScreen({ navigation, route }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
   const { tarefaId } = route.params;
+  const [tarefa, setTarefa] = useState(null);
+  const [estados, setEstados] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+  const [ocupado, setOcupado] = useState('');
+  const [revisao, setRevisao] = useState(0);
 
-  const [tarefa, setTarefa] =
-    useState(null);
-
-  const [carregando, setCarregando] =
-    useState(true);
-
-  const [erro, setErro] =
-    useState('');
-
-  const [ocupado, setOcupado] =
-    useState('');
-
-  const jaCarregou = useRef(false);
-
-  // ==========================================================
-  // CARREGAR TAREFA
-  // ==========================================================
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
 
   const carregar = useCallback(async () => {
-    const primeira = !jaCarregou.current;
+    const consulta = ++consultaAtual.current;
 
-    if (primeira) {
-      setCarregando(true);
-    }
-
+    setCarregando(true);
     setErro('');
 
     try {
-      setTarefa(await obterTarefa(tarefaId));
+      const [resultado, listaEstados] = await Promise.all([
+        obterTarefa(tarefaId),
+        obterEstadosTarefa(),
+      ]);
 
-      jaCarregou.current = true;
+      if (consulta !== consultaAtual.current) return;
 
-    } catch (e) {
-      if (primeira) {
-        setErro(
-          'Não foi possível carregar esta tarefa. Tente novamente.'
-        );
+      setTarefa(resultado);
+      setEstados(listaEstados);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar esta tarefa.');
+        setTarefa(null);
       }
-
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
   }, [tarefaId]);
 
   useFocusEffect(
     useCallback(() => {
       carregar();
-    }, [carregar])
+      return () => { consultaAtual.current += 1; };
+    }, [carregar, revisao])
   );
 
-  // ==========================================================
-  // ALTERNAR TAREFA
-  // ==========================================================
+  async function executar(acao, operacao) {
+    if (bloqueio.current || carregando || !tarefa) return;
 
-  async function alternar() {
-    setOcupado('alternar');
+    bloqueio.current = true;
+    setOcupado(operacao);
+
+    const consulta = consultaAtual.current;
 
     try {
-      await alternarTarefa(tarefa.id);
+      const resultado = await acao();
 
-      setTarefa(
-        await obterTarefa(tarefa.id)
-      );
+      if (consulta !== consultaAtual.current) {
+        setRevisao(atual => atual + 1);
+        return;
+      }
 
-    } catch (e) {
-      Alert.alert(
-        'Tarefa',
-        'Não foi possível atualizar a tarefa.'
-      );
+      if (operacao === 'excluir') {
+        navigation.goBack();
+      } else {
+        setTarefa(resultado);
+      }
+    } catch {
+      if (consulta === consultaAtual.current) {
+        Alert.alert('Tarefa', 'Não foi possível concluir a operação.');
+      }
 
+      setRevisao(atual => atual + 1);
     } finally {
+      bloqueio.current = false;
       setOcupado('');
     }
   }
 
-  // ==========================================================
-  // EXCLUIR TAREFA
-  // ==========================================================
+  function alternar() {
+    executar(() => alternarTarefa(tarefa, estados), 'alternar');
+  }
 
-  async function excluir() {
-    setOcupado('excluir');
-
-    try {
-      await excluirTarefa(tarefa.id);
-
-      navigation.goBack();
-
-    } catch (e) {
-      setOcupado('');
-
-      Alert.alert(
-        'Tarefa',
-        'Não foi possível excluir a tarefa.'
-      );
-    }
+  function mudarEstado(estadoId) {
+    executar(() => atualizarEstadoTarefa(tarefaId, estadoId), 'estado');
   }
 
   function confirmarExclusao() {
+    if (bloqueio.current) return;
+
     Alert.alert(
       'Excluir tarefa',
       'Esta ação não pode ser desfeita. Deseja continuar?',
       [
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: excluir,
+          text: 'Excluir', style: 'destructive',
+          onPress: () => executar(() => excluirTarefa(tarefaId), 'excluir'),
         },
       ]
     );
   }
 
-  function editarTarefa() {
-    navigation.navigate('EditarTarefa', {
-      tarefaId: tarefa.id,
-    });
-  }
-
-  // ==========================================================
-  // RENDER
-  // ==========================================================
-
   return (
-    <ScreenTemplate
-      titulo="Detalhe da tarefa"
-      aoVoltar={() => navigation.goBack()}
-      acaoCabecalho={
-        tarefa ? (
-          <BotaoIcone
-            nome="pencil-outline"
-            rotulo="Editar tarefa"
-            tamanho={18}
-            aoPressionar={editarTarefa}
-          />
-        ) : undefined
-      }
-    >
+    <ScreenTemplate titulo="Detalhe da tarefa"
+      aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}
+      acaoCabecalho={!carregando && !erro && tarefa && !ocupado ? (
+        <BotaoIcone nome="pencil-outline" rotulo="Editar tarefa"
+          tamanho={18} aoPressionar={() => {
+            if (!bloqueio.current) {
+              navigation.navigate('EditarTarefa', { tarefaId });
+            }
+          }} />
+      ) : undefined}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
-
-      {!carregando && !!erro && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erro || !tarefa ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erro}
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erro || 'Tarefa não encontrada.'}
           </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && tarefa && (
+      ) : (
         <DetalheTarefa
           tarefa={tarefa}
+          estados={estados}
           ocupado={ocupado}
+          aoMudarEstado={mudarEstado}
           aoAlternar={alternar}
           aoExcluir={confirmarExclusao}
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

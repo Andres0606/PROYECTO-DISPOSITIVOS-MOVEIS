@@ -1,91 +1,61 @@
+
 // MOLECULE — ItemTarefa
 
-import { useMemo } from 'react';
-
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Checkbox } from '../atoms/Checkbox';
 import { BotaoIcone } from '../atoms/BotaoIcone';
-
 import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function ItemTarefa({
-  titulo,
-  concluida,
-  aoAlternar,
-  aoAbrir,
-  aoEditar,
+  titulo, concluida, estado, ocupado = false,
+  aoAlternar, aoAbrir, aoEditar,
 }) {
   const { cores } = useTema();
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
   return (
-    <View style={estilos.linha}>
+    <View style={[
+      estilos.linha,
+      { borderBottomColor: cores.bordaForte },
+    ]}>
+      <Checkbox marcado={concluida}
+        aoAlternar={aoAlternar} desabilitado={ocupado} />
 
-      <Checkbox
-        marcado={concluida}
-        aoAlternar={aoAlternar}
-      />
+      <Pressable onPress={aoAbrir} disabled={ocupado}
+        accessibilityRole="button" style={estilos.texto}>
 
-      <Pressable
-        onPress={aoAbrir}
-        accessibilityRole="button"
-        style={estilos.texto}
-      >
-        <Text
-          style={[
-            estilos.titulo,
-            concluida && estilos.tituloConcluida,
-          ]}
-          numberOfLines={2}
-        >
+        <Text numberOfLines={2} style={[
+          estilos.titulo,
+          { color: concluida ? cores.textoSecundario : cores.texto },
+        ]}>
           {titulo}
         </Text>
+
+        {estado === 'Em Andamento' && (
+          <Text style={[
+            estilos.estado,
+            { color: cores.textoSecundario },
+          ]}>
+            Em andamento
+          </Text>
+        )}
       </Pressable>
 
-      <BotaoIcone
-        nome="pencil-outline"
-        rotulo="Editar tarefa"
-        aoPressionar={aoEditar}
-      />
-
+      <BotaoIcone nome="pencil-outline" rotulo="Editar tarefa"
+        aoPressionar={() => { if (!ocupado) aoEditar?.(); }} />
     </View>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    linha: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: espacamentos.md - 4,
-      paddingVertical: espacamentos.sm - 2,
-      borderBottomWidth: 1,
-      borderBottomColor: cores.bordaForte,
-    },
-
-    texto: {
-      flex: 1,
-    },
-
-    titulo: {
-      fontSize: tipografia.subtitulo,
-      lineHeight: 24,
-      color: cores.texto,
-    },
-
-    tituloConcluida: {
-      color: cores.textoSecundario,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  linha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacamentos.md - 4,
+    paddingVertical: espacamentos.sm - 2,
+    borderBottomWidth: 1,
+  },
+  texto: { flex: 1 },
+  titulo: { fontSize: tipografia.subtitulo, lineHeight: 24 },
+  estado: { fontSize: tipografia.legenda },
+});

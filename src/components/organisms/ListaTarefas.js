@@ -1,131 +1,149 @@
-// ORGANISM — ListaTarefas
+// MOLECULE — CampoSelecao
+// Campo com lista de opções.
 
-import { useMemo } from 'react';
-
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
-import { Pill } from '../atoms/Pill';
-import { ProgressBar } from '../atoms/ProgressBar';
-import { ItemTarefa } from '../molecules/ItemTarefa';
-
-import { espacamentos, tipografia } from '../../theme';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { FormField } from './FormField';
+import { espacamentos, raios, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
-export function ListaTarefas({
-  concluidas,
-  total,
-  etapas,
-  etapa,
-  aoMudarEtapa,
-  tarefas,
-  aoAlternar,
-  aoAbrir,
-  aoEditar,
+export function CampoSelecao({
+  rotulo,
+  opcoes,
+  valor,
+  aoMudar,
+  margemInferior,
+  desabilitado = false,
 }) {
   const { cores } = useTema();
+  const [aberto, setAberto] = useState(false);
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
+  function escolher(opcao) {
+    if (desabilitado) return;
 
-  const progresso =
-    total > 0 ? concluidas / total : 0;
+    aoMudar(opcao);
+    setAberto(false);
+  }
 
   return (
-    <View>
-
-      <ProgressBar
-        valor={progresso}
-        altura={8}
-      />
-
-      <Text style={estilos.legenda}>
-        {`${concluidas} de ${total} tarefas concluídas`}
-      </Text>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={estilos.pillsScroll}
-        contentContainerStyle={estilos.pills}
+    <FormField rotulo={rotulo} margemInferior={margemInferior}>
+      <Pressable
+        onPress={() => setAberto(atual => !atual)}
+        disabled={desabilitado}
+        accessibilityRole="button"
+        accessibilityState={{
+          expanded: aberto && !desabilitado,
+          disabled: desabilitado,
+        }}
+        style={[
+          estilos.campo,
+          {
+            borderColor: cores.borda,
+            backgroundColor: cores.superficie,
+          },
+          aberto && !desabilitado && {
+            borderColor: cores.bordaFoco,
+          },
+        ]}
       >
-        {etapas.map((nome) => (
-          <Pill
-            key={nome}
-            titulo={nome}
-            selecionado={nome === etapa}
-            aoPressionar={() => aoMudarEtapa(nome)}
-          />
-        ))}
-      </ScrollView>
-
-      <Text style={estilos.secao}>
-        {etapa}
-      </Text>
-
-      {tarefas.length === 0 ? (
-        <Text style={estilos.vazio}>
-          Nenhuma tarefa nesta etapa.
+        <Text style={[estilos.valor, { color: cores.texto }]}>
+          {valor}
         </Text>
-      ) : (
-        <View>
 
-          {tarefas.map((tarefa) => (
-            <ItemTarefa
-              key={tarefa.id}
-              titulo={tarefa.titulo}
-              concluida={tarefa.concluida}
-              aoAlternar={() => aoAlternar(tarefa)}
-              aoAbrir={() => aoAbrir?.(tarefa)}
-              aoEditar={() => aoEditar?.(tarefa)}
-            />
-          ))}
+        <Ionicons
+          name={aberto && !desabilitado ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={cores.textoSecundario}
+        />
+      </Pressable>
 
+      {aberto && !desabilitado && (
+        <View style={[
+          estilos.lista,
+          {
+            borderColor: cores.borda,
+            backgroundColor: cores.superficie,
+          },
+        ]}>
+          {opcoes.map((opcao, indice) => {
+            const selecionada = opcao === valor;
+
+            return (
+              <Pressable
+                key={opcao}
+                onPress={() => escolher(opcao)}
+                disabled={desabilitado}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected: selecionada,
+                  disabled: desabilitado,
+                }}
+                style={[
+                  estilos.opcao,
+                  indice > 0 && [
+                    estilos.separador,
+                    { borderTopColor: cores.divisor },
+                  ],
+                ]}
+              >
+                <Text style={[
+                  estilos.textoOpcao,
+                  { color: cores.texto },
+                  selecionada && estilos.textoSelecionado,
+                ]}>
+                  {opcao}
+                </Text>
+
+                {selecionada && (
+                  <Ionicons
+                    name="checkmark"
+                    size={16}
+                    color={cores.texto}
+                  />
+                )}
+              </Pressable>
+            );
+          })}
         </View>
       )}
-
-    </View>
+    </FormField>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    legenda: {
-      marginTop: espacamentos.sm,
-      fontSize: tipografia.corpo,
-      fontWeight: '600',
-      color: cores.textoSecundario,
-    },
-
-    pillsScroll: {
-      marginTop: espacamentos.lg,
-      marginHorizontal: -espacamentos.lg,
-    },
-
-    pills: {
-      paddingHorizontal: espacamentos.lg,
-      gap: 12,
-    },
-
-    secao: {
-      marginTop: espacamentos.lg - 4,
-      marginBottom: espacamentos.md,
-      fontSize: tipografia.subtitulo,
-      fontWeight: '600',
-      color: cores.texto,
-    },
-
-    vazio: {
-      marginTop: espacamentos.md,
-      textAlign: 'center',
-      fontSize: tipografia.corpo,
-      color: cores.textoSecundario,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  campo: {
+    minHeight: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: espacamentos.md,
+    borderWidth: 1,
+    borderRadius: raios.sm,
+  },
+  valor: {
+    fontSize: tipografia.corpo,
+  },
+  lista: {
+    marginTop: espacamentos.xs,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderRadius: raios.sm,
+  },
+  opcao: {
+    minHeight: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: espacamentos.md,
+  },
+  separador: {
+    borderTopWidth: 1,
+  },
+  textoOpcao: {
+    fontSize: tipografia.corpo,
+  },
+  textoSelecionado: {
+    fontWeight: '600',
+  },
+});
