@@ -1,59 +1,63 @@
-// SERVICE — Frases (Sobrevive em Português)
+// SERVICE — Sobrevive em Português
 
-const CATEGORIAS = [
-  { id: 'universidade', nome: 'Universidade', totalFrases: 4 },
-  { id: 'restaurante', nome: 'Restaurante', totalFrases: 10 },
-  { id: 'compras', nome: 'Compras', totalFrases: 8 },
-  { id: 'saude', nome: 'Saúde', totalFrases: 9 },
-  { id: 'vida-social', nome: 'Vida social', totalFrases: 7 },
-  { id: 'expressoes-comuns', nome: 'Expressões comuns', totalFrases: 14 },
-  { id: 'emergencias', nome: 'Emergências', totalFrases: 6 },
-];
+import { obterToken } from './storage';
+import { formatarFrase } from '../utils/frases';
+import {
+  obterCategoriasFrasesApi,
+  obterFrasesApi,
+  obterFraseApi,
+  obterFrasesFavoritasApi,
+  verificarFavoritoFraseApi,
+  adicionarFavoritoFraseApi,
+  removerFavoritoFraseApi,
+} from './api';
 
-const FRASES = {
-  universidade: [
-    {
-      id: 'universidade-1',
-      portugues: 'Onde fica esta sala?',
-      espanhol: '¿Dónde queda este salón?',
-    },
-    {
-      id: 'universidade-2',
-      portugues: 'Posso entregar o trabalho depois?',
-      espanhol: '¿Puedo entregar el trabajo después?',
-    },
-    {
-      id: 'universidade-3',
-      portugues: 'Qual é o horário da aula?',
-      espanhol: '¿Cuál es el horario de la clase?',
-    },
-    {
-      id: 'universidade-4',
-      portugues: 'Preciso falar com o professor.',
-      espanhol: 'Necesito hablar con el profesor.',
-    },
-  ],
+async function obterTokenSessao() {
+  const token = await obterToken();
 
-  restaurante: [],
-  compras: [],
-  saude: [],
-  'vida-social': [],
-  'expressoes-comuns': [],
-  emergencias: [],
-};
+  if (!token) throw new Error('Sessão não encontrada.');
 
-function esperar(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return token;
 }
 
 export async function obterCategoriasFrases() {
-  await esperar(400);
-
-  return CATEGORIAS;
+  return obterCategoriasFrasesApi(await obterTokenSessao());
 }
 
-export async function obterFrasesPorCategoria(categoriaId) {
-  await esperar(300);
+export async function obterFrases(categoriaId, busca) {
+  const token = await obterTokenSessao();
+  const frases = await obterFrasesApi(token, categoriaId, busca);
 
-  return FRASES[categoriaId] ?? [];
+  return frases.map(formatarFrase);
+}
+
+export async function obterFrasesPorCategoria(categoriaId, busca) {
+  return obterFrases(categoriaId, busca);
+}
+
+export async function obterFrasePorId(id) {
+  const token = await obterTokenSessao();
+
+  return formatarFrase(await obterFraseApi(token, id));
+}
+
+// FAVORITOS
+
+export async function obterFrasesFavoritas() {
+  const token = await obterTokenSessao();
+  const frases = await obterFrasesFavoritasApi(token);
+
+  return frases.map(formatarFrase);
+}
+
+export async function verificarFavoritoFrase(id) {
+  return verificarFavoritoFraseApi(await obterTokenSessao(), id);
+}
+
+export async function adicionarFavoritoFrase(id) {
+  return adicionarFavoritoFraseApi(await obterTokenSessao(), id);
+}
+
+export async function removerFavoritoFrase(id) {
+  return removerFavoritoFraseApi(await obterTokenSessao(), id);
 }

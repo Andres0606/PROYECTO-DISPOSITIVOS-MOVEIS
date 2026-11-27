@@ -974,3 +974,57 @@ export async function obterEstatisticasGastosApi(token, ano, mes) {
     token, rotaGastos('/estatisticas', ano, mes)
   );
 }
+
+// SOBREVIVE EM PORTUGUÊS
+
+export async function obterCategoriasFrasesApi(token) {
+  return requisicaoAutenticada(token, '/frases/categorias');
+}
+
+export async function obterFrasesApi(token, categoriaId, busca) {
+  const parametros = [];
+
+  if (categoriaId) {
+    parametros.push(`categoriaId=${encodeURIComponent(categoriaId)}`);
+  }
+
+  if (busca?.trim()) {
+    parametros.push(`busca=${encodeURIComponent(busca.trim())}`);
+  }
+
+  const rota = parametros.length
+    ? `/frases?${parametros.join('&')}`
+    : '/frases';
+
+  return requisicaoAutenticada(token, rota);
+}
+
+export async function obterFraseApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/frases/${encodeURIComponent(id)}`
+  );
+}
+
+// FAVORITOS DE FRASES
+
+export async function obterFrasesFavoritasApi(token) {
+  return requisicaoAutenticada(token, '/favoritos/frases');
+}
+
+export async function verificarFavoritoFraseApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/favoritos/frases/${encodeURIComponent(id)}`
+  );
+}
+
+export async function adicionarFavoritoFraseApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/favoritos/frases/${encodeURIComponent(id)}`, 'POST'
+  );
+}
+
+export async function removerFavoritoFraseApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/favoritos/frases/${encodeURIComponent(id)}`, 'DELETE'
+  );
+}
