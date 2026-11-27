@@ -9,6 +9,9 @@ import { Card } from '../components/atoms/Card';
 import { Button } from '../components/atoms/Button';
 import { useTema } from '../theme/useTema';
 import { espacamentos, tipografia } from '../theme';
+import { useCallback, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { obterResumoAdmin } from '../services/admin';
 
 const ATALHOS = [
   { titulo: 'Usuários', chave: 'usuarios', icone: 'people-outline', rota: 'Usuarios' },
@@ -19,11 +22,45 @@ const ATALHOS = [
   { titulo: 'Categorias', chave: 'categorias', icone: 'layers-outline', rota: 'Conteudos' },
 ];
 
-export function AdminHomeScreen({
-  navigation, route, resumo,
-  carregando = false, erro = '', aoRecarregar,
-}) {
+export function AdminHomeScreen({ navigation, route }) {
   const { cores } = useTema();
+
+  const [resumo, setResumo] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+  const consultaAtual = useRef(0);
+
+  const carregar = useCallback(async () => {
+    const consulta = ++consultaAtual.current;
+
+    setCarregando(true);
+    setErro('');
+
+    try {
+      const resultado = await obterResumoAdmin();
+
+      if (consulta === consultaAtual.current) {
+        setResumo(resultado);
+      }
+    } catch (erro) {
+      if (consulta === consultaAtual.current) {
+        setResumo(null);
+        setErro(erro.message || 'Não foi possível carregar o painel.');
+      }
+    } finally {
+      if (consulta === consultaAtual.current) {
+        setCarregando(false);
+      }
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    carregar();
+
+    return () => {
+      consultaAtual.current += 1;
+    };
+  }, [carregar]));
 
   const nome = route.params?.usuario?.nome
     ?.trim().split(/\s+/)[0] || 'Administrador';
@@ -44,7 +81,7 @@ export function AdminHomeScreen({
         <View style={estilos.aviso}>
           <Text style={{ color: cores.perigo }}>{erro}</Text>
           <Button titulo="Tentar novamente" variante="contorno"
-            aoPressionar={aoRecarregar} />
+            aoPressionar={carregar} />
         </View>
       )}
 
