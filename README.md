@@ -45,7 +45,7 @@ da Universidade Comunitária da Região de Chapecó
 | React Navigation | Gerenciamento da navegação |
 | Context API | Gerenciamento de preferências globais |
 | Expo SecureStore | Armazenamento seguro de dados |
-| AsyncStorage | Compatibilidade e migração de dados locais |
+| AsyncStorage | Persistência local do idioma, compatibilidade e migração de dados |
 | Expo ImagePicker | Acesso à câmera e galeria |
 | Expo Location | Geolocalização |
 | Expo Notifications | Notificações locais |
@@ -81,7 +81,11 @@ flowchart TD
     I --> J[(Supabase)]
 
     B --> K[Context API]
-    K --> L[Preferências e tema]
+    K --> L[Preferências, idioma e tema]
+    K --> O[AsyncStorage]
+    K --> P[Catálogos i18n]
+    B --> Q[Hooks personalizados]
+    Q --> G
 
     G --> M[SecureStore]
     G --> N[Recursos nativos]
@@ -223,6 +227,15 @@ PROYECTO-DISPOSITIVOS-MOVEIS/
 │   ├── contexts/
 │   │   └── PreferenciasContext.js
 │   │
+│   ├── hooks/
+│   │   └── usePosicaoExplorar.js
+│   ├── i18n/
+│   │   ├── index.js
+│   │   ├── pt-BR.js
+│   │   ├── es.js
+│   │   ├── en.js
+│   │   └── catalogos auxiliares
+│   │
 │   ├── navigation/
 │   │   ├── AdminTabs.js
 │   │   ├── MainTabs.js
@@ -326,6 +339,8 @@ com o perfil retornado pelo backend após a autenticação.
 O módulo de autenticação permite:
 
 - Cadastro de estudantes.
+- Seleção de idioma antes da autenticação.
+- Registro da preferência de idioma na criação da conta.
 - Login com e-mail e senha.
 - Recuperação de senha por e-mail.
 - Redefinição de senha.
@@ -375,9 +390,12 @@ Funcionalidades:
 - Consulta de informações detalhadas.
 - Visualização de endereços.
 - Geolocalização.
-- Consulta de distância, quando disponível.
-- Mapa interativo.
-- Marcadores de localização.
+- Cálculo da distância aproximada em linha reta, em quilômetros.
+- Exibição da distância nas listas e nos detalhes dos lugares.
+- Ordenação opcional por proximidade.
+- Mapa interativo com os lugares filtrados.
+- Marcador azul da posição do usuário e marcadores dos lugares.
+- Botão para centralizar o mapa na posição do usuário.
 - Abertura de lugares no Google Maps.
 - Gerenciamento de favoritos.
 
@@ -458,8 +476,8 @@ Funcionalidades:
 - Consulta de categorias de frases.
 - Pesquisa de frases.
 - Consulta de expressões em português.
-- Tradução das frases para espanhol.
-- Explicação do contexto de utilização.
+- Tradução das frases para espanhol e inglês.
+- Contextos de utilização em português, espanhol e inglês.
 - Reprodução da pronúncia.
 - Gerenciamento de frases favoritas.
 
@@ -473,7 +491,12 @@ A pronúncia é reproduzida utilizando Expo Speech,
 com configuração de voz em português do Brasil.
 
 A tradução das frases deste módulo é diferente da
-tradução geral da interface do aplicativo.
+tradução geral da interface do aplicativo. As expressões
+originais e a pronúncia permanecem em português. A tradução
+é apresentada em inglês quando esse idioma está selecionado
+e em espanhol nas interfaces em português e espanhol. O
+contexto acompanha o idioma selecionado. Os textos educativos
+são cadastrados no banco de dados, sem tradução automática.
 
 ### 8.7. Conselhos úteis
 
@@ -668,6 +691,7 @@ src/services/
 ├── favoritos.js
 ├── frases.js
 ├── gastos.js
+├── geolocalizacao.js
 ├── inicio.js
 ├── locais.js
 ├── nativos.js
@@ -692,6 +716,7 @@ src/services/
 | favoritos.js | Gerenciamento dos conteúdos favoritos |
 | admin.js | Operações administrativas |
 | nativos.js | Integração com recursos do dispositivo |
+| geolocalizacao.js | Verificação de preferências, permissões e obtenção da posição para os lugares |
 
 ## 11. Comunicação com o backend
 
@@ -745,7 +770,10 @@ sequenceDiagram
 ### Tratamento de respostas
 
 A aplicação interpreta as respostas recebidas
-do backend e apresenta mensagens adequadas.
+do backend e apresenta mensagens adequadas. O catálogo
+`src/i18n/catalogosMensagens.js` permite adaptar mensagens
+conhecidas da API e erros ao idioma selecionado, com tratamento
+de mensagens não reconhecidas na interface.
 
 São considerados:
 
@@ -797,7 +825,7 @@ a tokens inválidos, expirados ou contas desativadas.
 Quando uma sessão deixa de ser válida:
 
 - Os dados locais da sessão são removidos.
-- As preferências globais são restauradas.
+- As preferências globais da conta são restauradas, preservando o último idioma da interface.
 - O usuário é redirecionado para o login.
 - Uma mensagem informa o encerramento da sessão.
 
@@ -815,9 +843,12 @@ proteger informações armazenadas no dispositivo.
 | Dados do usuário | SecureStore |
 | Referência de fotografia local | SecureStore |
 | Localização persistida, quando utilizada | SecureStore |
+| Último idioma da interface | AsyncStorage |
 
-O AsyncStorage é mantido para compatibilidade
-e migração dos dados de versões anteriores.
+O AsyncStorage armazena a preferência local de idioma
+na chave `interchapeco_idioma`, inclusive antes do login,
+e também é utilizado para compatibilidade e migração
+de dados de versões anteriores.
 
 As senhas dos usuários não são armazenadas
 localmente de forma persistente.
@@ -872,6 +903,14 @@ O contexto principal está localizado em:
 Esse contexto permite compartilhar informações
 de idioma e tema entre diferentes telas.
 
+### Hooks personalizados
+
+A pasta `src/hooks/` contém `usePosicaoExplorar.js`,
+responsável por consultar a posição ao receber o foco
+nas telas de exploração e de detalhes. O hook mantém
+o estado de carregamento da posição separado da listagem
+e evita atualizar o estado após a perda de foco.
+
 ## 15. Identidade visual e temas
 
 A aplicação possui uma estrutura centralizada
@@ -910,9 +949,8 @@ e sincronizada com o backend.
 
 ## 16. Internacionalização e idiomas
 
-Considerando que o público-alvo é composto por
-estudantes de intercâmbio de diferentes países,
-a aplicação prevê suporte a três idiomas:
+A aplicação disponibiliza a interface dos módulos principais,
+das telas de acesso e do painel administrativo em três idiomas:
 
 | Idioma | Código |
 |---|---|
@@ -920,31 +958,50 @@ a aplicação prevê suporte a três idiomas:
 | Espanhol | es |
 | Inglês | en |
 
-A seleção de idioma está associada às configurações
-do usuário e pode ser persistida no backend.
+### 16.1. Organização das traduções
 
-O gerenciamento da preferência de idioma é realizado
-por meio de PreferenciasContext e dos serviços de
-configuração do usuário.
+Os dicionários em `src/i18n/` centralizam os textos da interface.
+O arquivo `index.js` resolve as chaves de tradução, aplica
+parâmetros e utiliza o português como idioma de referência.
+O contexto `PreferenciasContext.js` disponibiliza o idioma
+e a função de tradução aos componentes.
 
-A tradução integral dos textos da interface encontra-se
-em etapa de finalização.
+Os catálogos complementares adaptam categorias, países,
+mensagens da API e textos de geolocalização. Os identificadores
+dos registros e os valores utilizados nas operações com o
+backend permanecem inalterados.
 
-A internacionalização tem como objetivo adaptar:
+### 16.2. Seleção e persistência do idioma
 
-- Títulos das telas.
-- Menus.
-- Botões.
-- Campos de formulário.
-- Mensagens de validação.
-- Mensagens de erro.
-- Mensagens de confirmação.
-- Textos informativos.
-- Elementos de navegação.
+- Seleção de português, espanhol ou inglês na tela de login.
+- Persistência local da seleção por meio do AsyncStorage.
+- Manutenção do idioma nas telas de cadastro e recuperação de senha.
+- Envio do idioma selecionado no cadastro de uma nova conta.
+- Carregamento da preferência da conta após a autenticação.
+- Alteração do idioma nas configurações e sincronização com o backend.
+- Preservação do último idioma da interface após o logout.
 
-A tradução da interface não implica tradução automática
-dos conselhos, comentários ou atividades publicados
-pelos estudantes.
+Na primeira utilização, sem preferência local, o idioma padrão
+é o português do Brasil. Após o login, prevalece a preferência
+da conta autenticada.
+
+### 16.3. Localização de informações
+
+- Datas, períodos mensais, distâncias e valores monetários são formatados conforme o idioma.
+- Os valores financeiros permanecem em reais (BRL), sem conversão cambial.
+- Os campos de entrada de datas mantêm o formato DD/MM/AAAA.
+- Os nomes de países e as categorias conhecidas são apresentados por catálogos locais.
+- As mensagens conhecidas de erro e validação são adaptadas na interface.
+
+### 16.4. Conteúdo educativo e publicações
+
+O módulo Sobrevive em Português apresenta traduções cadastradas
+em espanhol e inglês, além de contextos nos três idiomas.
+A pronúncia permanece em português do Brasil.
+
+Os conselhos, comentários e atividades publicados pelos usuários
+mantêm o idioma original. Não foi integrada uma API externa de
+tradução automática de publicações.
 
 ## 17. Recursos nativos
 
@@ -982,7 +1039,20 @@ O recurso pode fornecer:
 
 Caso a posição atual não esteja disponível,
 o serviço pode utilizar uma posição recente conhecida,
-respeitando os critérios definidos no código.
+respeitando os critérios definidos no código: idade máxima
+de 60 segundos e precisão requerida de 100 metros.
+
+Em Explorar, a consulta depende da preferência de localização
+da conta, da permissão concedida e dos serviços de localização
+ativos ativos. A posição é atualizada ao acessar as telas, sem
+rastreamento contínuo em segundo plano. Na ausência de posição
+ou coordenadas válidas do destino, a distância não é exibida.
+
+O cálculo utiliza a fórmula de Haversine em `src/utils/geolocalizacao.js`,
+considerando o raio médio terrestre de 6.371 km. O resultado
+é uma distância aproximada em linha reta, não uma rota viária
+nem uma estimativa de tempo de deslocamento. A posição utilizada
+para o cálculo não é enviada ao backend.
 
 ### 17.4. Mapas interativos
 
@@ -994,6 +1064,13 @@ Permite visualizar:
 - Marcadores no mapa.
 - Informações associadas aos marcadores.
 - Posicionamento geográfico dos conteúdos.
+- Posição do usuário por meio de um marcador azul.
+- Centralização na última posição obtida pelo botão de localização.
+
+O mapa mantém os marcadores dos lugares e seu enquadramento
+inicial. O botão de centralização fica disponível quando
+há uma posição válida e não solicita uma nova leitura GPS.
+A abertura externa no Google Maps permite consultar trajetos.
 
 A configuração da chave do Google Maps é realizada
 por meio de variável de ambiente.
@@ -1354,6 +1431,7 @@ src/utils/
 ├── formatacao.js
 ├── frases.js
 ├── gastos.js
+├── geolocalizacao.js
 ├── locais.js
 ├── moeda.js
 ├── tarefas.js
@@ -1368,6 +1446,8 @@ Esses arquivos auxiliam em operações como:
 - Formatação de valores monetários.
 - Validação de entradas.
 - Normalização de textos.
+- Validação de coordenadas e cálculo de distâncias com Haversine.
+- Ordenação de lugares por proximidade.
 - Organização de dados.
 - Adaptação das respostas da API.
 - Apresentação das informações na interface.
@@ -1391,6 +1471,8 @@ Entre elas:
 - Atualização das informações.
 - Adaptação a diferentes dimensões de tela.
 - Suporte aos temas claro e escuro.
+- Interface em português, espanhol e inglês.
+- Exploração dos lugares por proximidade, quando autorizada.
 - Gerenciamento das preferências do usuário.
 
 ## 29. Testes e validação
@@ -1414,6 +1496,11 @@ Principais aspectos avaliados:
 - Consulta de frases.
 - Reprodução de áudio.
 - Mapas interativos.
+- Obtenção de posição simulada pelo emulador e atualização das coordenadas.
+- Distâncias, ordenação por proximidade e centralização do mapa.
+- Comportamento com localização ativada e desativada.
+- Internacionalização dos módulos e persistência do idioma.
+- Idioma no cadastro, login, recuperação de senha e logout.
 - Gerenciamento de favoritos.
 - Curtidas e comentários.
 - Registro de interesse em atividades.
@@ -1433,6 +1520,9 @@ funcional, observando a navegação e os tempos
 de resposta percebidos durante a utilização.
 
 Não foram realizados testes de carga em grande escala.
+A validação da geolocalização foi realizada no emulador,
+com posições simuladas fornecidas pelo Android. A confirmação
+em um dispositivo físico permanece pendente.
 
 ## 30. Solução de problemas
 
@@ -1466,6 +1556,14 @@ Verificar:
 
 Após modificar a configuração da chave,
 pode ser necessário recompilar o aplicativo.
+
+### A distância ou a posição do usuário não aparece
+
+Verificar a preferência de localização nas configurações
+da conta, a permissão do Android e os serviços de localização.
+No emulador, utilizar os controles de Location para fornecer
+uma posição simulada. Retornar à tela Explorar para atualizar
+as distâncias. Lugares sem coordenadas válidas não exibem distância.
 
 ### O Android SDK não é encontrado
 
