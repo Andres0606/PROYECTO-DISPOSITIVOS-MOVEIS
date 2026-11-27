@@ -12,57 +12,53 @@ import {
   atualizarConfiguracoes,
 } from '../services/auth';
 
-// ============================================================
+import {
+  IDIOMA_PADRAO,
+  normalizarIdioma,
+  traduzir,
+} from '../i18n';
+
 // CONFIGURAÇÕES PADRÃO
-// ============================================================
 
 const preferenciasPadrao = {
-  idioma: 'pt-BR',
+  idioma: IDIOMA_PADRAO,
   tema: 'claro',
 };
 
 const PreferenciasContext = createContext(null);
 
-// ============================================================
 // PROVIDER
-// ============================================================
 
 export function PreferenciasProvider({ children }) {
   const [preferencias, setPreferencias] =
     useState(preferenciasPadrao);
 
-  // ==========================================================
-  // CARREGAR PREFERÊNCIAS DO USUÁRIO
-  // ==========================================================
+  // CARREGAR PREFERÊNCIAS
 
   const carregarPreferencias = useCallback((usuario) => {
     setPreferencias({
-      idioma: usuario?.idioma ?? 'pt-BR',
+      idioma: normalizarIdioma(usuario?.idioma),
       tema: usuario?.tema ?? 'claro',
     });
   }, []);
 
-  // ==========================================================
   // ALTERAR IDIOMA
-  // ==========================================================
 
   const alterarIdioma = useCallback(async (idioma) => {
     const resultado =
       await atualizarConfiguracoes({
-        idioma,
+        idioma: normalizarIdioma(idioma),
       });
 
     setPreferencias({
-      idioma: resultado.idioma,
+      idioma: normalizarIdioma(resultado.idioma),
       tema: resultado.tema,
     });
 
     return resultado;
   }, []);
 
-  // ==========================================================
   // ALTERAR TEMA
-  // ==========================================================
 
   const alterarTema = useCallback(async (tema) => {
     const resultado =
@@ -71,24 +67,32 @@ export function PreferenciasProvider({ children }) {
       });
 
     setPreferencias({
-      idioma: resultado.idioma,
+      idioma: normalizarIdioma(resultado.idioma),
       tema: resultado.tema,
     });
 
     return resultado;
   }, []);
 
-  // ==========================================================
   // RESTAURAR PREFERÊNCIAS
-  // ==========================================================
 
   const restaurarPreferencias = useCallback(() => {
     setPreferencias(preferenciasPadrao);
   }, []);
 
-  // ==========================================================
+  // TRADUÇÃO
+
+  const t = useCallback(
+    (chave, parametros) =>
+      traduzir(
+        preferencias.idioma,
+        chave,
+        parametros
+      ),
+    [preferencias.idioma]
+  );
+
   // VALORES DO CONTEXTO
-  // ==========================================================
 
   const valor = useMemo(() => ({
     idioma: preferencias.idioma,
@@ -105,12 +109,15 @@ export function PreferenciasProvider({ children }) {
     alterarTema,
 
     restaurarPreferencias,
+
+    t,
   }), [
     preferencias,
     carregarPreferencias,
     alterarIdioma,
     alterarTema,
     restaurarPreferencias,
+    t,
   ]);
 
   return (
@@ -120,9 +127,7 @@ export function PreferenciasProvider({ children }) {
   );
 }
 
-// ============================================================
 // HOOK — UTILIZAR PREFERÊNCIAS
-// ============================================================
 
 export function usePreferencias() {
   const contexto = useContext(PreferenciasContext);
