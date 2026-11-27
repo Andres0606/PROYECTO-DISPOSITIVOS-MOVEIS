@@ -1,19 +1,38 @@
 import { File } from 'expo-file-system';
 import { fetch as expoFetch } from 'expo/fetch';
+import { invalidarSessao } from './sessao';
 const API_URL = 'http://10.0.2.2:3000';
 
 // ============================================================
 // PROCESSAR RESPOSTA
 // ============================================================
 
-async function processarResposta(resposta) {
+async function processarResposta(resposta, token) {
   const dados = await resposta.json();
 
   if (!resposta.ok) {
-    throw new Error(
+    const sessaoInvalida =
+      resposta.status === 401 ||
+      (
+        resposta.status === 403 &&
+        [
+          'Usuário inativo.',
+          'Perfil de acesso inválido.',
+        ].includes(dados.mensagem)
+      );
+
+    if (token && sessaoInvalida) {
+      await invalidarSessao(token);
+    }
+
+    const erro = new Error(
       dados.mensagem ||
-        'Erro ao comunicar com o servidor.'
+      'Erro ao comunicar com o servidor.'
     );
+
+    erro.status = resposta.status;
+
+    throw erro;
   }
 
   return dados;

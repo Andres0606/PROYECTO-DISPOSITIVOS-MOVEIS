@@ -124,8 +124,7 @@ export async function redefinirSenha(
 // ============================================================
 
 export async function sessaoAtiva() {
-  const token =
-    await obterToken();
+  const token = await obterToken();
 
   if (!token) {
     return false;
@@ -133,17 +132,19 @@ export async function sessaoAtiva() {
 
   try {
     const resultado =
-      await obterUsuarioAutenticadoApi(
-        token
-      );
+      await obterUsuarioAutenticadoApi(token);
 
-    await salvarUsuario(
-      resultado.usuario
-    );
+    await salvarUsuario(resultado.usuario);
 
     return true;
+
   } catch (erro) {
-    await limparSessao();
+    if (
+      erro.status === 401 ||
+      erro.status === 403
+    ) {
+      await limparSessao();
+    }
 
     return false;
   }

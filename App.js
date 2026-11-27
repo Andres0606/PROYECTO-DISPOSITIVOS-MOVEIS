@@ -1,13 +1,17 @@
+
 // APP — Ponto de entrada da aplicação
+
+import { useEffect } from 'react';
+import { Alert } from 'react-native';
 
 import {
   NavigationContainer,
   DefaultTheme,
   DarkTheme,
+  createNavigationContainerRef,
 } from '@react-navigation/native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import { StatusBar } from 'expo-status-bar';
 
 import { LoginScreen } from './src/screens/LoginScreen';
@@ -23,12 +27,12 @@ import {
 } from './src/contexts/PreferenciasContext';
 
 import { useTema } from './src/theme/useTema';
+import { configurarSessao } from './src/services/sessao';
 
 const Stack = createNativeStackNavigator();
+const navegacaoRef = createNavigationContainerRef();
 
-// ============================================================
-// NAVEGAÇÃO POR PERFIL DE ACESSO
-// ============================================================
+// NAVEGAÇÃO POR PERFIL
 
 function NavegacaoPorPerfil(props) {
   const usuario = props.route.params?.usuario;
@@ -44,14 +48,38 @@ function NavegacaoPorPerfil(props) {
   return <LoginScreen navigation={props.navigation} />;
 }
 
-// ============================================================
 // NAVEGAÇÃO PRINCIPAL
-// ============================================================
 
 function NavegacaoPrincipal() {
-  const { temaEscuro } = usePreferencias();
+  const {
+    temaEscuro,
+    restaurarPreferencias,
+  } = usePreferencias();
 
   const { cores } = useTema();
+
+  useEffect(() => {
+    return configurarSessao(() => {
+      restaurarPreferencias();
+
+      if (!navegacaoRef.isReady()) return;
+
+      const estado = navegacaoRef.getRootState();
+      const rota = estado?.routes[estado.index]?.name;
+
+      if (rota !== 'Home') return;
+
+      navegacaoRef.resetRoot({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+
+      Alert.alert(
+        'Sessão encerrada',
+        'Sua sessão não está mais válida. Faça login novamente.'
+      );
+    });
+  }, [restaurarPreferencias]);
 
   const temaBase = temaEscuro
     ? DarkTheme
@@ -62,30 +90,20 @@ function NavegacaoPrincipal() {
 
     colors: {
       ...temaBase.colors,
-
-      primary:
-        cores.primaria,
-
-      background:
-        cores.fundo,
-
-      card:
-        cores.superficie,
-
-      text:
-        cores.texto,
-
-      border:
-        cores.borda,
-
-      notification:
-        cores.perigo,
+      primary: cores.primaria,
+      background: cores.fundo,
+      card: cores.superficie,
+      text: cores.texto,
+      border: cores.borda,
+      notification: cores.perigo,
     },
   };
 
   return (
-    <NavigationContainer theme={temaNavegacao}>
-
+    <NavigationContainer
+      ref={navegacaoRef}
+      theme={temaNavegacao}
+    >
       <StatusBar
         style={temaEscuro ? 'light' : 'dark'}
       />
@@ -94,13 +112,11 @@ function NavegacaoPrincipal() {
         initialRouteName="Login"
         screenOptions={{
           headerShown: false,
-
           contentStyle: {
             backgroundColor: cores.fundo,
           },
         }}
       >
-
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -127,16 +143,12 @@ function NavegacaoPrincipal() {
   );
 }
 
-// ============================================================
 // APP
-// ============================================================
 
 export default function App() {
   return (
     <PreferenciasProvider>
-
       <NavegacaoPrincipal />
-
     </PreferenciasProvider>
   );
 }
