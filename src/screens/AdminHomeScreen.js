@@ -1,3 +1,5 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Painel administrativo
 
@@ -23,6 +25,7 @@ const ATALHOS = [
 ];
 
 export function AdminHomeScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [resumo, setResumo] = useState(null);
@@ -45,14 +48,14 @@ export function AdminHomeScreen({ navigation, route }) {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setResumo(null);
-        setErro(erro.message || 'Não foi possível carregar o painel.');
+        setErro(erro.message || t('grupo4.g024'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -63,16 +66,16 @@ export function AdminHomeScreen({ navigation, route }) {
   }, [carregar]));
 
   const nome = route.params?.usuario?.nome
-    ?.trim().split(/\s+/)[0] || 'Administrador';
+    ?.trim().split(/\s+/)[0] || t('grupo4.g012');
 
   return (
-    <ScreenTemplate titulo="Painel administrativo">
+    <ScreenTemplate titulo={t('grupo4.g016')}>
       <Text style={[estilos.saudacao, { color: cores.texto }]}>
-        Olá, {nome}!
+        {t('grupo4.g107', { nome })}
       </Text>
 
       <Text style={[estilos.descricao, { color: cores.textoSecundario }]}>
-        Gerencie os recursos do InterChapecó.
+        {t('grupo4.g017')}
       </Text>
 
       {carregando && <ActivityIndicator color={cores.primaria} />}
@@ -80,7 +83,7 @@ export function AdminHomeScreen({ navigation, route }) {
       {!!erro && (
         <View style={estilos.aviso}>
           <Text style={{ color: cores.perigo }}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="contorno"
+          <Button titulo={t('grupo4.g023')} variante="contorno"
             aoPressionar={carregar} />
         </View>
       )}
@@ -102,7 +105,7 @@ export function AdminHomeScreen({ navigation, route }) {
               </Text>
 
               <Text style={[estilos.rotulo, { color: cores.texto }]}>
-                {item.titulo}
+                {rotuloAdmin(item.titulo, t)}
               </Text>
             </Card>
 
@@ -112,14 +115,14 @@ export function AdminHomeScreen({ navigation, route }) {
 
       <Card style={estilos.resumo}>
         <Text style={[estilos.saudacao, { color: cores.texto }]}>
-          Resumo dos estudantes
+          {t('grupo4.g018')}
         </Text>
 
         {[
-          ['Estudantes cadastrados', resumo?.usuarios?.estudantes],
-          ['Contas ativas', resumo?.usuarios?.estudantesAtivos],
-          ['Contas inativas', resumo?.usuarios?.estudantesInativos],
-          ['Comentários publicados', resumo?.comentarios],
+          [t('grupo4.g019'), resumo?.usuarios?.estudantes],
+          [t('grupo4.g020'), resumo?.usuarios?.estudantesAtivos],
+          [t('grupo4.g021'), resumo?.usuarios?.estudantesInativos],
+          [t('grupo4.g022'), resumo?.comentarios],
         ].map(([rotulo, valor]) => (
           <View key={rotulo} style={estilos.linha}>
             <Text style={{ color: cores.textoSecundario }}>{rotulo}</Text>

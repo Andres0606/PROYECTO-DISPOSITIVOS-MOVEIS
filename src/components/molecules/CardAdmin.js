@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — CardAdmin
 
@@ -12,6 +13,7 @@ export function CardAdmin({
   titulo, subtitulo, descricao, imagemUrl, ativo,
   acoes = [], children,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -36,7 +38,7 @@ export function CardAdmin({
               fontSize: tipografia.legenda,
               fontWeight: '600',
             }}>
-              {ativo ? 'Ativo' : 'Inativo'}
+              {ativo ? t('grupo4.g004') : t('grupo4.g005')}
             </Text>
           </View>
         )}

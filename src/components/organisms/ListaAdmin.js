@@ -1,3 +1,5 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../../i18n/catalogosGrupo4';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — ListaAdmin
 
@@ -20,8 +22,9 @@ const ESTADOS = [
 export function ListaAdmin({
   itens = [], renderItem, camposBusca,
   carregando = false, erro = '', aoRecarregar,
-  filtrarEstado = true, placeholder = 'Buscar...',
+  filtrarEstado = true, placeholder,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [busca, setBusca] = useState('');
   const [estado, setEstado] = useState('todos');
@@ -43,10 +46,10 @@ export function ListaAdmin({
   return (
     <View style={estilos.container}>
       <BarraBusca valor={busca}
-        aoMudar={setBusca} placeholder={placeholder} />
+        aoMudar={setBusca} placeholder={placeholder ?? t('grupo4.g105')} />
 
       {filtrarEstado && (
-        <BotaoSegmentado opcoes={ESTADOS}
+        <BotaoSegmentado opcoes={ESTADOS.map(item => ({ ...item, titulo: rotuloAdmin(item.titulo, t) }))}
           valor={estado} aoMudar={setEstado} />
       )}
 
@@ -56,18 +59,18 @@ export function ListaAdmin({
         <View style={estilos.estado}>
           <Text style={{ color: cores.perigo }}>{erro}</Text>
 
-          <Button titulo="Tentar novamente" variante="contorno"
+          <Button titulo={t('grupo4.g023')} variante="contorno"
             aoPressionar={aoRecarregar} />
         </View>
       ) : (
         <>
           <Text style={[estilos.contagem, { color: cores.textoSecundario }]}>
-            {filtrados.length} registro(s)
+            {t('grupo4.g115', { total: filtrados.length })}
           </Text>
 
           {filtrados.length === 0 ? (
             <Text style={[estilos.vazio, { color: cores.textoSecundario }]}>
-              Nenhum registro encontrado.
+              {t('grupo4.g106')}
             </Text>
           ) : (
             filtrados.map(item => (

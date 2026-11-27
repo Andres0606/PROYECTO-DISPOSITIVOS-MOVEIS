@@ -1,3 +1,4 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
 
 // SCREEN — Gestão de conteúdos
 
@@ -37,7 +38,7 @@ const CATEGORIAS = {
 };
 
 export function AdminConteudosScreen({ route }) {
-  const { idioma } = usePreferencias();
+  const { idioma, t } = usePreferencias();
   const [lugares, setLugares] = useState([]);
   const [frases, setFrases] = useState([]);
   const [categorias, setCategorias] = useState({});
@@ -71,14 +72,14 @@ export function AdminConteudosScreen({ route }) {
       }
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || 'Não foi possível carregar os conteúdos.');
+        setErro(erro.message || t('grupo4.g042'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -114,9 +115,9 @@ export function AdminConteudosScreen({ route }) {
     if (indisponivel || bloqueio.current) return;
 
     Alert.alert(titulo, mensagem, [
-      { text: 'Cancelar', style: 'cancel' },
+      { text: t('grupo4.g033'), style: 'cancel' },
       {
-        text: 'Confirmar',
+        text: t('grupo4.g043'),
         style: 'destructive',
         onPress: async () => {
           if (bloqueio.current) return;
@@ -129,7 +130,7 @@ export function AdminConteudosScreen({ route }) {
             await acao();
             await carregar();
           } catch (erro) {
-            Alert.alert('Erro', erro.message);
+            Alert.alert(t('grupo4.g027'), erro.message);
             await carregar();
           } finally {
             bloqueio.current = false;
@@ -147,16 +148,16 @@ export function AdminConteudosScreen({ route }) {
     const ativo = !item.ativo;
 
     confirmar(
-      ativo ? 'Ativar conteúdo' : 'Desativar conteúdo',
-      'Deseja alterar a disponibilidade deste conteúdo?',
+      ativo ? t('grupo4.g044') : t('grupo4.g045'),
+      t('grupo4.g046'),
       async () => {
         await alterarEstadoConteudoAdmin(tipoAtual, item.id, ativo);
 
         Alert.alert(
-          'Sucesso',
+          t('grupo4.g026'),
           ativo
-            ? 'Conteúdo ativado com sucesso.'
-            : 'Conteúdo desativado com sucesso.'
+            ? t('grupo4.g047')
+            : t('grupo4.g048')
         );
       }
     );
@@ -168,11 +169,11 @@ export function AdminConteudosScreen({ route }) {
     const grupoAtual = grupoCategoria;
 
     confirmar(
-      'Excluir categoria',
-      `Deseja excluir a categoria "${item.nome}"?`,
+      t('grupo4.g049'),
+      t('grupo4.g112', { nome: rotuloCategoriaAdmin(item.nome, t) }),
       async () => {
         await excluirCategoriaAdmin(grupoAtual, item.id);
-        Alert.alert('Sucesso', 'Categoria excluída com sucesso.');
+        Alert.alert(t('grupo4.g026'), t('grupo4.g050'));
       }
     );
   }
@@ -200,9 +201,9 @@ export function AdminConteudosScreen({ route }) {
       await carregar();
 
       if (resultado.aviso) {
-        Alert.alert('Atenção', resultado.aviso);
+        Alert.alert(t('grupo4.g051'), resultado.aviso);
       } else {
-        Alert.alert('Sucesso', 'Conteúdo salvo com sucesso.');
+        Alert.alert(t('grupo4.g026'), t('grupo4.g052'));
       }
     } finally {
       bloqueio.current = false;
@@ -219,7 +220,7 @@ export function AdminConteudosScreen({ route }) {
   if (formulario) {
     return (
       <ScreenTemplate
-        titulo={formulario.registro ? 'Editar conteúdo' : 'Novo conteúdo'}
+        titulo={formulario.registro ? t('grupo4.g053') : t('grupo4.g054')}
         aoVoltar={fecharFormulario}>
 
         <FormularioAdmin
@@ -237,11 +238,11 @@ export function AdminConteudosScreen({ route }) {
   // Lista de conteúdos
 
   return (
-    <ScreenTemplate titulo="Conteúdos">
+    <ScreenTemplate titulo={t('grupo4.g055')}>
       <View style={estilos.container}>
 
         <BotaoSegmentado
-          opcoes={TIPOS}
+          opcoes={TIPOS.map(item => ({ ...item, titulo: rotuloAdmin(item.titulo, t) }))}
           valor={tipo}
           aoMudar={valor => {
             if (!ocupado) setTipo(valor);
@@ -250,9 +251,10 @@ export function AdminConteudosScreen({ route }) {
 
         {tipo === 'categorias' && (
           <CampoSelecao
-            rotulo="Tipo de categoria"
+            rotulo={t('grupo4.g056')}
             valor={grupo}
             opcoes={Object.keys(CATEGORIAS)}
+            formatarOpcao={valor => rotuloAdmin(valor, t)}
             aoMudar={setGrupo}
             desabilitado={ocupado}
           />
@@ -260,10 +262,10 @@ export function AdminConteudosScreen({ route }) {
 
         <Button
           titulo={tipo === 'lugares'
-            ? 'Adicionar lugar'
+            ? t('grupo4.g057')
             : tipo === 'frases'
-              ? 'Adicionar frase'
-              : 'Adicionar categoria'}
+              ? t('grupo4.g058')
+              : t('grupo4.g059')}
           variante="escuro"
           desabilitado={indisponivel}
           aoPressionar={() => setFormulario({
@@ -294,8 +296,8 @@ export function AdminConteudosScreen({ route }) {
           ]}
           renderItem={item => (
             <CardAdmin
-              titulo={item.nome || item.frasePortugues}
-              subtitulo={item.categoria?.nome}
+              titulo={tipo === 'categorias' ? rotuloCategoriaAdmin(item.nome, t) : item.nome || item.frasePortugues}
+              subtitulo={rotuloCategoriaAdmin(item.categoria?.nome, t)}
               descricao={tipo === 'frases'
                 ? obterTraducaoFrase(item, idioma)
                 : item.descricao}
@@ -303,7 +305,7 @@ export function AdminConteudosScreen({ route }) {
               ativo={item.ativo}
               acoes={[
                 {
-                  titulo: 'Editar',
+                  titulo: t('grupo4.g060'),
                   aoPressionar: () => setFormulario({
                     tipo,
                     grupo: grupoCategoria,
@@ -312,11 +314,11 @@ export function AdminConteudosScreen({ route }) {
                   desabilitado: indisponivel,
                 },
                 tipo === 'categorias' ? {
-                  titulo: 'Excluir',
+                  titulo: t('grupo4.g061'),
                   aoPressionar: () => excluirCategoria(item),
                   desabilitado: indisponivel,
                 } : {
-                  titulo: item.ativo ? 'Desativar' : 'Ativar',
+                  titulo: item.ativo ? t('grupo4.g032') : t('grupo4.g031'),
                   aoPressionar: () => alterarEstado(item),
                   desabilitado: indisponivel,
                 },

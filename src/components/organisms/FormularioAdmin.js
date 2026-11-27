@@ -1,3 +1,5 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../../i18n/catalogosGrupo4';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — Formulário administrativo
 
 import { useState } from 'react';
@@ -52,7 +54,8 @@ export function FormularioAdmin({
   aoSalvar,
   aoCancelar,
 }) {
-  const campos = CAMPOS[tipo];
+  const { t } = usePreferencias();
+  const campos = CAMPOS[tipo].map(([campo, rotulo, ...resto]) => [campo, rotuloAdmin(rotulo, t), ...resto]);
 
   const [dados, setDados] = useState(() => ({
     ...(tipo === 'lugares' ? {
@@ -94,7 +97,7 @@ export function FormularioAdmin({
         setRemoverImagem(false);
       }
     } catch (erro) {
-      Alert.alert('Erro', erro.message);
+      Alert.alert(t('grupo4.g027'), erro.message);
     }
   }
 
@@ -110,11 +113,11 @@ export function FormularioAdmin({
       const valor = String(dados[campo] ?? '').trim();
 
       if (obrigatorio && !valor) {
-        falhas[campo] = `${rotulo} é obrigatório.`;
+        falhas[campo] = t('grupo4.g113', { rotulo });
       }
 
       if (valor.length > limite) {
-        falhas[campo] = `Máximo de ${limite} caracteres.`;
+        falhas[campo] = t('grupo4.g114', { limite });
       }
 
       valores[campo] = valor || null;
@@ -126,7 +129,7 @@ export function FormularioAdmin({
     }
 
     if (tipo === 'frases' && !dados.categoriaId) {
-      falhas.categoriaId = 'Selecione uma categoria.';
+      falhas.categoriaId = t('grupo4.g095');
     }
 
     if (tipo === 'lugares') {
@@ -134,7 +137,7 @@ export function FormularioAdmin({
       const lon = valores.longitude;
 
       if ((lat === null) !== (lon === null)) {
-        falhas.latitude = 'Informe as duas coordenadas.';
+        falhas.latitude = t('grupo4.g096');
       }
 
       for (const [campo, limite] of [
@@ -147,7 +150,7 @@ export function FormularioAdmin({
           );
 
           if (!Number.isFinite(numero) || Math.abs(numero) > limite) {
-            falhas[campo] = 'Coordenada inválida.';
+            falhas[campo] = t('grupo4.g097');
           } else {
             valores[campo] = numero;
           }
@@ -155,7 +158,7 @@ export function FormularioAdmin({
       }
 
       if (valores.siteUrl && !/^https?:\/\/\S+$/i.test(valores.siteUrl)) {
-        falhas.siteUrl = 'Informe uma URL válida.';
+        falhas.siteUrl = t('grupo4.g098');
       }
     }
 
@@ -172,8 +175,8 @@ export function FormularioAdmin({
       });
     } catch (erro) {
       Alert.alert(
-        'Erro',
-        erro.message || 'Não foi possível salvar.'
+        t('grupo4.g027'),
+        erro.message || t('grupo4.g099')
       );
     } finally {
       setSalvando(false);
@@ -187,7 +190,7 @@ export function FormularioAdmin({
 
       {tipo === 'lugares' && (
         <SeletorImagem
-          rotulo="Foto do lugar (opcional)"
+          rotulo={t('grupo4.g100')}
           uri={
             imagem?.uri ||
             (!removerImagem ? registro?.imagemUrl : null)
@@ -225,7 +228,8 @@ export function FormularioAdmin({
       {tipo !== 'categorias' && (
         <>
           <CampoSelecao
-            rotulo="Categoria"
+            rotulo={t('grupo4.g101')}
+            formatarOpcao={valor => rotuloCategoriaAdmin(rotuloAdmin(valor, t), t)}
             valor={
               categorias.find(item =>
                 item.id === dados.categoriaId
@@ -248,7 +252,7 @@ export function FormularioAdmin({
           />
 
           <BotaoSegmentado
-            opcoes={ESTADOS}
+            opcoes={ESTADOS.map(item => ({ ...item, titulo: rotuloAdmin(item.titulo, t) }))}
             valor={dados.ativo}
             aoMudar={valor => {
               if (!salvando) {
@@ -260,7 +264,7 @@ export function FormularioAdmin({
       )}
 
       <Button
-        titulo="Salvar"
+        titulo={t('grupo4.g104')}
         variante="escuro"
         aoPressionar={salvar}
         carregando={salvando}
@@ -268,7 +272,7 @@ export function FormularioAdmin({
       />
 
       <Button
-        titulo="Cancelar"
+        titulo={t('grupo4.g033')}
         variante="contorno"
         aoPressionar={aoCancelar}
         desabilitado={salvando}

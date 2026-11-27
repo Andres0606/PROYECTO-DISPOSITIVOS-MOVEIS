@@ -1,3 +1,5 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Moderação administrativa
 
@@ -27,6 +29,7 @@ const TIPOS = [
 ];
 
 export function AdminModeracaoScreen({ route, navigation }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [conselhos, setConselhos] = useState([]);
@@ -63,14 +66,14 @@ export function AdminModeracaoScreen({ route, navigation }) {
       }
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || 'Não foi possível carregar os conteúdos.');
+        setErro(erro.message || t('grupo4.g042'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -115,7 +118,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
         .catch(erro => {
           if (ativo) {
             setErroComentarios(
-              erro.message || 'Não foi possível carregar os comentários.'
+              erro.message || t('grupo4.g062')
             );
           }
         })
@@ -125,7 +128,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
     }
 
     return () => { ativo = false; };
-  }, [tipo, selecionado, revisaoComentarios]));
+  }, [tipo, selecionado, revisaoComentarios, t]));
 
   // Confirmar operações
 
@@ -133,9 +136,9 @@ export function AdminModeracaoScreen({ route, navigation }) {
     if (indisponivel || bloqueio.current) return;
 
     Alert.alert(titulo, mensagem, [
-      { text: 'Cancelar', style: 'cancel' },
+      { text: t('grupo4.g033'), style: 'cancel' },
       {
-        text: 'Confirmar',
+        text: t('grupo4.g043'),
         style: 'destructive',
         onPress: async () => {
           if (bloqueio.current) return;
@@ -149,7 +152,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
             await carregar();
           } catch (erro) {
             if (navigation.isFocused()) {
-              Alert.alert('Erro', erro.message || 'Não foi possível concluir a operação.');
+              Alert.alert(t('grupo4.g027'), erro.message || t('grupo4.g063'));
             }
 
             await carregar();
@@ -169,8 +172,8 @@ export function AdminModeracaoScreen({ route, navigation }) {
     const ativo = !item.ativo;
 
     confirmar(
-      ativo ? 'Reativar conteúdo' : 'Desativar conteúdo',
-      'Deseja alterar a visibilidade deste conteúdo para os estudantes?',
+      ativo ? t('grupo4.g064') : t('grupo4.g045'),
+      t('grupo4.g065'),
       async () => {
         const atualizado = await alterarEstadoModeracaoAdmin(
           tipoAtual, item.id, ativo
@@ -185,10 +188,10 @@ export function AdminModeracaoScreen({ route, navigation }) {
 
         if (navigation.isFocused()) {
           Alert.alert(
-            'Sucesso',
+            t('grupo4.g026'),
             ativo
-              ? 'Conteúdo reativado com sucesso.'
-              : 'Conteúdo desativado com sucesso.'
+              ? t('grupo4.g066')
+              : t('grupo4.g048')
           );
         }
       }
@@ -203,8 +206,8 @@ export function AdminModeracaoScreen({ route, navigation }) {
     const conselhoId = selecionado;
 
     confirmar(
-      'Excluir comentário',
-      'Esta ação é permanente. Deseja continuar?',
+      t('grupo4.g067'),
+      t('grupo4.g068'),
       async () => {
         const resultado = await excluirComentarioAdmin(
           conselhoId, comentario.id
@@ -223,7 +226,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
         setRevisaoComentarios(atual => atual + 1);
 
         if (navigation.isFocused()) {
-          Alert.alert('Sucesso', 'Comentário excluído com sucesso.');
+          Alert.alert(t('grupo4.g026'), t('grupo4.g069'));
         }
       }
     );
@@ -234,12 +237,12 @@ export function AdminModeracaoScreen({ route, navigation }) {
   function acoes(item, mostrarDetalhes = true) {
     return [
       ...(mostrarDetalhes ? [{
-        titulo: 'Detalhes',
+        titulo: t('grupo4.g034'),
         aoPressionar: () => setSelecionado(item.id),
         desabilitado: indisponivel,
       }] : []),
       {
-        titulo: item.ativo ? 'Desativar' : 'Reativar',
+        titulo: item.ativo ? t('grupo4.g032') : t('grupo4.g070'),
         aoPressionar: () => alterarEstado(item),
         desabilitado: indisponivel,
       },
@@ -249,7 +252,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
   function subtitulo(item) {
     return [
       item.autor?.nomeCompleto || item.criador?.nomeCompleto,
-      item.categoria?.nome,
+      rotuloCategoriaAdmin(item.categoria?.nome, t),
     ].filter(Boolean).join(' · ');
   }
 
@@ -259,8 +262,8 @@ export function AdminModeracaoScreen({ route, navigation }) {
     return (
       <ScreenTemplate
         titulo={tipo === 'conselhos'
-          ? 'Detalhes do conselho'
-          : 'Detalhes da atividade'}
+          ? t('grupo4.g071')
+          : t('grupo4.g072')}
         aoVoltar={() => {
           if (!bloqueio.current) setSelecionado(null);
         }}>
@@ -275,7 +278,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
             <>
               <Text style={{ color: cores.perigo }}>{erro}</Text>
 
-              <Button titulo="Tentar novamente"
+              <Button titulo={t('grupo4.g023')}
                 variante="contorno"
                 aoPressionar={carregar}
                 desabilitado={ocupado} />
@@ -292,31 +295,30 @@ export function AdminModeracaoScreen({ route, navigation }) {
 
             <Text style={{ color: cores.textoSecundario }}>
               {tipo === 'conselhos'
-                ? `${detalhes.curtidas ?? 0} curtidas`
-                : `${detalhes.interessados ?? 0} interessados`}
+                ? t('grupo4.g116', { total: detalhes.curtidas ?? 0 })
+                : t('grupo4.g117', { total: detalhes.interessados ?? 0 })}
             </Text>
 
             {tipo === 'conselhos' && (
               <Text style={{ color: cores.textoSecundario }}>
-                {detalhes.comentarios ?? 0} comentários
+                {t('grupo4.g118', { total: detalhes.comentarios ?? 0 })}
               </Text>
             )}
 
             {tipo === 'atividades' && (
               <>
                 <Text style={{ color: cores.texto }}>
-                  Local: {detalhes.local}
+                  {t('grupo4.g119', { local: detalhes.local ?? "" })}
                 </Text>
 
                 <Text style={{ color: cores.texto }}>
-                  Data: {detalhes.dataAtividade?.split('-').reverse().join('/')}
-                  {' às '}{detalhes.horaInicio?.slice(0, 5)}
+                  {t('grupo4.g120', { data: detalhes.dataAtividade?.split('-').reverse().join('/') ?? '', hora: detalhes.horaInicio?.slice(0, 5) ?? '' })}
                 </Text>
 
                 <Text style={{ color: cores.textoSecundario }}>
                   {detalhes.vencida
-                    ? 'Horário de início ultrapassado'
-                    : 'Atividade futura'}
+                    ? t('grupo4.g073')
+                    : t('grupo4.g074')}
                 </Text>
               </>
             )}
@@ -326,7 +328,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
           {tipo === 'conselhos' && (
             <>
               <Text style={[estilos.titulo, { color: cores.texto }]}>
-                Comentários
+                {t('grupo4.g075')}
               </Text>
 
               {carregandoComentarios ? (
@@ -339,7 +341,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
                   </Text>
 
                   <Button
-                    titulo="Tentar novamente"
+                    titulo={t('grupo4.g023')}
                     variante="contorno"
                     desabilitado={ocupado}
                     aoPressionar={() =>
@@ -350,17 +352,17 @@ export function AdminModeracaoScreen({ route, navigation }) {
 
               ) : comentarios.length === 0 ? (
                 <Text style={{ color: cores.textoSecundario }}>
-                  Nenhum comentário disponível.
+                  {t('grupo4.g076')}
                 </Text>
 
               ) : (
                 comentarios.map(comentario => (
                   <CardAdmin
                     key={comentario.id}
-                    titulo={comentario.autor?.nomeCompleto || 'Estudante'}
+                    titulo={comentario.autor?.nomeCompleto || t('grupo4.g013')}
                     descricao={comentario.conteudo}
                     acoes={[{
-                      titulo: 'Excluir comentário',
+                      titulo: t('grupo4.g067'),
                       aoPressionar: () => excluirComentario(comentario),
                       desabilitado: indisponivel,
                     }]}
@@ -378,11 +380,11 @@ export function AdminModeracaoScreen({ route, navigation }) {
   // Lista de conteúdos
 
   return (
-    <ScreenTemplate titulo="Moderação">
+    <ScreenTemplate titulo={t('grupo4.g077')}>
       <View style={estilos.container}>
 
         <BotaoSegmentado
-          opcoes={TIPOS}
+          opcoes={TIPOS.map(item => ({ ...item, titulo: rotuloAdmin(item.titulo, t) }))}
           valor={tipo}
           aoMudar={valor => {
             if (!bloqueio.current) {

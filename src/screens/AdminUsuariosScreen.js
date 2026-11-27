@@ -1,3 +1,5 @@
+import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Gerenciamento de usuários
 
@@ -25,6 +27,7 @@ const PERFIS = [
 ];
 
 export function AdminUsuariosScreen() {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [usuarios, setUsuarios] = useState([]);
@@ -54,14 +57,14 @@ export function AdminUsuariosScreen() {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setUsuarios([]);
-        setErro(erro.message || 'Não foi possível carregar os usuários.');
+        setErro(erro.message || t('grupo4.g025'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -98,15 +101,15 @@ export function AdminUsuariosScreen() {
       await carregar();
 
       Alert.alert(
-        'Sucesso',
+        t('grupo4.g026'),
         ativo
-          ? 'Conta ativada com sucesso.'
-          : 'Conta desativada com sucesso.'
+          ? t('grupo4.g028')
+          : t('grupo4.g029')
       );
     } catch (erro) {
       Alert.alert(
-        'Erro',
-        erro.message || 'Não foi possível alterar o estado da conta.'
+        t('grupo4.g027'),
+        erro.message || t('grupo4.g030')
       );
 
       await carregar();
@@ -121,13 +124,13 @@ export function AdminUsuariosScreen() {
     if (usuario.rol?.nome !== 'Estudante') return;
 
     const ativo = !usuario.ativo;
-    const acao = ativo ? 'Ativar' : 'Desativar';
+    const acao = ativo ? t('grupo4.g031') : t('grupo4.g032');
 
     Alert.alert(
-      `${acao} conta`,
-      `Deseja ${acao.toLowerCase()} a conta de ${usuario.nomeCompleto}?`,
+      ativo ? t('grupo4.g108') : t('grupo4.g109'),
+      ativo ? t('grupo4.g110', { nome: usuario.nomeCompleto }) : t('grupo4.g111', { nome: usuario.nomeCompleto }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('grupo4.g033'), style: 'cancel' },
         {
           text: acao,
           style: ativo ? 'default' : 'destructive',
@@ -140,13 +143,13 @@ export function AdminUsuariosScreen() {
   function acoes(usuario, mostrarDetalhes = true) {
     return [
       ...(mostrarDetalhes ? [{
-        titulo: 'Detalhes',
+        titulo: t('grupo4.g034'),
         aoPressionar: () => setSelecionado(usuario.id),
         desabilitado: ocupado || carregando,
       }] : []),
 
       ...(usuario.rol?.nome === 'Estudante' ? [{
-        titulo: usuario.ativo ? 'Desativar' : 'Ativar',
+        titulo: usuario.ativo ? t('grupo4.g032') : t('grupo4.g031'),
         aoPressionar: () => confirmarEstado(usuario),
         desabilitado: ocupado || carregando,
       }] : []),
@@ -157,7 +160,7 @@ export function AdminUsuariosScreen() {
 
   if (detalhes) {
     return (
-      <ScreenTemplate titulo="Detalhes do usuário"
+      <ScreenTemplate titulo={t('grupo4.g035')}
         aoVoltar={() => {
           if (!ocupado) setSelecionado(null);
         }}>
@@ -169,10 +172,10 @@ export function AdminUsuariosScreen() {
           acoes={acoes(detalhes, false)}>
 
           {[
-            ['Perfil', detalhes.rol?.nome],
-            ['País de origem', detalhes.paisOrigem?.nome],
-            ['Universidade de origem', detalhes.universidadeOrigem?.nome],
-            ['Universidade de destino', detalhes.universidadeDestino?.nome],
+            [t('grupo4.g036'), rotuloAdmin(detalhes.rol?.nome, t)],
+            [t('grupo4.g037'), detalhes.paisOrigem?.nome],
+            [t('grupo4.g038'), detalhes.universidadeOrigem?.nome],
+            [t('grupo4.g039'), detalhes.universidadeDestino?.nome],
           ].map(([rotulo, valor]) => (
             <View key={rotulo} style={estilos.campo}>
               <Text style={{ color: cores.textoSecundario }}>
@@ -180,7 +183,7 @@ export function AdminUsuariosScreen() {
               </Text>
 
               <Text style={{ color: cores.texto, fontWeight: '600' }}>
-                {valor || 'Não informado'}
+                {valor || t('grupo4.g040')}
               </Text>
             </View>
           ))}
@@ -193,11 +196,11 @@ export function AdminUsuariosScreen() {
   // Lista de usuários
 
   return (
-    <ScreenTemplate titulo="Usuários">
+    <ScreenTemplate titulo={t('grupo4.g006')}>
       <View style={estilos.container}>
 
         <BotaoSegmentado
-          opcoes={PERFIS}
+          opcoes={PERFIS.map(item => ({ ...item, titulo: rotuloAdmin(item.titulo, t) }))}
           valor={perfil}
           aoMudar={setPerfil}
         />
@@ -207,7 +210,7 @@ export function AdminUsuariosScreen() {
           carregando={carregando}
           erro={erro}
           aoRecarregar={carregar}
-          placeholder="Buscar nome ou e-mail"
+          placeholder={t('grupo4.g041')}
           camposBusca={item => [
             item.nomeCompleto,
             item.email,
@@ -217,7 +220,7 @@ export function AdminUsuariosScreen() {
           renderItem={item => (
             <CardAdmin
               titulo={item.nomeCompleto}
-              subtitulo={`${item.email}\n${item.rol?.nome ?? ''}`}
+              subtitulo={`${item.email}\n${rotuloAdmin(item.rol?.nome, t) ?? ''}`}
               ativo={item.ativo}
               acoes={acoes(item)}
             />
