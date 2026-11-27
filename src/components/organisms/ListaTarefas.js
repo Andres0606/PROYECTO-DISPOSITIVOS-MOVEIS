@@ -1,149 +1,102 @@
-// MOLECULE — CampoSelecao
-// Campo com lista de opções.
+// ORGANISM — ListaTarefas
 
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { FormField } from './FormField';
-import { espacamentos, raios, tipografia } from '../../theme';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pill } from '../atoms/Pill';
+import { ProgressBar } from '../atoms/ProgressBar';
+import { ItemTarefa } from '../molecules/ItemTarefa';
+import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
-export function CampoSelecao({
-  rotulo,
-  opcoes,
-  valor,
-  aoMudar,
-  margemInferior,
-  desabilitado = false,
+export function ListaTarefas({
+  concluidas,
+  total,
+  etapas,
+  etapa,
+  aoMudarEtapa,
+  tarefas,
+  ocupado = false,
+  aoAlternar,
+  aoAbrir,
+  aoEditar,
 }) {
   const { cores } = useTema();
-  const [aberto, setAberto] = useState(false);
-
-  function escolher(opcao) {
-    if (desabilitado) return;
-
-    aoMudar(opcao);
-    setAberto(false);
-  }
+  const progresso = total > 0 ? concluidas / total : 0;
 
   return (
-    <FormField rotulo={rotulo} margemInferior={margemInferior}>
-      <Pressable
-        onPress={() => setAberto(atual => !atual)}
-        disabled={desabilitado}
-        accessibilityRole="button"
-        accessibilityState={{
-          expanded: aberto && !desabilitado,
-          disabled: desabilitado,
-        }}
-        style={[
-          estilos.campo,
-          {
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
-          },
-          aberto && !desabilitado && {
-            borderColor: cores.bordaFoco,
-          },
-        ]}
+    <View>
+      <ProgressBar valor={progresso} altura={8} />
+
+      <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
+        {`${concluidas} de ${total} tarefas concluídas`}
+      </Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={estilos.pillsScroll}
+        contentContainerStyle={estilos.pills}
       >
-        <Text style={[estilos.valor, { color: cores.texto }]}>
-          {valor}
+        {etapas.map(nome => (
+          <Pill
+            key={nome}
+            titulo={nome}
+            selecionado={nome === etapa}
+            aoPressionar={() => aoMudarEtapa(nome)}
+          />
+        ))}
+      </ScrollView>
+
+      <Text style={[estilos.secao, { color: cores.texto }]}>
+        {etapa}
+      </Text>
+
+      {tarefas.length === 0 ? (
+        <Text style={[estilos.vazio, { color: cores.textoSecundario }]}>
+          Nenhuma tarefa nesta etapa.
         </Text>
-
-        <Ionicons
-          name={aberto && !desabilitado ? 'chevron-up' : 'chevron-down'}
-          size={18}
-          color={cores.textoSecundario}
-        />
-      </Pressable>
-
-      {aberto && !desabilitado && (
-        <View style={[
-          estilos.lista,
-          {
-            borderColor: cores.borda,
-            backgroundColor: cores.superficie,
-          },
-        ]}>
-          {opcoes.map((opcao, indice) => {
-            const selecionada = opcao === valor;
-
-            return (
-              <Pressable
-                key={opcao}
-                onPress={() => escolher(opcao)}
-                disabled={desabilitado}
-                accessibilityRole="button"
-                accessibilityState={{
-                  selected: selecionada,
-                  disabled: desabilitado,
-                }}
-                style={[
-                  estilos.opcao,
-                  indice > 0 && [
-                    estilos.separador,
-                    { borderTopColor: cores.divisor },
-                  ],
-                ]}
-              >
-                <Text style={[
-                  estilos.textoOpcao,
-                  { color: cores.texto },
-                  selecionada && estilos.textoSelecionado,
-                ]}>
-                  {opcao}
-                </Text>
-
-                {selecionada && (
-                  <Ionicons
-                    name="checkmark"
-                    size={16}
-                    color={cores.texto}
-                  />
-                )}
-              </Pressable>
-            );
-          })}
+      ) : (
+        <View>
+          {tarefas.map(tarefa => (
+            <ItemTarefa
+              key={tarefa.id}
+              titulo={tarefa.titulo}
+              concluida={tarefa.concluida}
+              estado={tarefa.estado}
+              ocupado={ocupado}
+              aoAlternar={() => aoAlternar(tarefa)}
+              aoAbrir={() => aoAbrir?.(tarefa)}
+              aoEditar={() => aoEditar?.(tarefa)}
+            />
+          ))}
         </View>
       )}
-    </FormField>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  campo: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: espacamentos.md,
-    borderWidth: 1,
-    borderRadius: raios.sm,
-  },
-  valor: {
+  legenda: {
+    marginTop: espacamentos.sm,
     fontSize: tipografia.corpo,
-  },
-  lista: {
-    marginTop: espacamentos.xs,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderRadius: raios.sm,
-  },
-  opcao: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: espacamentos.md,
-  },
-  separador: {
-    borderTopWidth: 1,
-  },
-  textoOpcao: {
-    fontSize: tipografia.corpo,
-  },
-  textoSelecionado: {
     fontWeight: '600',
+  },
+  pillsScroll: {
+    marginTop: espacamentos.lg,
+    marginHorizontal: -espacamentos.lg,
+  },
+  pills: {
+    paddingHorizontal: espacamentos.lg,
+    gap: 12,
+  },
+  secao: {
+    marginTop: espacamentos.lg - 4,
+    marginBottom: espacamentos.md,
+    fontSize: tipografia.subtitulo,
+    fontWeight: '600',
+  },
+  vazio: {
+    marginTop: espacamentos.md,
+    textAlign: 'center',
+    fontSize: tipografia.corpo,
   },
 });

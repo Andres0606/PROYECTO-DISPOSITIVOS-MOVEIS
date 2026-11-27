@@ -902,3 +902,75 @@ export async function excluirTarefaApi(token, id) {
     token, `/tarefas/${encodeURIComponent(id)}`, 'DELETE'
   );
 }
+
+// MEUS GASTOS
+
+function rotaGastos(caminho = '', ano, mes) {
+  const rota = `/gastos${caminho}`;
+
+  if (ano === undefined && mes === undefined) return rota;
+
+  return `${rota}?ano=${encodeURIComponent(ano)}&mes=${encodeURIComponent(mes)}`;
+}
+
+// Categorias
+
+export async function obterCategoriasGastoApi(token) {
+  return requisicaoAutenticada(token, '/gastos/categorias');
+}
+
+// CRUD
+
+export async function obterGastosApi(token, ano, mes) {
+  return requisicaoAutenticada(token, rotaGastos('', ano, mes));
+}
+
+export async function obterGastoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/gastos/${encodeURIComponent(id)}`
+  );
+}
+
+export async function criarGastoApi(token, dados) {
+  return requisicaoAutenticada(token, '/gastos', 'POST', dados);
+}
+
+export async function atualizarGastoApi(token, id, dados) {
+  return requisicaoAutenticada(
+    token, `/gastos/${encodeURIComponent(id)}`, 'PUT', dados
+  );
+}
+
+export async function excluirGastoApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/gastos/${encodeURIComponent(id)}`, 'DELETE'
+  );
+}
+
+// Orçamento
+
+export async function obterOrcamentoApi(token, ano, mes) {
+  return requisicaoAutenticada(
+    token, rotaGastos('/orcamento', ano, mes)
+  );
+}
+
+export async function atualizarOrcamentoApi(token, valor, ano, mes) {
+  return requisicaoAutenticada(
+    token, rotaGastos('/orcamento', ano, mes), 'PUT', { valor }
+  );
+}
+
+// Resumo e estatísticas
+
+export async function obterResumoGastosApi(token, ano, mes) {
+  return requisicaoAutenticada(
+    token, rotaGastos('/resumo', ano, mes)
+  );
+}
+
+export async function obterEstatisticasGastosApi(token, ano, mes) {
+  return requisicaoAutenticada(
+    token, rotaGastos('/estatisticas', ano, mes)
+  );
+}
