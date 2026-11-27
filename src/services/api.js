@@ -1028,3 +1028,6 @@ export async function removerFavoritoFraseApi(token, id) {
     token, `/favoritos/frases/${encodeURIComponent(id)}`, 'DELETE'
   );
 }
+
+// Requisições compartilhadas com os serviços administrativos
+export { requisicaoAutenticada, enviarFotoApi };
