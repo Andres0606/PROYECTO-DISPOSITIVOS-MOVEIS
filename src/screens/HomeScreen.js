@@ -1,168 +1,150 @@
-// SCREEN — Início (resumo do intercâmbio)
+// SCREEN — Início
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ResumoInicio } from '../components/organisms/ResumoInicio';
 import { Button } from '../components/atoms/Button';
-
 import { obterResumoInicio } from '../services/inicio';
-
+import { obterUsuario } from '../services/storage';
 import { useTema } from '../theme/useTema';
+import { espacamentos, tipografia } from '../theme';
 
-import {
-  espacamentos,
-  tipografia,
-} from '../theme';
-
-export function HomeScreen({
-  navigation,
-  route,
-}) {
+export function HomeScreen({ navigation, route }) {
   const { cores } = useTema();
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
+  const [usuario, setUsuario] = useState(route.params?.usuario);
+  const [resumo, setResumo] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
-  const usuario =
-    route.params?.usuario;
+  const consultaAtual = useRef(0);
 
-  const primeiroNome =
-    usuario?.nome?.split(' ')[0] ??
-    'estudante';
+  const primeiroNome = usuario?.nome?.trim().split(/\s+/)[0]
+    || 'estudante';
 
-  const [resumo, setResumo] =
-    useState(null);
+  const carregar = useCallback(async () => {
+    const consulta = ++consultaAtual.current;
 
-  const [carregando, setCarregando] =
-    useState(true);
+    setCarregando(true);
+    setErro('');
 
-  const [erro, setErro] =
-    useState('');
+    try {
+      const [resultado, usuarioSalvo] = await Promise.all([
+        obterResumoInicio(),
+        obterUsuario(),
+      ]);
 
-  // ==========================================================
-  // CARREGAR RESUMO
-  // ==========================================================
+      if (consulta !== consultaAtual.current) return;
 
-  const carregar = useCallback(
-    async () => {
-      setCarregando(true);
-      setErro('');
+      setResumo(resultado);
 
-      try {
-        const resultado =
-          await obterResumoInicio();
-
-        setResumo(resultado);
-
-      } catch (e) {
-        setErro(
-          'Não foi possível carregar seu resumo. Tente novamente.'
-        );
-
-      } finally {
+      if (usuarioSalvo) setUsuario(usuarioSalvo);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar seu resumo. Tente novamente.');
+      }
+    } finally {
+      if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
-    },
-    []
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+
+      return () => {
+        consultaAtual.current += 1;
+      };
+    }, [carregar])
   );
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  function abrirAtalho(chave, id) {
+    switch (chave) {
+      case 'tarefas':
+        navigation.navigate('Intercambio', {
+          screen: 'TarefasLista',
+        });
+        break;
 
-  // ==========================================================
-  // ABRIR ATALHOS
-  // ==========================================================
+      case 'gastos':
+        navigation.navigate('Gastos', {
+          screen: 'GastosResumo',
+        });
+        break;
 
-  function abrirAtalho(chave) {
-    if (chave === 'portugues') {
-      navigation.navigate('Sobrevive');
-      return;
-    }
+      case 'portugues':
+        navigation.navigate('Sobrevive');
+        break;
 
-    if (chave === 'conselhos') {
-      navigation.navigate('Conselhos');
-      return;
-    }
+      case 'conselhos':
+        navigation.navigate('Conselhos');
+        break;
 
-    if (chave === 'atividades') {
-      navigation.navigate('Atividades');
-      return;
+      case 'atividades':
+        navigation.navigate('Atividades');
+        break;
+
+      case 'conselhoDetalhe':
+        if (id) {
+          navigation.navigate('ConselhoDetalhe', {
+            conselhoId: id,
+          });
+        } else {
+          navigation.navigate('Conselhos');
+        }
+        break;
+
+      case 'atividadeDetalhe':
+        if (id) {
+          navigation.navigate('AtividadeDetalhe', {
+            atividadeId: id,
+          });
+        } else {
+          navigation.navigate('Atividades');
+        }
+        break;
     }
   }
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
-
   return (
-    <ScreenTemplate
-      titulo={`Olá, ${primeiroNome}`}
-    >
-      {carregando && (
+    <ScreenTemplate titulo={`Olá, ${primeiroNome}`}>
+
+      {carregando ? (
         <ActivityIndicator
           color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
-
-      {!carregando && !!erro && (
+          style={estilos.centro} />
+      ) : erro ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
             {erro}
           </Text>
 
           <Button
             titulo="Tentar novamente"
             variante="secundario"
-            aoPressionar={carregar}
-          />
-
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && resumo && (
+      ) : resumo ? (
         <ResumoInicio
           resumo={resumo}
-          aoAbrirAtalho={abrirAtalho}
-        />
-      )}
+          aoAbrirAtalho={abrirAtalho} />
+      ) : null}
 
     </ScreenTemplate>
   );
 }
 
-// ============================================================
-// ESTILOS DINÂMICOS
-// ============================================================
-
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: {
+    marginTop: espacamentos.xl,
+    gap: espacamentos.md,
+  },
+  erro: {
+    fontSize: tipografia.corpo,
+    textAlign: 'center',
+  },
+});

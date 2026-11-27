@@ -1,25 +1,47 @@
 // SERVICE — Resumo da tela Início
-// ETAPA FRONT: dados estáticos. Depois, o corpo desta função será trocado
-// por uma chamada HTTP real, sem alterar a screen.
 
-function esperar(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { obterTarefas } from './tarefas';
+import { obterResumoGastos } from './gastos';
+import { obterConselhos } from './conselhos';
+import { obterAtividades } from './atividades';
+import { formatarDiaMes, formatarPeriodo } from '../utils/formatacao';
 
 export async function obterResumoInicio() {
-  await esperar(400); // simula o tempo de uma requisição
+  const [tarefas, gastos, conselhos, atividades] = await Promise.all([
+    obterTarefas(),
+    obterResumoGastos(),
+    obterConselhos('populares'),
+    obterAtividades('recentes'),
+  ]);
+
+  const conselho = conselhos[0] ?? null;
+
+  const atividade = atividades
+    .filter(item => !item.vencida)
+    .sort((a, b) => a.dataOrdenacao.localeCompare(b.dataOrdenacao))[0]
+    ?? null;
 
   return {
-    tarefas: { concluidas: 12, total: 18 },
-    gastos: { mes: 'setembro', gasto: 1245, orcamento: 2000 },
-    conselhoDestaque: {
-      texto: 'Leve um bom casaco para o inverno de Chapecó.',
-      autor: 'Laura',
-      pais: 'Colômbia',
+    tarefas: {
+      concluidas: tarefas.filter(item => item.concluida).length,
+      total: tarefas.length,
     },
-    proximaAtividade: {
-      titulo: 'Picnic no Ecoparque',
-      data: '14 set · 15:00',
+    gastos: {
+      periodo: formatarPeriodo(gastos.ano, gastos.mes),
+      gasto: gastos.gasto,
+      orcamento: gastos.orcamento,
+      disponivel: gastos.disponivel,
     },
+    conselhoDestaque: conselho ? {
+      id: conselho.id,
+      texto: conselho.texto,
+      autor: conselho.autor,
+      pais: conselho.pais,
+    } : null,
+    proximaAtividade: atividade ? {
+      id: atividade.id,
+      titulo: atividade.titulo,
+      data: `${formatarDiaMes(atividade.dataAtividade)} · ${atividade.horario}`,
+    } : null,
   };
 }
