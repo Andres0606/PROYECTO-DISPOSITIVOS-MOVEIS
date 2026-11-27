@@ -1,207 +1,159 @@
+
 // SCREEN — Lista de frases por categoria
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ItemFrase } from '../components/molecules/ItemFrase';
+import { BarraBusca } from '../components/molecules/BarraBusca';
 import { Button } from '../components/atoms/Button';
-
-import { obterFrasesPorCategoria } from '../services/frases';
-
+import {
+  obterFrasesPorCategoria,
+  obterFrasesFavoritas,
+  adicionarFavoritoFrase,
+  removerFavoritoFrase,
+} from '../services/frases';
+import { filtrarFrases } from '../utils/frases';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function ListaFrasesScreen({
-  navigation,
-  route,
-}) {
+export function ListaFrasesScreen({ navigation, route }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
   const categoria = route.params?.categoria;
 
-  const [frases, setFrases] =
-    useState([]);
+  const [frases, setFrases] = useState([]);
+  const [favoritas, setFavoritas] = useState([]);
+  const [busca, setBusca] = useState('');
+  const [carregando, setCarregando] = useState(true);
+  const [ocupado, setOcupado] = useState(false);
+  const [erro, setErro] = useState('');
+  const [revisao, setRevisao] = useState(0);
 
-  const [favoritas, setFavoritas] =
-    useState([]);
-
-  const [carregando, setCarregando] =
-    useState(true);
-
-  const [erro, setErro] =
-    useState('');
-
-  // ==========================================================
-  // CARREGAR FRASES
-  // ==========================================================
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
 
   const carregar = useCallback(async () => {
-    if (!categoria?.id) {
-      setErro('Categoria não encontrada.');
-      setCarregando(false);
-      return;
-    }
-
+    const consulta = ++consultaAtual.current;
     setCarregando(true);
     setErro('');
 
     try {
-      const resultado =
-        await obterFrasesPorCategoria(
-          categoria.id
-        );
+      if (!categoria?.id) throw new Error('Categoria não encontrada.');
 
-      setFrases(resultado);
+      const [lista, guardadas] = await Promise.all([
+        obterFrasesPorCategoria(categoria.id),
+        obterFrasesFavoritas(),
+      ]);
 
-    } catch (e) {
-      setErro(
-        'Não foi possível carregar as frases. Tente novamente.'
-      );
+      if (consulta !== consultaAtual.current) return;
 
+      setFrases(lista);
+      setFavoritas(guardadas.map(item => item.id));
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar as frases.');
+      }
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) {
+        setCarregando(false);
+      }
     }
   }, [categoria?.id]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+      return () => { consultaAtual.current += 1; };
+    }, [carregar, revisao])
+  );
 
-  // ==========================================================
-  // ALTERNAR FAVORITA
-  // ==========================================================
+  async function alternarFavorita(id) {
+    if (bloqueio.current || carregando) return;
 
-  function alternarFavorita(fraseId) {
-    setFavoritas((atuais) => {
-      const jaFavorita =
-        atuais.includes(fraseId);
+    bloqueio.current = true;
+    setOcupado(true);
 
-      if (jaFavorita) {
-        return atuais.filter(
-          (id) => id !== fraseId
+    const consulta = consultaAtual.current;
+
+    try {
+      const resultado = favoritas.includes(id)
+        ? await removerFavoritoFrase(id)
+        : await adicionarFavoritoFrase(id);
+
+      if (consulta === consultaAtual.current) {
+        setFavoritas(atuais => resultado.guardado
+          ? [...new Set([...atuais, id])]
+          : atuais.filter(item => item !== id)
         );
+      } else {
+        setRevisao(atual => atual + 1);
+      }
+    } catch {
+      if (navigation.isFocused()) {
+        Alert.alert('Favoritos', 'Não foi possível atualizar o favorito.');
       }
 
-      return [...atuais, fraseId];
-    });
+      setRevisao(atual => atual + 1);
+    } finally {
+      bloqueio.current = false;
+      setOcupado(false);
+    }
   }
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
+  const filtradas = filtrarFrases(frases, busca);
 
   return (
-    <ScreenTemplate
-      titulo={categoria?.nome ?? 'Frases'}
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo={categoria?.nome ?? 'Frases'}
+      aoVoltar={() => navigation.goBack()}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.carregando}
-        />
-      )}
-
-      {!carregando && !!erro && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.estado} />
+      ) : erro ? (
         <View style={estilos.estado}>
-
-          <Text style={estilos.erro}>
+          <Text style={[estilos.texto, { color: cores.perigo }]}>
             {erro}
           </Text>
 
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && frases.length === 0 && (
-        <View style={estilos.estado}>
-          <Text style={estilos.vazio}>
-            Nenhuma frase disponível nesta categoria.
-          </Text>
-        </View>
-      )}
-
-      {!carregando && !erro && frases.length > 0 && (
+      ) : (
         <View style={estilos.lista}>
+          <BarraBusca valor={busca} aoMudar={setBusca}
+            placeholder="Buscar frase..." />
 
-          {frases.map((frase) => (
-            <ItemFrase
-              key={frase.id}
-
-              frase={frase}
-
-              favorita={
-                favoritas.includes(frase.id)
-              }
-
-              aoAbrir={() =>
-                navigation.navigate('FraseDetalhe', {
-                  frase,
-                  categoria,
-                })
-              }
-
-              aoAlternarFavorita={() =>
-                alternarFavorita(frase.id)
-              }
-            />
-          ))}
-
+          {filtradas.length === 0 ? (
+            <Text style={[estilos.texto, { color: cores.textoSecundario }]}>
+              {busca.trim()
+                ? 'Nenhuma frase encontrada.'
+                : 'Nenhuma frase disponível nesta categoria.'}
+            </Text>
+          ) : (
+            filtradas.map(frase => (
+              <ItemFrase key={frase.id}
+                frase={frase}
+                favorita={favoritas.includes(frase.id)}
+                ocupado={ocupado}
+                aoAbrir={() => {
+                  if (!bloqueio.current) {
+                    navigation.navigate('FraseDetalhe', {
+                      fraseId: frase.id,
+                    });
+                  }
+                }}
+                aoAlternarFavorita={() => alternarFavorita(frase.id)}
+              />
+            ))
+          )}
         </View>
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    lista: {
-      marginTop: espacamentos.xs,
-    },
-
-    carregando: {
-      marginTop: espacamentos.xl,
-    },
-
-    estado: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-
-    vazio: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.textoSecundario,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  lista: { gap: espacamentos.xs },
+  estado: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  texto: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

@@ -1,191 +1,187 @@
+
 // SCREEN — Detalhe de uma frase
 
-import { useMemo } from 'react';
-
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
-import { Ionicons } from '@expo/vector-icons';
-
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import * as Speech from 'expo-speech';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
-
+import { DetalheFrase } from '../components/organisms/DetalheFrase';
+import { Button } from '../components/atoms/Button';
 import {
-  espacamentos,
-  raios,
-  tipografia,
-} from '../theme';
-
+  obterFrasePorId,
+  verificarFavoritoFrase,
+  adicionarFavoritoFrase,
+  removerFavoritoFrase,
+} from '../services/frases';
+import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function FraseDetalheScreen({
-  navigation,
-  route,
-}) {
+export function FraseDetalheScreen({ navigation, route }) {
   const { cores } = useTema();
+  const fraseId = route.params?.fraseId ?? route.params?.frase?.id;
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
+  const [frase, setFrase] = useState(null);
+  const [favorita, setFavorita] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+  const [ocupado, setOcupado] = useState(false);
+  const [falando, setFalando] = useState(false);
+  const [erro, setErro] = useState('');
+  const [revisao, setRevisao] = useState(0);
+
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
+  const audioAtual = useRef(0);
+  const audioAtivo = useRef(false);
+
+  const carregar = useCallback(async () => {
+    const consulta = ++consultaAtual.current;
+
+    setCarregando(true);
+    setErro('');
+
+    try {
+      if (!fraseId) throw new Error('Frase não encontrada.');
+
+      const [resultado, favorito] = await Promise.all([
+        obterFrasePorId(fraseId),
+        verificarFavoritoFrase(fraseId),
+      ]);
+
+      if (consulta !== consultaAtual.current) return;
+
+      setFrase(resultado);
+      setFavorita(favorito.guardado);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar esta frase.');
+      }
+    } finally {
+      if (consulta === consultaAtual.current) {
+        setCarregando(false);
+      }
+    }
+  }, [fraseId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      audioAtivo.current = false;
+      setFalando(false);
+      carregar();
+
+      return () => {
+        consultaAtual.current += 1;
+        audioAtual.current += 1;
+        audioAtivo.current = false;
+        Speech.stop().catch(() => {});
+      };
+    }, [carregar, revisao])
   );
 
-  const frase =
-    route.params?.frase;
+  async function alternarFavorita() {
+    if (bloqueio.current || carregando) return;
 
-  const categoria =
-    route.params?.categoria;
+    bloqueio.current = true;
+    setOcupado(true);
 
-  // ==========================================================
-  // FRASE NÃO ENCONTRADA
-  // ==========================================================
+    const consulta = consultaAtual.current;
 
-  if (!frase) {
-    return (
-      <ScreenTemplate
-        titulo="Frase"
-        aoVoltar={() => navigation.goBack()}
-      >
-        <Text style={estilos.erro}>
-          Frase não encontrada.
-        </Text>
-      </ScreenTemplate>
-    );
+    try {
+      const resultado = favorita
+        ? await removerFavoritoFrase(fraseId)
+        : await adicionarFavoritoFrase(fraseId);
+
+      if (consulta === consultaAtual.current) {
+        setFavorita(resultado.guardado);
+      } else {
+        setRevisao(atual => atual + 1);
+      }
+    } catch {
+      if (navigation.isFocused()) {
+        Alert.alert('Favoritos', 'Não foi possível atualizar o favorito.');
+      }
+
+      setRevisao(atual => atual + 1);
+    } finally {
+      bloqueio.current = false;
+      setOcupado(false);
+    }
   }
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
+  async function pronunciar() {
+    if (!frase?.portugues) return;
+
+    const audio = ++audioAtual.current;
+    const estavaFalando = audioAtivo.current;
+
+    audioAtivo.current = !estavaFalando;
+    setFalando(!estavaFalando);
+
+    function finalizar() {
+      if (audio === audioAtual.current) {
+        audioAtivo.current = false;
+        setFalando(false);
+      }
+    }
+
+    function falhar() {
+      if (audio !== audioAtual.current) return;
+
+      finalizar();
+
+      if (navigation.isFocused()) {
+        Alert.alert('Pronúncia', 'Não foi possível reproduzir a frase.');
+      }
+    }
+
+    try {
+      await Speech.stop();
+
+      if (audio !== audioAtual.current || estavaFalando) return;
+
+      Speech.speak(frase.portugues, {
+        language: 'pt-BR',
+        rate: 0.85,
+        pitch: 1,
+        onDone: finalizar,
+        onStopped: finalizar,
+        onError: falhar,
+      });
+    } catch {
+      falhar();
+    }
+  }
 
   return (
-    <ScreenTemplate
-      titulo="Frase"
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo="Frase"
+      aoVoltar={() => navigation.goBack()}>
 
-      <View style={estilos.espacoSuperior} />
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.estado} />
+      ) : erro || !frase ? (
+        <View style={estilos.estado}>
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erro || 'Frase não encontrada.'}
+          </Text>
 
-      {/* CARTÃO DA FRASE */}
-
-      <View style={estilos.cartao}>
-
-        <Text style={estilos.portugues}>
-          {frase.portugues}
-        </Text>
-
-        <View style={estilos.divisor} />
-
-        <Text style={estilos.espanhol}>
-          {frase.espanhol}
-        </Text>
-
-      </View>
-
-      {/* CATEGORIA */}
-
-      <View style={estilos.categoria}>
-        <Text style={estilos.categoriaTexto}>
-          {categoria?.nome ?? 'Português'}
-        </Text>
-      </View>
-
-      {/* PRONUNCIAÇÃO */}
-
-      <View style={estilos.pronunciacao}>
-
-        <Ionicons
-          name="play-circle-outline"
-          size={22}
-          color={cores.texto}
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
+        </View>
+      ) : (
+        <DetalheFrase
+          frase={frase}
+          favorita={favorita}
+          ocupado={ocupado}
+          falando={falando}
+          aoAlternarFavorita={alternarFavorita}
+          aoPronunciar={pronunciar}
         />
-
-        <Text style={estilos.pronunciacaoTexto}>
-          Escuchar pronunciación
-        </Text>
-
-      </View>
-
+      )}
     </ScreenTemplate>
   );
 }
 
-// ============================================================
-// ESTILOS DINÂMICOS
-// ============================================================
-
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    espacoSuperior: {
-      height: 105,
-    },
-
-    cartao: {
-      backgroundColor: cores.superficie,
-      borderWidth: 1,
-      borderColor: cores.borda,
-      borderRadius: raios.sm,
-      paddingHorizontal: espacamentos.md,
-      paddingVertical: espacamentos.sm,
-    },
-
-    portugues: {
-      fontSize: tipografia.subtitulo,
-      fontWeight: '700',
-      color: cores.texto,
-      paddingVertical: espacamentos.xs,
-    },
-
-    divisor: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: cores.bordaForte,
-      marginVertical: espacamentos.sm,
-    },
-
-    espanhol: {
-      fontSize: tipografia.subtitulo,
-      color: cores.textoSecundario,
-      paddingBottom: espacamentos.xs,
-    },
-
-    categoria: {
-      alignSelf: 'flex-start',
-      marginTop: espacamentos.lg,
-      marginLeft: espacamentos.xs,
-      paddingHorizontal: espacamentos.md,
-      paddingVertical: 6,
-      borderWidth: 1,
-      borderColor: cores.borda,
-      borderRadius: raios.pill,
-      backgroundColor: cores.superficie,
-    },
-
-    categoriaTexto: {
-      fontSize: tipografia.legenda,
-      fontWeight: '600',
-      color: cores.texto,
-    },
-
-    pronunciacao: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-      gap: espacamentos.xs,
-      marginTop: espacamentos.lg,
-      paddingVertical: espacamentos.sm,
-      paddingHorizontal: espacamentos.xs,
-    },
-
-    pronunciacaoTexto: {
-      fontSize: tipografia.legenda,
-      color: cores.textoSecundario,
-    },
-
-    erro: {
-      marginTop: espacamentos.xl,
-      textAlign: 'center',
-      fontSize: tipografia.corpo,
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  estado: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});
