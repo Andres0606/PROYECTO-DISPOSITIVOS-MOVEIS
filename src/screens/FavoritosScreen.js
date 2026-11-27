@@ -106,14 +106,23 @@ export function FavoritosScreen({ navigation }) {
     }
   }
 
-  // Abrir detalhes da atividade
-  function abrirAtividade(item) {
-    if (bloqueio.current) return;
+function abrirFavorito(item) {
+  if (bloqueio.current) return;
 
+  if (tipo === 'atividades') {
     navigation.navigate('AtividadeDetalhe', {
       atividadeId: item.id,
     });
   }
+
+  if (tipo === 'frases') {
+    navigation.navigate('FraseDetalhe', {
+      fraseId: item.id,
+      frase: item,
+      categoria: item.categoria,
+    });
+  }
+}
 
   return (
     <ScreenTemplate
@@ -171,8 +180,8 @@ export function FavoritosScreen({ navigation }) {
               removendo={removendo}
               aoRemover={() => remover(item)}
               aoAbrir={
-                tipo === 'atividades'
-                  ? () => abrirAtividade(item)
+                tipo === 'atividades' || tipo === 'frases'
+                  ? () => abrirFavorito(item)
                   : undefined
               }
             />

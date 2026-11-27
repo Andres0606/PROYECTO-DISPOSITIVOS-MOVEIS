@@ -48,11 +48,6 @@ export function DetalheFrase({
         </Text>
       </Card>
 
-      <Button
-        titulo={falando ? 'Parar pronúncia' : 'Ouvir pronúncia'}
-        variante="contorno"
-        aoPressionar={aoPronunciar}
-      />
 
       {!!frase.explicacao && (
         <Card>

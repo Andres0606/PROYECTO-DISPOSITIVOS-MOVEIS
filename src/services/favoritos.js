@@ -1,49 +1,14 @@
-
 // SERVICE — Favoritos
 
-import {
-  obterLocaisFavoritos,
-  removerFavoritoLocal,
-} from './locais';
+import { obterLocaisFavoritos, removerFavoritoLocal } from './locais';
+import { obterAtividadesFavoritas, removerFavoritoAtividade } from './atividades';
+import { obterFrasesFavoritas, removerFavoritoFrase } from './frases';
 
-import {
-  obterAtividadesFavoritas,
-  removerFavoritoAtividade,
-} from './atividades';
-
-// Dados temporários — frases
-let FAVORITOS = {
-  frases: [
-    {
-      id: 'frase-1',
-      titulo: 'Tudo bem?',
-      descricao: '¿Todo bien?',
-    },
-    {
-      id: 'frase-2',
-      titulo: 'Quanto custa?',
-      descricao: '¿Cuánto cuesta?',
-    },
-    {
-      id: 'frase-3',
-      titulo: 'Onde fica?',
-      descricao: '¿Dónde queda?',
-    },
-  ],
-};
-
-function esperar(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-// Listar favoritos
 export async function obterFavoritos(tipo) {
   if (tipo === 'lugares') {
     const locais = await obterLocaisFavoritos();
 
-    return locais.map((local) => ({
+    return locais.map(local => ({
       ...local,
       imagem: local.imagemUrl ?? null,
     }));
@@ -53,28 +18,29 @@ export async function obterFavoritos(tipo) {
     return obterAtividadesFavoritas();
   }
 
-  await esperar(150);
+  if (tipo === 'frases') {
+    const frases = await obterFrasesFavoritas();
 
-  return [...(FAVORITOS[tipo] ?? [])];
+    return frases.map(frase => ({
+      ...frase,
+      titulo: frase.portugues,
+      descricao: frase.espanhol,
+    }));
+  }
+
+  return [];
 }
 
-// Remover favorito
 export async function removerFavorito(tipo, id) {
   if (tipo === 'lugares') {
     await removerFavoritoLocal(id);
-    return true;
-  }
-
-  if (tipo === 'atividades') {
+  } else if (tipo === 'atividades') {
     await removerFavoritoAtividade(id);
-    return true;
+  } else if (tipo === 'frases') {
+    await removerFavoritoFrase(id);
+  } else {
+    throw new Error('Tipo de favorito inválido.');
   }
-
-  await esperar(150);
-
-  FAVORITOS[tipo] = (FAVORITOS[tipo] ?? []).filter(
-    (item) => item.id !== id
-  );
 
   return true;
 }

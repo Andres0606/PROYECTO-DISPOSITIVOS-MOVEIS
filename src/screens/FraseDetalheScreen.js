@@ -4,7 +4,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import * as Speech from 'expo-speech';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { DetalheFrase } from '../components/organisms/DetalheFrase';
 import { Button } from '../components/atoms/Button';
@@ -73,7 +72,6 @@ export function FraseDetalheScreen({ navigation, route }) {
         consultaAtual.current += 1;
         audioAtual.current += 1;
         audioAtivo.current = false;
-        Speech.stop().catch(() => {});
       };
     }, [carregar, revisao])
   );
@@ -108,49 +106,7 @@ export function FraseDetalheScreen({ navigation, route }) {
     }
   }
 
-  async function pronunciar() {
-    if (!frase?.portugues) return;
-
-    const audio = ++audioAtual.current;
-    const estavaFalando = audioAtivo.current;
-
-    audioAtivo.current = !estavaFalando;
-    setFalando(!estavaFalando);
-
-    function finalizar() {
-      if (audio === audioAtual.current) {
-        audioAtivo.current = false;
-        setFalando(false);
-      }
-    }
-
-    function falhar() {
-      if (audio !== audioAtual.current) return;
-
-      finalizar();
-
-      if (navigation.isFocused()) {
-        Alert.alert('Pronúncia', 'Não foi possível reproduzir a frase.');
-      }
-    }
-
-    try {
-      await Speech.stop();
-
-      if (audio !== audioAtual.current || estavaFalando) return;
-
-      Speech.speak(frase.portugues, {
-        language: 'pt-BR',
-        rate: 0.85,
-        pitch: 1,
-        onDone: finalizar,
-        onStopped: finalizar,
-        onError: falhar,
-      });
-    } catch {
-      falhar();
-    }
-  }
+  
 
   return (
     <ScreenTemplate titulo="Frase"
@@ -174,7 +130,6 @@ export function FraseDetalheScreen({ navigation, route }) {
           ocupado={ocupado}
           falando={falando}
           aoAlternarFavorita={alternarFavorita}
-          aoPronunciar={pronunciar}
         />
       )}
     </ScreenTemplate>

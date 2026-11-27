@@ -1,8 +1,6 @@
 // NAVIGATION — PerfilStack
 
-import {
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { PerfilScreen } from '../screens/PerfilScreen';
 import { EditarPerfilScreen } from '../screens/EditarPerfilScreen';
@@ -11,68 +9,38 @@ import { RecursosScreen } from '../screens/RecursosScreen';
 import { FavoritosScreen } from '../screens/FavoritosScreen';
 import { AtividadeDetalheScreen } from '../screens/AtividadeDetalheScreen';
 import { EditarAtividadeScreen } from '../screens/EditarAtividadeScreen';
+import { FraseDetalheScreen } from '../screens/FraseDetalheScreen';
 
-const Stack =
-  createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
 
-export function PerfilStack({
-  route,
-}) {
-  const usuario =
-    route.params?.usuario;
+export function PerfilStack({ route }) {
+  const usuario = route.params?.usuario;
 
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen
-        name="PerfilPrincipal"
-        component={
-          PerfilScreen
-        }
-        initialParams={{
-          usuario,
-        }}
-      />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="PerfilPrincipal"
+        component={PerfilScreen} initialParams={{ usuario }} />
 
-      <Stack.Screen
-        name="EditarPerfil"
-        component={
-          EditarPerfilScreen
-        }
-      />
+      <Stack.Screen name="EditarPerfil"
+        component={EditarPerfilScreen} />
 
-      <Stack.Screen
-        name="Configuracoes"
-        component={
-          ConfiguracoesScreen
-        }
-      />
+      <Stack.Screen name="Configuracoes"
+        component={ConfiguracoesScreen} />
 
-      <Stack.Screen
-        name="Favoritos"
-        component={
-          FavoritosScreen
-        }
-      />
-      <Stack.Screen
-  name="AtividadeDetalhe"
-  component={AtividadeDetalheScreen}
-/>
+      <Stack.Screen name="Favoritos"
+        component={FavoritosScreen} />
 
-<Stack.Screen
-  name="EditarAtividade"
-  component={EditarAtividadeScreen}
-/>
+      <Stack.Screen name="AtividadeDetalhe"
+        component={AtividadeDetalheScreen} />
 
-      <Stack.Screen
-        name="Recursos"
-        component={
-          RecursosScreen
-        }
-      />
+      <Stack.Screen name="EditarAtividade"
+        component={EditarAtividadeScreen} />
+
+      <Stack.Screen name="FraseDetalhe"
+        component={FraseDetalheScreen} />
+
+      <Stack.Screen name="Recursos"
+        component={RecursosScreen} />
     </Stack.Navigator>
   );
 }
