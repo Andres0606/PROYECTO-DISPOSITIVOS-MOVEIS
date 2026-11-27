@@ -8,19 +8,21 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { useTema } from '../../theme/useTema';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 export function BotaoVoltar({
   aoPressionar,
   style,
 }) {
   const { cores } = useTema();
+  const { t } = usePreferencias();
 
   return (
     <Pressable
       onPress={aoPressionar}
       hitSlop={12}
       accessibilityRole="button"
-      accessibilityLabel="Voltar"
+      accessibilityLabel={t('comum.voltar')}
       style={({ pressed }) => [
         estilos.botao,
         pressed && estilos.pressionado,

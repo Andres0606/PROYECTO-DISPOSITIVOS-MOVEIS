@@ -1,12 +1,24 @@
 // MOLECULE — SeletorImagem
 
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 import { Button } from '../atoms/Button';
 import { FotoLocal } from '../atoms/FotoLocal';
-import { espacamentos, raios, tipografia } from '../../theme';
+
+import {
+  espacamentos,
+  raios,
+  tipografia,
+} from '../../theme';
+
 import { useTema } from '../../theme/useTema';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 export function SeletorImagem({
   uri,
@@ -14,14 +26,21 @@ export function SeletorImagem({
   aoEscolher,
   aoRemover,
   desabilitado = false,
-  rotulo = 'Foto da atividade (opcional)',
+  rotulo,
 }) {
   const { cores } = useTema();
+  const { t } = usePreferencias();
 
   return (
     <View style={estilos.container}>
-      <Text style={[estilos.rotulo, { color: cores.texto }]}>
-        {rotulo}
+
+      <Text
+        style={[
+          estilos.rotulo,
+          { color: cores.texto },
+        ]}
+      >
+        {rotulo ?? t('componentes.fotoAtividade')}
       </Text>
 
       <FotoLocal
@@ -30,45 +49,63 @@ export function SeletorImagem({
       />
 
       <View style={estilos.linha}>
+
         <View style={estilos.botao}>
+
           <Button
-            titulo="Tirar foto"
+            titulo={t('componentes.tirarFoto')}
             variante="escuro"
             aoPressionar={aoCapturar}
             desabilitado={desabilitado}
             icone={
-              <Ionicons name="camera-outline" size={18}
-                color={cores.textoBotaoPrincipal} />
+              <Ionicons
+                name="camera-outline"
+                size={18}
+                color={cores.textoBotaoPrincipal}
+              />
             }
           />
+
         </View>
 
         <View style={estilos.botao}>
+
           <Button
-            titulo="Galeria"
+            titulo={t('componentes.galeria')}
             variante="contorno"
             aoPressionar={aoEscolher}
             desabilitado={desabilitado}
             icone={
-              <Ionicons name="images-outline" size={18}
-                color={cores.texto} />
+              <Ionicons
+                name="images-outline"
+                size={18}
+                color={cores.texto}
+              />
             }
           />
+
         </View>
+
       </View>
 
       {!!uri && (
         <Button
-          titulo="Remover foto"
+          titulo={t('componentes.removerFoto')}
           variante="link"
           aoPressionar={aoRemover}
           desabilitado={desabilitado}
         />
       )}
 
-      <Text style={[estilos.ajuda, { color: cores.textoSecundario }]}>
-        JPG, PNG ou WEBP · Até 5 MB
+      <Text
+        style={[
+          estilos.ajuda,
+          { color: cores.textoSecundario },
+        ]}
+      >
+        {t('componentes.formatosImagem')}
       </Text>
+
     </View>
   );
 }
@@ -78,20 +115,27 @@ const estilos = StyleSheet.create({
     gap: espacamentos.sm,
     marginBottom: espacamentos.lg,
   },
+
   rotulo: {
     fontSize: tipografia.legenda,
     fontWeight: '700',
   },
+
   imagem: {
     width: '100%',
     height: 150,
     borderRadius: raios.sm,
   },
+
   linha: {
     flexDirection: 'row',
     gap: espacamentos.sm,
   },
-  botao: { flex: 1 },
+
+  botao: {
+    flex: 1,
+  },
+
   ajuda: {
     fontSize: tipografia.legenda,
     textAlign: 'center',

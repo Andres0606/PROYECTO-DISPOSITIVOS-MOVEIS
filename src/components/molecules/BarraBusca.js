@@ -18,14 +18,16 @@ import {
 } from '../../theme';
 
 import { useTema } from '../../theme/useTema';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 export function BarraBusca({
   valor,
   aoMudar,
-  placeholder = 'Buscar...',
+  placeholder,
   aoFiltrar,
 }) {
   const { cores } = useTema();
+  const { t } = usePreferencias();
 
   const estilos = useMemo(
     () => criarEstilos(cores),
@@ -46,7 +48,9 @@ export function BarraBusca({
         <TextInput
           value={valor}
           onChangeText={aoMudar}
-          placeholder={placeholder}
+          placeholder={
+            placeholder ?? t('componentes.buscar')
+          }
           placeholderTextColor={cores.textoSecundario}
           returnKeyType="search"
           autoCorrect={false}
@@ -59,7 +63,7 @@ export function BarraBusca({
         <Pressable
           onPress={aoFiltrar}
           accessibilityRole="button"
-          accessibilityLabel="Filtros"
+          accessibilityLabel={t('componentes.filtros')}
           style={({ pressed }) => [
             estilos.botao,
             pressed && estilos.pressionado,

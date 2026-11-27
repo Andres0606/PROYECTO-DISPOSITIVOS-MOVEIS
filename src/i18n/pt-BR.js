@@ -75,4 +75,14 @@ export default {
     encerrada: 'Sessão encerrada',
     invalida: 'Sua sessão não está mais válida. Faça login novamente.',
   },
+
+    componentes: {
+    buscar: 'Buscar...',
+    filtros: 'Filtros',
+    fotoAtividade: 'Foto da atividade (opcional)',
+    tirarFoto: 'Tirar foto',
+    galeria: 'Galeria',
+    removerFoto: 'Remover foto',
+    formatosImagem: 'JPG, PNG ou WEBP · Até 5 MB',
+  },
 };

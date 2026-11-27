@@ -4,7 +4,6 @@
 import { StyleSheet } from 'react-native';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
 import { Ionicons } from '@expo/vector-icons';
 
 import { PerfilStack } from './PerfilStack';
@@ -15,12 +14,11 @@ import { GastosStack } from './GastosStack';
 
 import { tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 const Tab = createBottomTabNavigator();
 
-// ============================================================
 // ÍCONES DAS ABAS
-// ============================================================
 
 const ICONES = {
   Inicio: 'home-outline',
@@ -30,9 +28,7 @@ const ICONES = {
   Perfil: 'contrast-outline',
 };
 
-// ============================================================
 // CONFIGURAÇÕES DAS ABAS
-// ============================================================
 
 function opcoesAba(rotulo, nomeRota) {
   return {
@@ -50,14 +46,13 @@ function opcoesAba(rotulo, nomeRota) {
   };
 }
 
-// ============================================================
 // NAVEGAÇÃO PRINCIPAL
-// ============================================================
 
 export function MainTabs({ route }) {
   const usuario = route.params?.usuario;
 
   const { cores } = useTema();
+  const { t } = usePreferencias();
 
   return (
     <Tab.Navigator
@@ -93,7 +88,7 @@ export function MainTabs({ route }) {
         component={InicioStack}
         initialParams={{ usuario }}
         options={opcoesAba(
-          'Início',
+          t('navegacao.inicio'),
           'Inicio'
         )}
       />
@@ -102,7 +97,7 @@ export function MainTabs({ route }) {
         name="Explorar"
         component={ExploreStack}
         options={opcoesAba(
-          'Explorar',
+          t('navegacao.explorar'),
           'Explorar'
         )}
       />
@@ -111,7 +106,7 @@ export function MainTabs({ route }) {
         name="Intercambio"
         component={IntercambioStack}
         options={opcoesAba(
-          'Intercâmbio',
+          t('navegacao.intercambio'),
           'Intercambio'
         )}
       />
@@ -120,7 +115,7 @@ export function MainTabs({ route }) {
         name="Gastos"
         component={GastosStack}
         options={opcoesAba(
-          'Gastos',
+          t('navegacao.gastos'),
           'Gastos'
         )}
       />
@@ -130,7 +125,7 @@ export function MainTabs({ route }) {
         component={PerfilStack}
         initialParams={{ usuario }}
         options={opcoesAba(
-          'Perfil',
+          t('navegacao.perfil'),
           'Perfil'
         )}
       />
@@ -139,9 +134,7 @@ export function MainTabs({ route }) {
   );
 }
 
-// ============================================================
 // ESTILOS
-// ============================================================
 
 const estilos = StyleSheet.create({
   barra: {
