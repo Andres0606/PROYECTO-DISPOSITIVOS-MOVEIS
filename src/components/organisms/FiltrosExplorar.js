@@ -1,3 +1,4 @@
+
 // ORGANISM — FiltrosExplorar
 
 import { StyleSheet, View } from 'react-native';
@@ -17,7 +18,6 @@ const VISOES = [
 export function FiltrosExplorar({
   busca,
   aoMudarBusca,
-  aoFiltrar,
   visao,
   aoMudarVisao,
   categoria,
@@ -25,21 +25,16 @@ export function FiltrosExplorar({
   categorias = [],
 }) {
   const opcoes = [
-    {
-      id: CATEGORIA_TODOS,
-      nome: 'Todos',
-    },
+    { id: CATEGORIA_TODOS, nome: 'Todos' },
     ...categorias,
   ];
 
   return (
     <View style={estilos.bloco}>
-
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
         placeholder="Buscar lugares..."
-        aoFiltrar={aoFiltrar}
       />
 
       <BotaoSegmentado
@@ -49,20 +44,15 @@ export function FiltrosExplorar({
       />
 
       <View style={estilos.pills}>
-
-        {opcoes.map((item) => (
+        {opcoes.map(item => (
           <Pill
             key={item.id}
             titulo={item.nome}
             selecionado={item.id === categoria}
-            aoPressionar={() =>
-              aoMudarCategoria(item.id)
-            }
+            aoPressionar={() => aoMudarCategoria(item.id)}
           />
         ))}
-
       </View>
-
     </View>
   );
 }

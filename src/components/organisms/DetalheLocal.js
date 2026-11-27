@@ -1,23 +1,15 @@
+
 // ORGANISM — DetalheLocal
 
 import { useMemo } from 'react';
-
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '../atoms/Card';
 import { Chip } from '../atoms/Chip';
 import { FotoLocal } from '../atoms/FotoLocal';
+import { MapaLocais } from './MapaLocais';
 
-import {
-  espacamentos,
-  raios,
-  tipografia,
-} from '../../theme';
-
+import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function DetalheLocal({
@@ -28,26 +20,25 @@ export function DetalheLocal({
   aoVerMapa,
 }) {
   const { cores } = useTema();
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
+  const locaisMapa = useMemo(() => [local], [local]);
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
+  const temEndereco = !!(local.endereco || local.bairro);
+
+  const temInformacoes = !!(
+    local.horario ||
+    local.telefone ||
+    local.siteUrl
   );
 
-  const temEndereco =
-    !!(local.endereco || local.bairro);
-
-  const temInformacoes =
-    !!(
-      local.horario ||
-      local.telefone ||
-      local.siteUrl
-    );
+  const temCoordenadas =
+    Number.isFinite(local.latitude) &&
+    Number.isFinite(local.longitude) &&
+    Math.abs(local.latitude) <= 90 &&
+    Math.abs(local.longitude) <= 180;
 
   return (
     <View>
-
-      {/* FOTO DO LUGAR */}
 
       <FotoLocal
         imagem={
@@ -58,17 +49,11 @@ export function DetalheLocal({
         style={estilos.foto}
       />
 
-      {/* NOME E CATEGORIA */}
-
-      <Text style={estilos.nome}>
-        {local.nome}
-      </Text>
+      <Text style={estilos.nome}>{local.nome}</Text>
 
       <Text style={estilos.subtitulo}>
         {local.categoria}
       </Text>
-
-      {/* DESCRIÇÃO */}
 
       {!!local.descricao && (
         <Text style={estilos.descricao}>
@@ -76,11 +61,8 @@ export function DetalheLocal({
         </Text>
       )}
 
-      {/* ENDEREÇO */}
-
       {temEndereco && (
         <Card style={estilos.endereco}>
-
           <Text style={estilos.tituloSecao}>
             Endereço
           </Text>
@@ -92,19 +74,15 @@ export function DetalheLocal({
           )}
 
           {!!local.bairro && (
-            <Text style={estilos.bairro}>
+            <Text style={estilos.informacao}>
               {local.bairro}
             </Text>
           )}
-
         </Card>
       )}
 
-      {/* INFORMAÇÕES DO LUGAR */}
-
       {temInformacoes && (
         <Card style={estilos.endereco}>
-
           <Text style={estilos.tituloSecao}>
             Informações
           </Text>
@@ -126,21 +104,27 @@ export function DetalheLocal({
               Site: {local.siteUrl}
             </Text>
           )}
-
         </Card>
       )}
 
-      {/* MAPA — VISUALIZAÇÃO FUTURA */}
+      <View style={estilos.mapa}>
+        <Text style={estilos.tituloSecao}>
+          Localização
+        </Text>
 
-      <FotoLocal
-        icone="map-outline"
-        style={estilos.mapa}
-      />
-
-      {/* AÇÕES */}
+        {temCoordenadas ? (
+          <MapaLocais
+            locais={locaisMapa}
+            altura={210}
+          />
+        ) : (
+          <Text style={estilos.informacao}>
+            Coordenadas não disponíveis. Consulte o endereço no Google Maps.
+          </Text>
+        )}
+      </View>
 
       <View style={estilos.acoes}>
-
         <Chip
           titulo="Ver no mapa"
           aoPressionar={aoVerMapa}
@@ -154,29 +138,16 @@ export function DetalheLocal({
                 ? 'Guardado'
                 : 'Guardar'
           }
-
-          variante={
-            guardado
-              ? 'selecionado'
-              : 'suave'
-          }
-
+          variante={guardado ? 'selecionado' : 'suave'}
           aoPressionar={
-            salvando
-              ? undefined
-              : aoAlternarGuardado
+            salvando ? undefined : aoAlternarGuardado
           }
         />
-
       </View>
 
     </View>
   );
 }
-
-// ============================================================
-// ESTILOS
-// ============================================================
 
 function criarEstilos(cores) {
   return StyleSheet.create({
@@ -227,21 +198,14 @@ function criarEstilos(cores) {
       color: cores.texto,
     },
 
-    bairro: {
-      fontSize: tipografia.corpo,
-      color: cores.textoSecundario,
-    },
-
     informacao: {
       fontSize: tipografia.corpo,
       color: cores.textoSecundario,
     },
 
     mapa: {
-      width: '100%',
-      height: 134,
-      marginTop: espacamentos.md,
-      borderRadius: raios.sm,
+      marginTop: espacamentos.lg,
+      gap: espacamentos.xs,
     },
 
     acoes: {
