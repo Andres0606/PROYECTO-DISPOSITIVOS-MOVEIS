@@ -29,6 +29,7 @@ import {
 } from '../theme';
 
 export function LoginScreen({ navigation }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
 
   const {
@@ -119,8 +120,8 @@ export function LoginScreen({ navigation }) {
 
   function emBreve() {
     Alert.alert(
-      'Em breve',
-      'Esta função estará disponível em uma próxima etapa.'
+      grupo1Traducao('grupo1.em_breve'),
+      grupo1Traducao('grupo1.esta_funcao_estara_disponivel_em_uma_proxima_etapa')
     );
   }
 
@@ -149,9 +150,7 @@ export function LoginScreen({ navigation }) {
                 color: cores.textoSecundario,
               },
             ]}
-          >
-            Verificando sessão...
-          </Text>
+          >{grupo1Traducao('grupo1.verificando_sessao')}{' '}</Text>
 
         </View>
 

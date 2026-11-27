@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Recuperar senha
 import { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
@@ -8,6 +9,7 @@ import { recuperarSenha, redefinirSenha } from '../services/auth';
 import { espacamentos } from '../theme';
 
 export function RecoverPasswordScreen({ navigation }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const [etapa, setEtapa] = useState('email');
   const [email, setEmail] = useState('');
   const [carregando, setCarregando] = useState(false);
@@ -24,10 +26,10 @@ export function RecoverPasswordScreen({ navigation }) {
     try {
       const resultado = await recuperarSenha(endereco);
       setEmail(endereco.trim().toLowerCase());
-      setMensagem(resultado.mensagem || 'Se o e-mail estiver cadastrado, você receberá um código.');
+      setMensagem(resultado.mensagem || grupo1Traducao('grupo1.se_o_e_mail_estiver_cadastrado_voce_recebera_um_codigo'));
       setEtapa('codigo');
     } catch (e) {
-      setErro(e.message || 'Não foi possível solicitar a recuperação.');
+      setErro(e.message || grupo1Traducao('grupo1.nao_foi_possivel_solicitar_a_recuperacao'));
     } finally {
       ocupado.current = false;
       setCarregando(false);
@@ -44,7 +46,7 @@ export function RecoverPasswordScreen({ navigation }) {
       await redefinirSenha(token, novaSenha);
       setEtapa('sucesso');
     } catch (e) {
-      setErro(e.message || 'Não foi possível redefinir a senha.');
+      setErro(e.message || grupo1Traducao('grupo1.nao_foi_possivel_redefinir_a_senha'));
     } finally {
       ocupado.current = false;
       setCarregando(false);

@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — RegisterForm
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -10,6 +11,7 @@ import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const [nome, setNome] = useState('');
@@ -66,12 +68,12 @@ export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
   }
   function validar() {
     const novosErros = {};
-    if (!campoObrigatorio(nome)) novosErros.nome = 'Informe seu nome.';
-    if (!paisSelecionado) novosErros.pais = 'Selecione seu país de origem.';
-    if (!universidadeOrigemSelecionada) novosErros.universidadeOrigem = 'Selecione sua universidade de origem.';
-    if (!universidadeDestinoSelecionada) novosErros.universidadeDestino = 'Selecione sua universidade em Chapecó.';
-    if (!emailValido(email)) novosErros.email = 'Informe um e-mail válido.';
-    if (!senhaValida(senha)) novosErros.senha = 'A senha deve ter pelo menos 6 caracteres.';
+    if (!campoObrigatorio(nome)) novosErros.nome = grupo1Traducao('grupo1.informe_seu_nome');
+    if (!paisSelecionado) novosErros.pais = grupo1Traducao('grupo1.selecione_seu_pais_de_origem');
+    if (!universidadeOrigemSelecionada) novosErros.universidadeOrigem = grupo1Traducao('grupo1.selecione_sua_universidade_de_origem');
+    if (!universidadeDestinoSelecionada) novosErros.universidadeDestino = grupo1Traducao('grupo1.selecione_sua_universidade_em_chapeco');
+    if (!emailValido(email)) novosErros.email = grupo1Traducao('grupo1.informe_um_e_mail_valido');
+    if (!senhaValida(senha)) novosErros.senha = grupo1Traducao('grupo1.a_senha_deve_ter_pelo_menos_6_caracteres');
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   }
@@ -81,20 +83,20 @@ export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
   }
   return (
     <View>
-      <FormField rotulo="Nome completo" placeholder="Laura Gomez" value={nome} onChangeText={setNome} autoCapitalize="words" erro={erros.nome} margemInferior={espacamentos.md} />
-      <CampoSelecao rotulo="País de origem" opcoes={paises.map((pais) => pais.nome)} valor={paisSelecionado?.nome || (carregandoDados ? 'Carregando...' : 'Selecione seu país')} aoMudar={selecionarPais} margemInferior={espacamentos.md} />
+      <FormField rotulo={grupo1Traducao('grupo1.nome_completo')} placeholder="Laura Gomez" value={nome} onChangeText={setNome} autoCapitalize="words" erro={erros.nome} margemInferior={espacamentos.md} />
+      <CampoSelecao rotulo={grupo1Traducao('grupo1.pais_de_origem_89')} opcoes={paises.map((pais) => pais.nome)} valor={paisSelecionado?.nome || (carregandoDados ? grupo1Traducao('grupo1.carregando') : grupo1Traducao('grupo1.selecione_seu_pais'))} aoMudar={selecionarPais} margemInferior={espacamentos.md} />
       {!!erros.pais && <Text style={estilos.erroCampo}>{erros.pais}</Text>}
-      <CampoSelecao rotulo="Universidade de origem" opcoes={universidadesOrigem.map((universidade) => universidade.nome)} valor={universidadeOrigemSelecionada?.nome || (paisSelecionado ? 'Selecione sua universidade' : 'Selecione primeiro o país')} aoMudar={selecionarUniversidadeOrigem} margemInferior={espacamentos.md} />
+      <CampoSelecao rotulo={grupo1Traducao('grupo1.universidade_de_origem_90')} opcoes={universidadesOrigem.map((universidade) => universidade.nome)} valor={universidadeOrigemSelecionada?.nome || (paisSelecionado ? grupo1Traducao('grupo1.selecione_sua_universidade') : grupo1Traducao('grupo1.selecione_primeiro_o_pais'))} aoMudar={selecionarUniversidadeOrigem} margemInferior={espacamentos.md} />
       {!!erros.universidadeOrigem && <Text style={estilos.erroCampo}>{erros.universidadeOrigem}</Text>}
-      <CampoSelecao rotulo="Universidade em Chapecó" opcoes={universidadesDestino.map((universidade) => universidade.nome)} valor={universidadeDestinoSelecionada?.nome || (carregandoDados ? 'Carregando...' : 'Selecione a universidade')} aoMudar={selecionarUniversidadeDestino} margemInferior={espacamentos.md} />
+      <CampoSelecao rotulo={grupo1Traducao('grupo1.universidade_em_chapeco_91')} opcoes={universidadesDestino.map((universidade) => universidade.nome)} valor={universidadeDestinoSelecionada?.nome || (carregandoDados ? grupo1Traducao('grupo1.carregando') : grupo1Traducao('grupo1.selecione_a_universidade'))} aoMudar={selecionarUniversidadeDestino} margemInferior={espacamentos.md} />
       {!!erros.universidadeDestino && <Text style={estilos.erroCampo}>{erros.universidadeDestino}</Text>}
-      <FormField rotulo="E-mail" placeholder="laura@email.com" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} erro={erros.email} margemInferior={espacamentos.md} />
-      <FormField rotulo="Senha" placeholder="•••••••" value={senha} onChangeText={setSenha} secureTextEntry autoCapitalize="none" erro={erros.senha} margemInferior={espacamentos.md} />
+      <FormField rotulo={grupo1Traducao('grupo1.e_mail')} placeholder="laura@email.com" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} erro={erros.email} margemInferior={espacamentos.md} />
+      <FormField rotulo={grupo1Traducao('grupo1.senha')} placeholder="•••••••" value={senha} onChangeText={setSenha} secureTextEntry autoCapitalize="none" erro={erros.senha} margemInferior={espacamentos.md} />
       {!!erroDados && <Text style={estilos.erroGeral}>{erroDados}</Text>}
       {!!erroGeral && <Text style={estilos.erroGeral}>{erroGeral}</Text>}
       <View style={estilos.espaco} />
-      <Button titulo="Criar conta" aoPressionar={enviar} carregando={carregando} grande />
-      <Text style={estilos.termos}>Ao clicar em Criar conta, você aceita nossos Termos de Serviço e nossa Política de Privacidade.</Text>
+      <Button titulo={grupo1Traducao('grupo1.criar_conta')} aoPressionar={enviar} carregando={carregando} grande />
+      <Text style={estilos.termos}>{grupo1Traducao('grupo1.ao_clicar_em_criar_conta_voce_aceita_nossos_termos_de_servic')}</Text>
     </View>
   );
 }

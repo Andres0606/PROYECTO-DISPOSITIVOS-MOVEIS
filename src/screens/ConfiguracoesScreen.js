@@ -57,34 +57,31 @@ const idiomas = {
   en: 'English',
 };
 
-const temas = {
-  claro: 'Claro',
-  escuro: 'Escuro',
-};
 
-function rotuloPermissao(status) {
+
+function rotuloPermissao(status, grupo1Traducao) {
   if (status === 'granted') {
-    return 'Permitida';
+    return grupo1Traducao('grupo1.permitida');
   }
 
   if (status === 'denied') {
-    return 'Negada';
+    return grupo1Traducao('grupo1.negada');
   }
 
   if (status === 'undetermined') {
-    return 'Não solicitada';
+    return grupo1Traducao('grupo1.nao_solicitada');
   }
 
   if (status === 'indisponivel') {
-    return 'Indisponível';
+    return grupo1Traducao('grupo1.indisponivel');
   }
 
   return '—';
 }
 
-function formatarGps(coords) {
+function formatarGps(coords, grupo1Traducao) {
   if (!coords) {
-    return 'Nenhuma localização salva';
+    return grupo1Traducao('grupo1.nenhuma_localizacao_salva');
   }
 
   return `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
@@ -95,6 +92,7 @@ function formatarGps(coords) {
 // ============================================================
 
 export function ConfiguracoesScreen({ navigation }) {
+  const { t: grupo1Traducao } = usePreferencias();
 
   const { cores } = useTema();
 
@@ -156,10 +154,10 @@ const estilos = useMemo(
     } catch (erro) {
       setErro(
         erro?.message ??
-          'Não foi possível carregar as configurações.'
+          grupo1Traducao('grupo1.nao_foi_possivel_carregar_as_configuracoes')
       );
     }
-  }, [carregarPreferencias]);
+  }, [carregarPreferencias, grupo1Traducao]);
 
   useFocusEffect(
     useCallback(() => {
@@ -191,9 +189,9 @@ const estilos = useMemo(
       return resultado;
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível atualizar as configurações.'
+          grupo1Traducao('grupo1.nao_foi_possivel_atualizar_as_configuracoes')
       );
 
       return null;
@@ -208,8 +206,8 @@ const estilos = useMemo(
 
   function abrirIdioma() {
     Alert.alert(
-      'Idioma',
-      'Selecione seu idioma de preferência.',
+      grupo1Traducao('grupo1.idioma'),
+      grupo1Traducao('grupo1.selecione_seu_idioma_de_preferencia'),
       [
         {
           text: 'Português',
@@ -243,25 +241,25 @@ const estilos = useMemo(
 
   function abrirTema() {
     Alert.alert(
-      'Tema',
-      'Selecione o tema de sua preferência.',
+      grupo1Traducao('grupo1.tema'),
+      grupo1Traducao('grupo1.selecione_o_tema_de_sua_preferencia'),
       [
         {
-          text: 'Claro',
+          text: grupo1Traducao('grupo1.claro'),
           onPress: () =>
             salvarConfiguracao({
               tema: 'claro',
             }),
         },
         {
-          text: 'Escuro',
+          text: grupo1Traducao('grupo1.escuro'),
           onPress: () =>
             salvarConfiguracao({
               tema: 'escuro',
             }),
         },
         {
-          text: 'Cancelar',
+          text: grupo1Traducao('grupo1.cancelar'),
           style: 'cancel',
         },
       ]
@@ -281,8 +279,8 @@ const estilos = useMemo(
   async function testarNotificacao() {
     if (!configuracoes?.notificacoesAtivas) {
       Alert.alert(
-        'Notificações',
-        'Ative as notificações antes de realizar o teste.'
+        grupo1Traducao('grupo1.notificacoes'),
+        grupo1Traducao('grupo1.ative_as_notificacoes_antes_de_realizar_o_teste')
       );
 
       return;
@@ -294,12 +292,12 @@ const estilos = useMemo(
       await enviarAvisoLocal({
         titulo: 'InterChapecó',
         corpo:
-          'As notificações estão funcionando corretamente.',
+          grupo1Traducao('grupo1.as_notificacoes_estao_funcionando_corretamente'),
       });
 
       Alert.alert(
-        'Notificação enviada',
-        'A notificação deverá aparecer em alguns segundos.'
+        grupo1Traducao('grupo1.notificacao_enviada'),
+        grupo1Traducao('grupo1.a_notificacao_devera_aparecer_em_alguns_segundos')
       );
 
       setPermissoes(
@@ -307,9 +305,9 @@ const estilos = useMemo(
       );
     } catch (erro) {
       Alert.alert(
-        'Notificações',
+        grupo1Traducao('grupo1.notificacoes'),
         erro?.message ??
-          'Não foi possível enviar a notificação.'
+          grupo1Traducao('grupo1.nao_foi_possivel_enviar_a_notificacao')
       );
     } finally {
       setOcupado('');
@@ -337,9 +335,9 @@ const estilos = useMemo(
       }
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível atualizar a localização.'
+          grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_localizacao')
       );
     } finally {
       setOcupado('');
@@ -353,8 +351,8 @@ const estilos = useMemo(
   async function atualizarLocalizacao() {
     if (!configuracoes?.localizacaoPermitida) {
       Alert.alert(
-        'Localização',
-        'Ative a localização nas configurações.'
+        grupo1Traducao('grupo1.localizacao'),
+        grupo1Traducao('grupo1.ative_a_localizacao_nas_configuracoes')
       );
 
       return;
@@ -376,9 +374,9 @@ const estilos = useMemo(
       );
     } catch (erro) {
       Alert.alert(
-        'Localização',
+        grupo1Traducao('grupo1.localizacao'),
         erro?.message ??
-          'Não foi possível obter sua localização.'
+          grupo1Traducao('grupo1.nao_foi_possivel_obter_sua_localizacao')
       );
     } finally {
       setOcupado('');
@@ -391,15 +389,15 @@ const estilos = useMemo(
 
   function confirmarRemocaoLocalizacao() {
     Alert.alert(
-      'Remover localização',
-      'Deseja apagar a localização salva?',
+      grupo1Traducao('grupo1.remover_localizacao'),
+      grupo1Traducao('grupo1.deseja_apagar_a_localizacao_salva'),
       [
         {
-          text: 'Cancelar',
+          text: grupo1Traducao('grupo1.cancelar'),
           style: 'cancel',
         },
         {
-          text: 'Remover',
+          text: grupo1Traducao('grupo1.remover'),
           style: 'destructive',
           onPress: removerLocalizacaoSalva,
         },
@@ -414,8 +412,8 @@ const estilos = useMemo(
       setLocalizacao(null);
     } catch (erro) {
       Alert.alert(
-        'Erro',
-        'Não foi possível remover a localização salva.'
+        grupo1Traducao('grupo1.erro'),
+        grupo1Traducao('grupo1.nao_foi_possivel_remover_a_localizacao_salva')
       );
     }
   }
@@ -426,12 +424,12 @@ const estilos = useMemo(
 
   function abrirPrivacidade() {
     Alert.alert(
-      'Privacidade',
-      'Suas preferências são vinculadas à sua conta. ' +
-        'A localização GPS é armazenada apenas neste dispositivo. ' +
-        'Você pode removê-la a qualquer momento. ' +
-        'As fotos de perfil são armazenadas no servidor e podem ' +
-        'ser acessadas por quem possuir o endereço da imagem.',
+      grupo1Traducao('grupo1.privacidade'),
+      grupo1Traducao('grupo1.suas_preferencias_sao_vinculadas_a_sua_conta') +
+        grupo1Traducao('grupo1.a_localizacao_gps_e_armazenada_apenas_neste_dispositivo') +
+        grupo1Traducao('grupo1.voce_pode_remove_la_a_qualquer_momento') +
+        grupo1Traducao('grupo1.as_fotos_de_perfil_sao_armazenadas_no_servidor_e_podem') +
+        grupo1Traducao('grupo1.ser_acessadas_por_quem_possuir_o_endereco_da_imagem'),
       [
         {
           text: 'OK',
@@ -447,7 +445,7 @@ const estilos = useMemo(
   function abrirSobre() {
     Alert.alert(
       'InterChapecó',
-      'Versão 1.0'
+      grupo1Traducao('grupo1.versao_1_0')
     );
   }
 
@@ -459,7 +457,7 @@ const estilos = useMemo(
 
   return (
     <ScreenTemplate
-      titulo="Configurações"
+      titulo={grupo1Traducao('grupo1.configuracoes')}
       aoVoltar={() => navigation.goBack()}
     >
 
@@ -473,9 +471,7 @@ const estilos = useMemo(
             onPress={carregarDados}
             style={estilos.botaoSecundario}
           >
-            <Text style={estilos.botaoSecundarioTexto}>
-              Tentar novamente
-            </Text>
+            <Text style={estilos.botaoSecundarioTexto}>{grupo1Traducao('grupo1.tentar_novamente')}{' '}</Text>
           </Pressable>
         </View>
       )}
@@ -492,7 +488,7 @@ const estilos = useMemo(
           <View style={estilos.menu}>
 
             <OpcaoConfiguracao
-              titulo="Idioma"
+              titulo={grupo1Traducao('grupo1.idioma')}
               valor={
                 idiomas[configuracoes.idioma] ??
                 'Português'
@@ -502,37 +498,36 @@ const estilos = useMemo(
             />
 
             <OpcaoInterruptor
-              titulo="Notificações"
+              titulo={grupo1Traducao('grupo1.notificacoes')}
               valor={configuracoes.notificacoesAtivas}
               aoMudar={alterarNotificacoes}
               desabilitado={trabalhando}
             />
 
             <OpcaoInterruptor
-              titulo="Localização"
+              titulo={grupo1Traducao('grupo1.localizacao')}
               valor={configuracoes.localizacaoPermitida}
               aoMudar={alterarPermissaoLocalizacao}
               desabilitado={trabalhando}
             />
 
             <OpcaoConfiguracao
-              titulo="Privacidade"
+              titulo={grupo1Traducao('grupo1.privacidade')}
               aoPressionar={abrirPrivacidade}
               desabilitado={trabalhando}
             />
 
             <OpcaoConfiguracao
-              titulo="Tema"
+              titulo={grupo1Traducao('grupo1.tema')}
               valor={
-                temas[configuracoes.tema] ??
-                'Claro'
+                configuracoes.tema === 'escuro' ? grupo1Traducao('grupo1.escuro') : grupo1Traducao('grupo1.claro')
               }
               aoPressionar={abrirTema}
               desabilitado={trabalhando}
             />
 
             <OpcaoConfiguracao
-              titulo="Sobre o app"
+              titulo={grupo1Traducao('grupo1.sobre_o_app')}
               valor="v1.0"
               aoPressionar={abrirSobre}
               desabilitado={trabalhando}
@@ -544,14 +539,11 @@ const estilos = useMemo(
 
           <View style={estilos.secaoLocalizacao}>
 
-            <Text style={estilos.tituloSecao}>
-              Notificações
-            </Text>
+            <Text style={estilos.tituloSecao}>{grupo1Traducao('grupo1.notificacoes')}{' '}</Text>
 
-            <Text style={estilos.textoSecundario}>
-              Permissão do dispositivo:{' '}
+            <Text style={estilos.textoSecundario}>{grupo1Traducao('grupo1.permissao_do_dispositivo')}{' '}
               {rotuloPermissao(
-                permissoes.notificacoes
+                permissoes.notificacoes, grupo1Traducao
               )}
             </Text>
 
@@ -583,8 +575,8 @@ const estilos = useMemo(
 
                 <Text style={estilos.botaoPrincipalTexto}>
                   {ocupado === 'notificacao'
-                    ? 'Enviando...'
-                    : 'Testar notificação'}
+                    ? grupo1Traducao('grupo1.enviando')
+                    : grupo1Traducao('grupo1.testar_notificacao')}
                 </Text>
 
               </Pressable>
@@ -597,27 +589,21 @@ const estilos = useMemo(
 
           <View style={estilos.secaoLocalizacao}>
 
-            <Text style={estilos.tituloSecao}>
-              Localização salva
-            </Text>
+            <Text style={estilos.tituloSecao}>{grupo1Traducao('grupo1.localizacao_salva')}{' '}</Text>
 
-            <Text style={estilos.textoSecundario}>
-              Permissão do dispositivo:{' '}
+            <Text style={estilos.textoSecundario}>{grupo1Traducao('grupo1.permissao_do_dispositivo')}{' '}
               {rotuloPermissao(
-                permissoes.localizacao
+                permissoes.localizacao, grupo1Traducao
               )}
             </Text>
 
             <Text style={estilos.localizacaoTexto}>
-              {formatarGps(localizacao)}
+              {formatarGps(localizacao, grupo1Traducao)}
             </Text>
 
             {localizacao?.precisao != null && (
-              <Text style={estilos.textoSecundario}>
-                Precisão aproximada:{' '}
-                {Math.round(localizacao.precisao)}{' '}
-                metros
-              </Text>
+              <Text style={estilos.textoSecundario}>{grupo1Traducao('grupo1.precisao_aproximada')}{' '}
+                {Math.round(localizacao.precisao)}{' '}{grupo1Traducao('grupo1.metros')}{' '}</Text>
             )}
 
             <View style={estilos.acoesLocalizacao}>
@@ -648,8 +634,8 @@ const estilos = useMemo(
 
                 <Text style={estilos.botaoPrincipalTexto}>
                   {ocupado === 'gps'
-                    ? 'Obtendo...'
-                    : 'Atualizar localização'}
+                    ? grupo1Traducao('grupo1.obtendo')
+                    : grupo1Traducao('grupo1.atualizar_localizacao')}
                 </Text>
 
               </Pressable>
@@ -665,9 +651,7 @@ const estilos = useMemo(
                       estilos.pressionado,
                   ]}
                 >
-                  <Text style={estilos.botaoSecundarioTexto}>
-                    Remover
-                  </Text>
+                  <Text style={estilos.botaoSecundarioTexto}>{grupo1Traducao('grupo1.remover')}{' '}</Text>
                 </Pressable>
               )}
 

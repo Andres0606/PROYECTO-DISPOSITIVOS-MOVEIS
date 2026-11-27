@@ -12,6 +12,7 @@ import { obterUsuario } from '../services/storage';
 import { espacamentos, raios, tipografia } from '../theme';
 
 export function AdminPerfilScreen({ navigation, route }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
   const { restaurarPreferencias } = usePreferencias();
   const [usuario, setUsuario] = useState(route.params?.usuario);
@@ -24,12 +25,12 @@ export function AdminPerfilScreen({ navigation, route }) {
         const salvo = await obterUsuario();
         if (ativo && salvo) setUsuario(salvo);
       } catch (erro) {
-        if (ativo) Alert.alert('Erro', 'Não foi possível carregar o perfil.');
+        if (ativo) Alert.alert(grupo1Traducao('grupo1.erro'), grupo1Traducao('grupo1.nao_foi_possivel_carregar_o_perfil'));
       }
     }
     carregar();
     return () => { ativo = false; };
-  }, []));
+  }, [grupo1Traducao]));
 
   async function sair() {
     setSaindo(true);
@@ -41,20 +42,20 @@ export function AdminPerfilScreen({ navigation, route }) {
         routes: [{ name: 'Login' }],
       });
     } catch (erro) {
-      Alert.alert('Erro', 'Não foi possível encerrar a sessão.');
+      Alert.alert(grupo1Traducao('grupo1.erro'), grupo1Traducao('grupo1.nao_foi_possivel_encerrar_a_sessao'));
       setSaindo(false);
     }
   }
 
   function confirmarLogout() {
-    Alert.alert('Encerrar sessão', 'Tem certeza que deseja sair da sua conta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: sair },
+    Alert.alert(grupo1Traducao('grupo1.encerrar_sessao'), grupo1Traducao('grupo1.tem_certeza_que_deseja_sair_da_sua_conta'), [
+      { text: grupo1Traducao('grupo1.cancelar'), style: 'cancel' },
+      { text: grupo1Traducao('grupo1.sair'), style: 'destructive', onPress: sair },
     ]);
   }
 
   return (
-    <ScreenTemplate titulo="Perfil">
+    <ScreenTemplate titulo={grupo1Traducao('grupo1.perfil')}>
       <View style={[estilos.cartao, { backgroundColor: cores.superficie, borderColor: cores.borda }]}>
         {usuario?.fotoUrl ? (
           <Image source={{ uri: usuario.fotoUrl }} style={estilos.avatar} />
@@ -64,15 +65,15 @@ export function AdminPerfilScreen({ navigation, route }) {
           </View>
         )}
         <View style={estilos.dados}>
-          <Text style={[estilos.nome, { color: cores.texto }]}>{usuario?.nome ?? 'Administrador'}</Text>
-          <Text style={[estilos.info, { color: cores.textoSecundario }]}>{usuario?.email ?? 'Não informado'}</Text>
-          <Text style={[estilos.info, { color: cores.textoSecundario }]}>{usuario?.rol?.nome ?? 'Administrador'}</Text>
+          <Text style={[estilos.nome, { color: cores.texto }]}>{usuario?.nome ?? grupo1Traducao('grupo1.administrador')}</Text>
+          <Text style={[estilos.info, { color: cores.textoSecundario }]}>{usuario?.email ?? grupo1Traducao('grupo1.nao_informado')}</Text>
+          <Text style={[estilos.info, { color: cores.textoSecundario }]}>{grupo1Traducao('grupo1.administrador')}</Text>
         </View>
       </View>
       <View style={estilos.acoes}>
-        <Button titulo="Configurações" variante="secundario"
+        <Button titulo={grupo1Traducao('grupo1.configuracoes')} variante="secundario"
           aoPressionar={() => navigation.navigate('Configuracoes')} desabilitado={saindo} />
-        <Button titulo="Encerrar sessão" variante="contorno"
+        <Button titulo={grupo1Traducao('grupo1.encerrar_sessao')} variante="contorno"
           aoPressionar={confirmarLogout} carregando={saindo} desabilitado={saindo} />
       </View>
     </ScreenTemplate>

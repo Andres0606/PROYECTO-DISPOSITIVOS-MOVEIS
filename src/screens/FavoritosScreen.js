@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Favoritos
 
@@ -15,13 +16,15 @@ import { obterFavoritos, removerFavorito } from '../services/favoritos';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-const OPCOES = [
-  { titulo: 'Lugares', valor: 'lugares' },
-  { titulo: 'Frases', valor: 'frases' },
-  { titulo: 'Atividades', valor: 'atividades' },
-];
+
 
 export function FavoritosScreen({ navigation }) {
+  const { t: grupo1Traducao } = usePreferencias();
+  const OPCOES = [
+  { titulo: grupo1Traducao('grupo1.lugares'), valor: 'lugares' },
+  { titulo: grupo1Traducao('grupo1.frases'), valor: 'frases' },
+  { titulo: grupo1Traducao('grupo1.atividades'), valor: 'atividades' },
+];
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
 
@@ -50,14 +53,14 @@ export function FavoritosScreen({ navigation }) {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setFavoritos([]);
-        setErro('Não foi possível carregar os favoritos. Tente novamente.');
+        setErro(grupo1Traducao('grupo1.nao_foi_possivel_carregar_os_favoritos_tente_novamente'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, [tipo]);
+  }, [tipo, grupo1Traducao]);
 
   useFocusEffect(
     useCallback(() => {
@@ -97,8 +100,8 @@ export function FavoritosScreen({ navigation }) {
       }
     } catch (erro) {
       Alert.alert(
-        'Favoritos',
-        'Não foi possível remover o favorito. Tente novamente.'
+        grupo1Traducao('grupo1.favoritos'),
+        grupo1Traducao('grupo1.nao_foi_possivel_remover_o_favorito_tente_novamente')
       );
     } finally {
       bloqueio.current = false;
@@ -126,7 +129,7 @@ function abrirFavorito(item) {
 
   return (
     <ScreenTemplate
-      titulo="Favoritos"
+      titulo={grupo1Traducao('grupo1.favoritos')}
       aoVoltar={() => navigation.goBack()}
     >
       <View style={estilos.abas}>
@@ -153,7 +156,7 @@ function abrirFavorito(item) {
           <Text style={estilos.erro}>{erro}</Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={grupo1Traducao('grupo1.tentar_novamente')}
             variante="secundario"
             aoPressionar={carregar}
           />
@@ -166,9 +169,7 @@ function abrirFavorito(item) {
             color={cores.textoSecundario}
           />
 
-          <Text style={estilos.vazioTexto}>
-            Nenhum favorito nesta categoria.
-          </Text>
+          <Text style={estilos.vazioTexto}>{grupo1Traducao('grupo1.nenhum_favorito_nesta_categoria')}{' '}</Text>
         </View>
       ) : (
         <View>

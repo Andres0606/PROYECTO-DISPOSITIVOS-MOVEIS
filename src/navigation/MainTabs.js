@@ -1,8 +1,6 @@
 // NAVIGATION — MainTabs
-// Menu inferior com 5 abas
 
 import { StyleSheet } from 'react-native';
-
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -33,7 +31,6 @@ const ICONES = {
 function opcoesAba(rotulo, nomeRota) {
   return {
     title: rotulo,
-
     tabBarLabel: rotulo,
 
     tabBarIcon: ({ color }) => (
@@ -83,6 +80,7 @@ export function MainTabs({ route }) {
         tabBarHideOnKeyboard: true,
       }}
     >
+
       <Tab.Screen
         name="Inicio"
         component={InicioStack}

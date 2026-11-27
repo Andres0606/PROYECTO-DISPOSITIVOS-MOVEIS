@@ -54,6 +54,7 @@ function NavegacaoPrincipal() {
   const {
     temaEscuro,
     restaurarPreferencias,
+    t,
   } = usePreferencias();
 
   const { cores } = useTema();
@@ -75,11 +76,11 @@ function NavegacaoPrincipal() {
       });
 
       Alert.alert(
-        'Sessão encerrada',
-        'Sua sessão não está mais válida. Faça login novamente.'
+        t('sessao.encerrada'),
+        t('sessao.invalida')
       );
     });
-  }, [restaurarPreferencias]);
+  }, [restaurarPreferencias, t]);
 
   const temaBase = temaEscuro
     ? DarkTheme

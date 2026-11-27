@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // MOLECULE — ItemFavorito
 
 import { useMemo } from 'react';
@@ -15,6 +16,7 @@ const ICONES = {
 };
 
 export function ItemFavorito({ item, tipo, aoAbrir, aoRemover, removendo = false }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const titulo = item.nome ?? item.titulo;
@@ -33,12 +35,12 @@ export function ItemFavorito({ item, tipo, aoAbrir, aoRemover, removendo = false
           <Text style={estilos.titulo} numberOfLines={1}>{titulo}</Text>
           {!!descricao && <Text style={estilos.descricao} numberOfLines={1}>{descricao}</Text>}
           {tipo === 'atividades' && item.vencida && (
-            <View style={estilos.estado}><Etiqueta titulo="Encerrada" /></View>
+            <View style={estilos.estado}><Etiqueta titulo={grupo1Traducao('grupo1.encerrada')} /></View>
           )}
         </View>
       </Pressable>
       <View style={estilos.coracao}>
-        <BotaoIcone nome="heart-outline" tamanho={22} rotulo="Remover dos favoritos"
+        <BotaoIcone nome="heart-outline" tamanho={22} rotulo={grupo1Traducao('grupo1.remover_dos_favoritos')}
           aoPressionar={removendo ? undefined : aoRemover} />
       </View>
     </View>

@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Editar perfil
 
 import { useEffect, useMemo, useState } from 'react';
@@ -43,6 +44,7 @@ import {
 import { useTema } from '../theme/useTema';
 
 export function EditarPerfilScreen({ navigation, route }) {
+  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -126,9 +128,9 @@ export function EditarPerfilScreen({ navigation, route }) {
         }
       } catch (erro) {
         Alert.alert(
-          'Erro',
+          grupo1Traducao('grupo1.erro'),
           erro?.message ??
-            'Não foi possível carregar os dados.'
+            grupo1Traducao('grupo1.nao_foi_possivel_carregar_os_dados')
         );
       } finally {
         setCarregandoDados(false);
@@ -174,9 +176,9 @@ export function EditarPerfilScreen({ navigation, route }) {
       setUniversidadesOrigem(universidades);
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível carregar as universidades.'
+          grupo1Traducao('grupo1.nao_foi_possivel_carregar_as_universidades')
       );
     }
   }
@@ -245,9 +247,9 @@ export function EditarPerfilScreen({ navigation, route }) {
       }
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível atualizar a foto.'
+          grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_foto')
       );
     } finally {
       setOcupado('');
@@ -271,9 +273,9 @@ export function EditarPerfilScreen({ navigation, route }) {
       }
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível atualizar a foto.'
+          grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_foto')
       );
     } finally {
       setOcupado('');
@@ -286,15 +288,15 @@ export function EditarPerfilScreen({ navigation, route }) {
 
   function confirmarRemocaoFoto() {
     Alert.alert(
-      'Remover foto',
-      'Deseja remover a foto do perfil?',
+      grupo1Traducao('grupo1.remover_foto'),
+      grupo1Traducao('grupo1.deseja_remover_a_foto_do_perfil'),
       [
         {
-          text: 'Cancelar',
+          text: grupo1Traducao('grupo1.cancelar'),
           style: 'cancel',
         },
         {
-          text: 'Remover',
+          text: grupo1Traducao('grupo1.remover'),
           style: 'destructive',
           onPress: removerFoto,
         },
@@ -311,9 +313,9 @@ export function EditarPerfilScreen({ navigation, route }) {
       setFotoUri(null);
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível remover a foto.'
+          grupo1Traducao('grupo1.nao_foi_possivel_remover_a_foto')
       );
     } finally {
       setOcupado('');
@@ -335,8 +337,8 @@ export function EditarPerfilScreen({ navigation, route }) {
       !contemLetras(nomeLimpo)
     ) {
       Alert.alert(
-        'Nome inválido',
-        'Informe um nome válido.'
+        grupo1Traducao('grupo1.nome_invalido'),
+        grupo1Traducao('grupo1.informe_um_nome_valido')
       );
 
       return;
@@ -344,8 +346,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
     if (!paisSelecionado) {
       Alert.alert(
-        'País inválido',
-        'Selecione seu país de origem.'
+        grupo1Traducao('grupo1.pais_invalido'),
+        grupo1Traducao('grupo1.selecione_seu_pais_de_origem')
       );
 
       return;
@@ -353,8 +355,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
     if (!universidadeOrigemSelecionada) {
       Alert.alert(
-        'Universidade inválida',
-        'Selecione sua universidade de origem.'
+        grupo1Traducao('grupo1.universidade_invalida'),
+        grupo1Traducao('grupo1.selecione_sua_universidade_de_origem')
       );
 
       return;
@@ -362,8 +364,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
     if (!universidadeDestinoSelecionada) {
       Alert.alert(
-        'Universidade inválida',
-        'Selecione sua universidade em Chapecó.'
+        grupo1Traducao('grupo1.universidade_invalida'),
+        grupo1Traducao('grupo1.selecione_sua_universidade_em_chapeco')
       );
 
       return;
@@ -371,8 +373,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
     if (!emailValido(emailLimpo)) {
       Alert.alert(
-        'E-mail inválido',
-        'Informe um endereço de e-mail válido.'
+        grupo1Traducao('grupo1.e_mail_invalido'),
+        grupo1Traducao('grupo1.informe_um_endereco_de_e_mail_valido')
       );
 
       return;
@@ -397,8 +399,8 @@ export function EditarPerfilScreen({ navigation, route }) {
       });
 
       Alert.alert(
-        'Perfil atualizado',
-        'Suas alterações foram salvas com sucesso.',
+        grupo1Traducao('grupo1.perfil_atualizado'),
+        grupo1Traducao('grupo1.suas_alteracoes_foram_salvas_com_sucesso'),
         [
           {
             text: 'OK',
@@ -408,9 +410,9 @@ export function EditarPerfilScreen({ navigation, route }) {
       );
     } catch (erro) {
       Alert.alert(
-        'Erro',
+        grupo1Traducao('grupo1.erro'),
         erro?.message ??
-          'Não foi possível atualizar o perfil.'
+          grupo1Traducao('grupo1.nao_foi_possivel_atualizar_o_perfil')
       );
     } finally {
       setSalvando(false);
@@ -426,7 +428,7 @@ export function EditarPerfilScreen({ navigation, route }) {
 
   return (
     <ScreenTemplate
-      titulo="Editar Perfil"
+      titulo={grupo1Traducao('grupo1.editar_perfil_55')}
       aoVoltar={() => {
         if (!ocupado && !salvando) {
           navigation.goBack();
@@ -452,20 +454,14 @@ export function EditarPerfilScreen({ navigation, route }) {
           </View>
         )}
 
-        <Text style={estilos.tituloFoto}>
-          Foto de perfil
-        </Text>
+        <Text style={estilos.tituloFoto}>{grupo1Traducao('grupo1.foto_de_perfil')}{' '}</Text>
 
         {ocupado === 'enviando' && (
-          <Text style={estilos.statusFoto}>
-            Enviando foto...
-          </Text>
+          <Text style={estilos.statusFoto}>{grupo1Traducao('grupo1.enviando_foto')}{' '}</Text>
         )}
 
         {ocupado === 'removendo' && (
-          <Text style={estilos.statusFoto}>
-            Removendo foto...
-          </Text>
+          <Text style={estilos.statusFoto}>{grupo1Traducao('grupo1.removendo_foto')}{' '}</Text>
         )}
 
         <View style={estilos.botoesFoto}>
@@ -487,8 +483,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
             <Text style={estilos.botaoFotoTexto}>
               {ocupado === 'camera'
-                ? 'Abrindo...'
-                : 'Tirar foto'}
+                ? grupo1Traducao('grupo1.abrindo')
+                : grupo1Traducao('grupo1.tirar_foto')}
             </Text>
           </Pressable>
 
@@ -509,8 +505,8 @@ export function EditarPerfilScreen({ navigation, route }) {
 
             <Text style={estilos.botaoGaleriaTexto}>
               {ocupado === 'galeria'
-                ? 'Abrindo...'
-                : 'Galeria'}
+                ? grupo1Traducao('grupo1.abrindo')
+                : grupo1Traducao('grupo1.galeria')}
             </Text>
           </Pressable>
 
@@ -526,9 +522,7 @@ export function EditarPerfilScreen({ navigation, route }) {
               trabalhando && estilos.desabilitado,
             ]}
           >
-            <Text style={estilos.botaoRemoverFotoTexto}>
-              Remover foto
-            </Text>
+            <Text style={estilos.botaoRemoverFotoTexto}>{grupo1Traducao('grupo1.remover_foto')}{' '}</Text>
           </Pressable>
         )}
 
@@ -540,9 +534,7 @@ export function EditarPerfilScreen({ navigation, route }) {
 
         <View style={estilos.campo}>
 
-          <Text style={estilos.rotulo}>
-            Nome completo
-          </Text>
+          <Text style={estilos.rotulo}>{grupo1Traducao('grupo1.nome_completo')}{' '}</Text>
 
           <TextInput
             value={nome}
@@ -557,18 +549,18 @@ export function EditarPerfilScreen({ navigation, route }) {
         </View>
 
         <CampoSelecao
-          rotulo="País de origem"
+          rotulo={grupo1Traducao('grupo1.pais_de_origem_89')}
           opcoes={paises.map((pais) => pais.nome)}
           valor={
             paisSelecionado?.nome ||
-            'Selecione seu país'
+            grupo1Traducao('grupo1.selecione_seu_pais')
           }
           aoMudar={selecionarPais}
           margemInferior={espacamentos.sm}
         />
 
         <CampoSelecao
-          rotulo="Universidade de origem"
+          rotulo={grupo1Traducao('grupo1.universidade_de_origem_90')}
           opcoes={
             universidadesOrigem.map(
               (universidade) => universidade.nome
@@ -576,14 +568,14 @@ export function EditarPerfilScreen({ navigation, route }) {
           }
           valor={
             universidadeOrigemSelecionada?.nome ||
-            'Selecione sua universidade'
+            grupo1Traducao('grupo1.selecione_sua_universidade')
           }
           aoMudar={selecionarUniversidadeOrigem}
           margemInferior={espacamentos.sm}
         />
 
         <CampoSelecao
-          rotulo="Universidade em Chapecó"
+          rotulo={grupo1Traducao('grupo1.universidade_em_chapeco_91')}
           opcoes={
             universidadesDestino.map(
               (universidade) => universidade.nome
@@ -591,7 +583,7 @@ export function EditarPerfilScreen({ navigation, route }) {
           }
           valor={
             universidadeDestinoSelecionada?.nome ||
-            'Selecione a universidade'
+            grupo1Traducao('grupo1.selecione_a_universidade')
           }
           aoMudar={selecionarUniversidadeDestino}
           margemInferior={espacamentos.sm}
@@ -599,9 +591,7 @@ export function EditarPerfilScreen({ navigation, route }) {
 
         <View style={estilos.campo}>
 
-          <Text style={estilos.rotulo}>
-            E-mail
-          </Text>
+          <Text style={estilos.rotulo}>{grupo1Traducao('grupo1.e_mail')}{' '}</Text>
 
           <TextInput
             value={email}
@@ -634,8 +624,8 @@ export function EditarPerfilScreen({ navigation, route }) {
         >
           <Text style={estilos.botaoSalvarTexto}>
             {salvando
-              ? 'Salvando...'
-              : 'Guardar alterações'}
+              ? grupo1Traducao('grupo1.salvando')
+              : grupo1Traducao('grupo1.guardar_alteracoes')}
           </Text>
         </Pressable>
 
