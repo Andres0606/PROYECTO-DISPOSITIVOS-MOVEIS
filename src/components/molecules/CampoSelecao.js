@@ -1,5 +1,4 @@
 // MOLECULE — CampoSelecao
-// Campo com lista de opções.
 
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -15,6 +14,7 @@ export function CampoSelecao({
   aoMudar,
   margemInferior,
   desabilitado = false,
+  erro = '',
 }) {
   const { cores } = useTema();
   const [aberto, setAberto] = useState(false);
@@ -27,7 +27,9 @@ export function CampoSelecao({
   }
 
   return (
-    <FormField rotulo={rotulo} margemInferior={margemInferior}>
+    <FormField rotulo={rotulo} erro={erro}
+      margemInferior={margemInferior}>
+
       <Pressable
         onPress={() => setAberto(atual => !atual)}
         disabled={desabilitado}
@@ -39,12 +41,14 @@ export function CampoSelecao({
         style={[
           estilos.campo,
           {
-            borderColor: cores.borda,
+            borderColor: erro
+              ? cores.perigo
+              : aberto && !desabilitado
+                ? cores.bordaFoco
+                : cores.borda,
             backgroundColor: cores.superficie,
           },
-          aberto && !desabilitado && {
-            borderColor: cores.bordaFoco,
-          },
+          desabilitado && estilos.desabilitado,
         ]}
       >
         <Text style={[estilos.valor, { color: cores.texto }]}>
@@ -96,11 +100,8 @@ export function CampoSelecao({
                 </Text>
 
                 {selecionada && (
-                  <Ionicons
-                    name="checkmark"
-                    size={16}
-                    color={cores.texto}
-                  />
+                  <Ionicons name="checkmark" size={16}
+                    color={cores.texto} />
                 )}
               </Pressable>
             );
@@ -122,6 +123,7 @@ const estilos = StyleSheet.create({
     borderRadius: raios.sm,
   },
   valor: {
+    flex: 1,
     fontSize: tipografia.corpo,
   },
   lista: {
@@ -141,9 +143,13 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
   },
   textoOpcao: {
+    flex: 1,
     fontSize: tipografia.corpo,
   },
   textoSelecionado: {
     fontWeight: '600',
+  },
+  desabilitado: {
+    opacity: 0.6,
   },
 });
