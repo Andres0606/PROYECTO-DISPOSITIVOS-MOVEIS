@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Editar gasto
 
@@ -11,6 +12,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ExpenseEditScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const { gastoId } = route.params;
 
@@ -34,12 +36,12 @@ export function ExpenseEditScreen({ navigation, route }) {
       if (consulta === consultaAtual.current) setGasto(resultado);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErroCarga('Não foi possível carregar este gasto.');
+        setErroCarga(t('grupo2.g037'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [gastoId]);
+  }, [t, gastoId]);
 
   useEffect(() => {
     carregar();
@@ -58,7 +60,7 @@ export function ExpenseEditScreen({ navigation, route }) {
 
       if (navigation.isFocused()) navigation.goBack();
     } catch (e) {
-      setErro(e.message || 'Não foi possível concluir a operação.');
+      setErro(e.message || t('grupo2.g020'));
     } finally {
       bloqueio.current = false;
       setOcupado('');
@@ -73,12 +75,12 @@ export function ExpenseEditScreen({ navigation, route }) {
     if (bloqueio.current) return;
 
     Alert.alert(
-      'Excluir gasto',
-      'Esta ação não pode ser desfeita. Deseja continuar?',
+      t('grupo2.g038'),
+      t('grupo2.g022'),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('grupo2.g023'), style: 'cancel' },
         {
-          text: 'Excluir', style: 'destructive',
+          text: t('grupo2.g024'), style: 'destructive',
           onPress: () => executar(() => excluirGasto(gastoId), 'excluir'),
         },
       ]
@@ -86,7 +88,7 @@ export function ExpenseEditScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Editar gasto"
+    <ScreenTemplate titulo={t('grupo2.g039')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
       {carregando ? (
@@ -94,15 +96,15 @@ export function ExpenseEditScreen({ navigation, route }) {
       ) : erroCarga || !gasto ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>
-            {erroCarga || 'Gasto não encontrado.'}
+            {erroCarga || t('grupo2.g040')}
           </Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (
         <FormularioGasto
           valoresIniciais={gasto}
-          rotuloEnviar="Guardar alterações"
+          rotuloEnviar={t('grupo2.g027')}
           aoEnviar={salvar}
           aoExcluir={confirmarExclusao}
           carregando={ocupado === 'salvar'}

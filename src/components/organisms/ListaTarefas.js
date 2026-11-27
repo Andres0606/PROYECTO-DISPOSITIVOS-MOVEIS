@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — ListaTarefas
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -19,6 +21,7 @@ export function ListaTarefas({
   aoAbrir,
   aoEditar,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const progresso = total > 0 ? concluidas / total : 0;
 
@@ -27,7 +30,7 @@ export function ListaTarefas({
       <ProgressBar valor={progresso} altura={8} />
 
       <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-        {`${concluidas} de ${total} tarefas concluídas`}
+        {t('grupo2.g152', { v0: concluidas, v1: total })}
       </Text>
 
       <ScrollView
@@ -39,7 +42,7 @@ export function ListaTarefas({
         {etapas.map(nome => (
           <Pill
             key={nome}
-            titulo={nome}
+            titulo={rotuloCatalogo(nome, t)}
             selecionado={nome === etapa}
             aoPressionar={() => aoMudarEtapa(nome)}
           />
@@ -47,12 +50,12 @@ export function ListaTarefas({
       </ScrollView>
 
       <Text style={[estilos.secao, { color: cores.texto }]}>
-        {etapa}
+        {rotuloCatalogo(etapa, t)}
       </Text>
 
       {tarefas.length === 0 ? (
         <Text style={[estilos.vazio, { color: cores.textoSecundario }]}>
-          Nenhuma tarefa nesta etapa.
+          {t('grupo2.g077')}
         </Text>
       ) : (
         <View>

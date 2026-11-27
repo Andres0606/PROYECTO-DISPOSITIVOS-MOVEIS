@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — DetalheLocal
 
@@ -19,6 +20,7 @@ export function DetalheLocal({
   aoAlternarGuardado,
   aoVerMapa,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const locaisMapa = useMemo(() => [local], [local]);
@@ -64,7 +66,7 @@ export function DetalheLocal({
       {temEndereco && (
         <Card style={estilos.endereco}>
           <Text style={estilos.tituloSecao}>
-            Endereço
+            {t('grupo2.g064')}
           </Text>
 
           {!!local.endereco && (
@@ -84,24 +86,24 @@ export function DetalheLocal({
       {temInformacoes && (
         <Card style={estilos.endereco}>
           <Text style={estilos.tituloSecao}>
-            Informações
+            {t('grupo2.g065')}
           </Text>
 
           {!!local.horario && (
             <Text style={estilos.informacao}>
-              Horário: {local.horario}
+              {t('grupo2.g066')} {local.horario}
             </Text>
           )}
 
           {!!local.telefone && (
             <Text style={estilos.informacao}>
-              Telefone: {local.telefone}
+              {t('grupo2.g067')} {local.telefone}
             </Text>
           )}
 
           {!!local.siteUrl && (
             <Text style={estilos.informacao}>
-              Site: {local.siteUrl}
+              {t('grupo2.g068')} {local.siteUrl}
             </Text>
           )}
         </Card>
@@ -109,7 +111,7 @@ export function DetalheLocal({
 
       <View style={estilos.mapa}>
         <Text style={estilos.tituloSecao}>
-          Localização
+          {t('grupo2.g069')}
         </Text>
 
         {temCoordenadas ? (
@@ -119,24 +121,24 @@ export function DetalheLocal({
           />
         ) : (
           <Text style={estilos.informacao}>
-            Coordenadas não disponíveis. Consulte o endereço no Google Maps.
+            {t('grupo2.g070')}
           </Text>
         )}
       </View>
 
       <View style={estilos.acoes}>
         <Chip
-          titulo="Ver no mapa"
+          titulo={t('grupo2.g071')}
           aoPressionar={aoVerMapa}
         />
 
         <Chip
           titulo={
             salvando
-              ? 'Aguarde...'
+              ? t('grupo2.g072')
               : guardado
-                ? 'Guardado'
-                : 'Guardar'
+                ? t('grupo2.g073')
+                : t('grupo2.g074')
           }
           variante={guardado ? 'selecionado' : 'suave'}
           aoPressionar={

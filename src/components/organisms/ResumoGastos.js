@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — ResumoGastos
 
@@ -18,6 +20,7 @@ export function ResumoGastos({
   editando, aoEditarOrcamento, aoSalvarOrcamento, aoCancelarOrcamento,
   salvando, erroOrcamento,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const { orcamento, gasto, disponivel, distribuicao } = resumo;
 
@@ -25,7 +28,7 @@ export function ResumoGastos({
   const ultrapassado = definido && disponivel < 0;
   const progresso = definido && orcamento > 0 ? gasto / orcamento : 0;
   const dadosGrafico = distribuicao.map(item => ({
-    rotulo: item.categoria,
+    rotulo: rotuloCatalogo(item.categoria, t),
     valor: item.valor,
   }));
 
@@ -35,19 +38,19 @@ export function ResumoGastos({
         <Card>
           <View style={estilos.cabecalho}>
             <View style={estilos.valor}>
-              <LinhaValor rotulo="Orçamento"
-                valor={definido ? formatarReais(orcamento) : 'Não definido'} />
+              <LinhaValor rotulo={t('grupo2.g096')}
+                valor={definido ? formatarReais(orcamento) : t('grupo2.g097')} />
             </View>
 
             <BotaoIcone nome="pencil-outline" tamanho={18}
-              rotulo="Editar orçamento"
+              rotulo={t('grupo2.g098')}
               aoPressionar={() => {
                 if (!salvando) aoEditarOrcamento();
               }} />
           </View>
 
-          <LinhaValor rotulo="Gasto" valor={formatarReais(gasto)} />
-          <LinhaValor rotulo="Disponível"
+          <LinhaValor rotulo={t('grupo2.g099')} valor={formatarReais(gasto)} />
+          <LinhaValor rotulo={t('grupo2.g100')}
             valor={definido ? formatarReais(disponivel) : '—'} />
 
           {definido && (
@@ -60,20 +63,20 @@ export function ResumoGastos({
                 { color: ultrapassado ? cores.perigo : cores.textoSecundario },
               ]}>
                 {(progresso * 100).toFixed(1).replace('.', ',')}%
-                {' do orçamento utilizado'}
+                {t('grupo2.g101')}
               </Text>
             </View>
           )}
 
           {!definido && !editando && (
             <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-              Defina um orçamento para acompanhar seus gastos.
+              {t('grupo2.g102')}
             </Text>
           )}
 
           {ultrapassado && (
             <Text style={[estilos.aviso, { color: cores.perigo }]}>
-              Orçamento ultrapassado em {formatarReais(Math.abs(disponivel))}.
+              {t('grupo2.g103')} {formatarReais(Math.abs(disponivel))}.
             </Text>
           )}
 
@@ -90,29 +93,29 @@ export function ResumoGastos({
 
         <Card>
           <Text style={[estilos.titulo, { color: cores.texto }]}>
-            Distribuição
+            {t('grupo2.g104')}
           </Text>
 
           {distribuicao.length > 0 ? (
             <GraficoBarras dados={dadosGrafico} />
           ) : (
             <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-              Nenhum gasto neste mês.
+              {t('grupo2.g105')}
             </Text>
           )}
 
           <View style={estilos.barra}>
-            <Button titulo="Ver estatísticas" variante="secundario"
+            <Button titulo={t('grupo2.g106')} variante="secundario"
               aoPressionar={aoAbrirEstatisticas} desabilitado={salvando} />
           </View>
         </Card>
       </View>
 
       <View style={estilos.acoes}>
-        <Button titulo="Ver histórico" variante="contorno"
+        <Button titulo={t('grupo2.g107')} variante="contorno"
           aoPressionar={aoAbrirHistorico} desabilitado={salvando} />
 
-        <Button titulo="+ Registrar gasto" variante="escuro"
+        <Button titulo={t('grupo2.g108')} variante="escuro"
           aoPressionar={aoRegistrar} desabilitado={salvando} />
       </View>
     </View>

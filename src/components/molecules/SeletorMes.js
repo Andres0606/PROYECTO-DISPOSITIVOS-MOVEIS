@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // MOLECULE — SeletorMes
 
 import { StyleSheet, Text, View } from 'react-native';
@@ -10,6 +11,7 @@ import { useTema } from '../../theme/useTema';
 export function SeletorMes({
   periodo, aoMudar, desabilitado = false,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   function alterar(deslocamento) {
@@ -21,14 +23,14 @@ export function SeletorMes({
   return (
     <View style={estilos.linha}>
       <BotaoIcone nome="chevron-back" tamanho={22}
-        rotulo="Mês anterior" aoPressionar={() => alterar(-1)} />
+        rotulo={t('grupo2.g131')} aoPressionar={() => alterar(-1)} />
 
       <Text style={[estilos.periodo, { color: cores.texto }]}>
         {formatarPeriodo(periodo.ano, periodo.mes)}
       </Text>
 
       <BotaoIcone nome="chevron-forward" tamanho={22}
-        rotulo="Próximo mês" aoPressionar={() => alterar(1)} />
+        rotulo={t('grupo2.g132')} aoPressionar={() => alterar(1)} />
     </View>
   );
 }

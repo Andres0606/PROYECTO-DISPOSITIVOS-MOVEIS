@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — DetalheTarefa
 
 import { useMemo } from 'react';
@@ -21,6 +23,7 @@ export function DetalheTarefa({
   aoAlternar,
   aoExcluir,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -38,7 +41,7 @@ export function DetalheTarefa({
       <View>
 
         <Text style={estilos.etapa}>
-          {tarefa.etapa}
+          {rotuloCatalogo(tarefa.etapa, t)}
         </Text>
 
         <Text style={estilos.titulo}>
@@ -50,12 +53,12 @@ export function DetalheTarefa({
 
             {!!tarefa.prioridade && (
               <Etiqueta
-                titulo={`${tarefa.prioridade} prioridade`}
+                titulo={t('grupo2.g157', { v0: rotuloCatalogo(tarefa.prioridade, t) })}
               />
             )}
 
             {!!prazo && (
-              <Etiqueta titulo={`Prazo: ${prazo}`} />
+              <Etiqueta titulo={t('grupo2.g158', { v0: prazo })} />
             )}
 
           </View>
@@ -65,7 +68,7 @@ export function DetalheTarefa({
           <Card style={estilos.descricao}>
 
             <Text style={estilos.rotulo}>
-              Descrição
+              {t('grupo2.g087')}
             </Text>
 
             <Text style={estilos.texto}>
@@ -79,8 +82,8 @@ export function DetalheTarefa({
 
       <View style={estilos.acoes}>
 
-        <CampoSelecao
-  rotulo="Estado da tarefa"
+        <CampoSelecao formatarOpcao={valor => rotuloCatalogo(valor, t)}
+  rotulo={t('grupo2.g093')}
   opcoes={estados.map(item => item.nome)}
   valor={tarefa.estado}
   aoMudar={nome => {
@@ -97,8 +100,8 @@ export function DetalheTarefa({
         <Button
           titulo={
             tarefa.concluida
-              ? 'Marcar como pendente'
-              : 'Marcar como concluída'
+              ? t('grupo2.g094')
+              : t('grupo2.g095')
           }
           variante="escuro"
           aoPressionar={aoAlternar}
@@ -107,7 +110,7 @@ export function DetalheTarefa({
         />
 
         <Button
-          titulo="Excluir tarefa"
+          titulo={t('grupo2.g021')}
           variante="contorno"
           aoPressionar={aoExcluir}
           carregando={ocupado === 'excluir'}

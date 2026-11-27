@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Início
 
 import { useCallback, useRef, useState } from 'react';
@@ -12,6 +13,7 @@ import { useTema } from '../theme/useTema';
 import { espacamentos, tipografia } from '../theme';
 
 export function HomeScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [usuario, setUsuario] = useState(route.params?.usuario);
@@ -22,7 +24,7 @@ export function HomeScreen({ navigation, route }) {
   const consultaAtual = useRef(0);
 
   const primeiroNome = usuario?.nome?.trim().split(/\s+/)[0]
-    || 'estudante';
+    || t('grupo2.g017');
 
   const carregar = useCallback(async () => {
     const consulta = ++consultaAtual.current;
@@ -43,14 +45,14 @@ export function HomeScreen({ navigation, route }) {
       if (usuarioSalvo) setUsuario(usuarioSalvo);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar seu resumo. Tente novamente.');
+        setErro(t('grupo2.g018'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,7 +113,7 @@ export function HomeScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo={`Olá, ${primeiroNome}`}>
+    <ScreenTemplate titulo={t('grupo2.g151', { v0: primeiroNome })}>
 
       {carregando ? (
         <ActivityIndicator
@@ -124,7 +126,7 @@ export function HomeScreen({ navigation, route }) {
           </Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={t('grupo2.g006')}
             variante="secundario"
             aoPressionar={carregar} />
         </View>

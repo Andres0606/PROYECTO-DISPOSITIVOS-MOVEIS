@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — FormularioTarefa
 
@@ -20,6 +22,7 @@ export function FormularioTarefa({
   valoresIniciais, rotuloEnviar, aoEnviar, aoExcluir,
   carregando = false, excluindo = false, erroGeral = '',
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [titulo, setTitulo] = useState(valoresIniciais?.titulo ?? '');
   const [descricao, setDescricao] = useState(valoresIniciais?.descricao ?? '');
@@ -67,14 +70,14 @@ export function FormularioTarefa({
       }
     } catch {
       if (consulta === consultaAtual.current) {
-        setErroCatalogos('Não foi possível carregar as opções.');
+        setErroCatalogos(t('grupo2.g078'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregandoCatalogos(false);
       }
     }
-  }, [novaTarefa]);
+  }, [t, novaTarefa]);
 
   useEffect(() => {
     carregarCatalogos();
@@ -85,25 +88,25 @@ export function FormularioTarefa({
     const novosErros = {};
 
     if (!campoObrigatorio(titulo)) {
-      novosErros.titulo = 'Informe o título da tarefa.';
+      novosErros.titulo = t('grupo2.g079');
     } else if (titulo.trim().length > 150) {
-      novosErros.titulo = 'O título deve ter no máximo 150 caracteres.';
+      novosErros.titulo = t('grupo2.g080');
     }
 
     if (descricao.trim().length > 3000) {
-      novosErros.descricao = 'A descrição deve ter no máximo 3000 caracteres.';
+      novosErros.descricao = t('grupo2.g081');
     }
 
     if (!etapas.some(item => item.id === etapaId)) {
-      novosErros.etapa = 'Selecione uma etapa válida.';
+      novosErros.etapa = t('grupo2.g082');
     }
 
     if (prioridadeId && !prioridades.some(item => item.id === prioridadeId)) {
-      novosErros.prioridade = 'Selecione uma prioridade válida.';
+      novosErros.prioridade = t('grupo2.g083');
     }
 
     if (prazo && !dataValida(prazo)) {
-      novosErros.prazo = 'Informe uma data válida (dd/mm/aaaa).';
+      novosErros.prazo = t('grupo2.g084');
     }
 
     setErros(novosErros);
@@ -132,7 +135,7 @@ export function FormularioTarefa({
         <Text style={[estilos.erro, { color: cores.perigo }]}>
           {erroCatalogos}
         </Text>
-        <Button titulo="Tentar novamente" variante="contorno"
+        <Button titulo={t('grupo2.g006')} variante="contorno"
           aoPressionar={carregarCatalogos} />
       </View>
     );
@@ -140,17 +143,17 @@ export function FormularioTarefa({
 
   return (
     <View>
-      <FormField rotulo="Título" placeholder="Ex: Solicitar CPF"
+      <FormField rotulo={t('grupo2.g085')} placeholder={t('grupo2.g086')}
         value={titulo} onChangeText={setTitulo} maxLength={150}
         autoCapitalize="sentences" editable={!ocupado}
         erro={erros.titulo} margemInferior={espacamentos.md} />
 
-      <FormField rotulo="Descrição" value={descricao}
+      <FormField rotulo={t('grupo2.g087')} value={descricao}
         onChangeText={setDescricao} multiline maxLength={3000}
         autoCapitalize="sentences" editable={!ocupado}
         erro={erros.descricao} margemInferior={espacamentos.md} />
 
-      <CampoSelecao rotulo="Etapa"
+      <CampoSelecao formatarOpcao={valor => rotuloCatalogo(valor, t)} rotulo={t('grupo2.g088')}
         opcoes={etapas.map(item => item.nome)}
         valor={etapas.find(item => item.id === etapaId)?.nome ?? 'Selecione'}
         aoMudar={nome => setEtapaId(etapas.find(item => item.nome === nome)?.id)}
@@ -160,7 +163,7 @@ export function FormularioTarefa({
         <Text style={[estilos.erro, { color: cores.perigo }]}>{erros.etapa}</Text>
       )}
 
-      <CampoSelecao rotulo="Prioridade"
+      <CampoSelecao formatarOpcao={valor => rotuloCatalogo(valor, t)} rotulo={t('grupo2.g089')}
         opcoes={['Sem prioridade', ...prioridades.map(item => item.nome)]}
         valor={prioridades.find(item => item.id === prioridadeId)?.nome ?? 'Sem prioridade'}
         aoMudar={nome => setPrioridadeId(
@@ -172,7 +175,7 @@ export function FormularioTarefa({
         <Text style={[estilos.erro, { color: cores.perigo }]}>{erros.prioridade}</Text>
       )}
 
-      <FormField rotulo="Prazo" placeholder="dd/mm/aaaa"
+      <FormField rotulo={t('grupo2.g092')} placeholder="dd/mm/aaaa"
         value={prazo} onChangeText={texto => setPrazo(mascaraData(texto))}
         keyboardType="number-pad" maxLength={10} editable={!ocupado}
         erro={erros.prazo} margemInferior={espacamentos.md} />
@@ -190,7 +193,7 @@ export function FormularioTarefa({
 
         {aoExcluir && (
           <View style={estilos.botao}>
-            <Button titulo="Excluir" variante="contorno"
+            <Button titulo={t('grupo2.g024')} variante="contorno"
               aoPressionar={aoExcluir} carregando={excluindo}
               desabilitado={ocupado} />
           </View>

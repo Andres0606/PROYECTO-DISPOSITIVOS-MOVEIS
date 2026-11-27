@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Estatísticas de gastos
 
@@ -16,6 +17,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ExpenseStatsScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [periodo, setPeriodo] = useState(
@@ -46,12 +48,12 @@ export function ExpenseStatsScreen({ navigation, route }) {
       setCategorias(listaCategorias);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar as estatísticas.');
+        setErro(t('grupo2.g045'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [periodo.ano, periodo.mes]);
+  }, [t, periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
@@ -67,7 +69,7 @@ export function ExpenseStatsScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Estatísticas"
+    <ScreenTemplate titulo={t('grupo2.g046')}
       aoVoltar={() => navigation.goBack()}>
 
       <SeletorMes periodo={periodo} aoMudar={mudarPeriodo}
@@ -78,9 +80,9 @@ export function ExpenseStatsScreen({ navigation, route }) {
       ) : erro || !estatisticas ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>
-            {erro || 'Estatísticas não encontradas.'}
+            {erro || t('grupo2.g047')}
           </Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (

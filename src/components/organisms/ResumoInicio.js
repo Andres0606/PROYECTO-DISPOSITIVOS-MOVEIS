@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — ResumoInicio
 
@@ -33,6 +34,7 @@ function calcularProporcao(parte, total) {
 }
 
 export function ResumoInicio({ resumo, aoAbrirAtalho }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const {
@@ -55,14 +57,14 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         accessibilityRole="button"
       >
         <CardInfo
-          titulo="Seu intercâmbio em Chapecó"
+          titulo={t('grupo2.g051')}
           progresso={calcularProporcao(
             tarefas.concluidas,
             tarefas.total
           )}
           legenda={tarefas.total
-            ? `${tarefas.concluidas} de ${tarefas.total} tarefas concluídas`
-            : 'Nenhuma tarefa cadastrada.'}
+            ? t('grupo2.g152', { v0: tarefas.concluidas, v1: tarefas.total })
+            : t('grupo2.g052')}
         />
       </Pressable>
 
@@ -73,20 +75,20 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         accessibilityRole="button"
       >
         <CardInfo
-          titulo={`Gastos — ${gastos.periodo}`}
+          titulo={t('grupo2.g153', { v0: gastos.periodo })}
           detalhe={formatarReais(gastos.gasto)}
           progresso={temOrcamento
             ? calcularProporcao(gastos.gasto, gastos.orcamento)
             : undefined}
           alerta={excedido}
           legenda={!temOrcamento
-            ? 'Orçamento ainda não definido.'
-            : `Orçamento: ${formatarReais(gastos.orcamento)}`}
+            ? t('grupo2.g053')
+            : t('grupo2.g154', { v0: formatarReais(gastos.orcamento) })}
           texto={temOrcamento
             ? excedido
-              ? `Orçamento excedido em ${formatarReais(-gastos.disponivel)}.`
-              : `Disponível: ${formatarReais(gastos.disponivel)}`
-            : 'Toque para definir seu orçamento.'}
+              ? t('grupo2.g155', { v0: formatarReais(-gastos.disponivel) })
+              : t('grupo2.g156', { v0: formatarReais(gastos.disponivel) })
+            : t('grupo2.g054')}
         />
       </Pressable>
 
@@ -98,7 +100,7 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
           estilos.tituloAtalhos,
           { color: cores.texto },
         ]}>
-          Acesso rápido
+          {t('grupo2.g055')}
         </Text>
 
         <View style={estilos.atalhos}>
@@ -107,7 +109,7 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
             <Pressable
               key={atalho.chave}
               accessibilityRole="button"
-              accessibilityLabel={atalho.titulo}
+              accessibilityLabel={({ portugues: t('grupo2.g048'), conselhos: t('grupo2.g049'), atividades: t('grupo2.g050') }[atalho.chave] ?? atalho.titulo)}
               onPress={() => aoAbrirAtalho(atalho.chave)}
               style={({ pressed }) => [
                 estilos.cartaoAtalho,
@@ -134,7 +136,7 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
                 estilos.textoAtalho,
                 { color: cores.texto },
               ]}>
-                {atalho.titulo}
+                {({ portugues: t('grupo2.g048'), conselhos: t('grupo2.g049'), atividades: t('grupo2.g050') }[atalho.chave] ?? atalho.titulo)}
               </Text>
 
             </Pressable>
@@ -154,13 +156,13 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         )}
       >
         <CardInfo
-          titulo="Conselho em destaque"
+          titulo={t('grupo2.g056')}
           texto={conselhoDestaque
             ? `“${conselhoDestaque.texto}” — ${[
               conselhoDestaque.autor,
               conselhoDestaque.pais,
             ].filter(Boolean).join(', ')}.`
-            : 'Nenhum conselho publicado.'}
+            : t('grupo2.g057')}
         />
       </Pressable>
 
@@ -174,10 +176,10 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         )}
       >
         <CardInfo
-          titulo="Próxima atividade"
+          titulo={t('grupo2.g058')}
           detalhe={proximaAtividade?.data}
           texto={proximaAtividade?.titulo
-            ?? 'Nenhuma atividade próxima disponível.'}
+            ?? t('grupo2.g059')}
         />
       </Pressable>
 

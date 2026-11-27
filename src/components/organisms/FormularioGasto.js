@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — FormularioGasto
 
@@ -21,6 +23,7 @@ export function FormularioGasto({
   valoresIniciais, dataInicial, rotuloEnviar, aoEnviar, aoExcluir,
   carregando = false, excluindo = false, erroGeral = '',
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const [conceito, setConceito] = useState(valoresIniciais?.conceito ?? '');
@@ -58,14 +61,14 @@ export function FormularioGasto({
       );
     } catch {
       if (consulta === consultaAtual.current) {
-        setErroCategorias('Não foi possível carregar as categorias.');
+        setErroCategorias(t('grupo2.g118'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregandoCategorias(false);
       }
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     carregarCategorias();
@@ -76,23 +79,23 @@ export function FormularioGasto({
     const novosErros = {};
 
     if (!campoObrigatorio(conceito) || conceito.trim().length > 150) {
-      novosErros.conceito = 'Informe um conceito de até 150 caracteres.';
+      novosErros.conceito = t('grupo2.g119');
     }
 
     if (!valorMonetarioValido(valor)) {
-      novosErros.valor = 'Informe um valor válido e maior que zero.';
+      novosErros.valor = t('grupo2.g120');
     }
 
     if (!categorias.some(item => item.id === categoriaId)) {
-      novosErros.categoria = 'Selecione uma categoria.';
+      novosErros.categoria = t('grupo2.g121');
     }
 
     if (!dataValida(data)) {
-      novosErros.data = 'Informe uma data válida (dd/mm/aaaa).';
+      novosErros.data = t('grupo2.g084');
     }
 
     if (descricao.trim().length > 3000) {
-      novosErros.descricao = 'A descrição deve ter até 3000 caracteres.';
+      novosErros.descricao = t('grupo2.g122');
     }
 
     setErros(novosErros);
@@ -121,7 +124,7 @@ export function FormularioGasto({
         <Text style={[estilos.erro, { color: cores.perigo }]}>
           {erroCategorias}
         </Text>
-        <Button titulo="Tentar novamente" variante="secundario"
+        <Button titulo={t('grupo2.g006')} variante="secundario"
           aoPressionar={carregarCategorias} />
       </View>
     );
@@ -129,17 +132,17 @@ export function FormularioGasto({
 
   return (
     <View>
-      <FormField rotulo="Conceito" placeholder="Ex: Mercado da semana"
+      <FormField rotulo={t('grupo2.g123')} placeholder={t('grupo2.g124')}
         value={conceito} onChangeText={setConceito}
         maxLength={150} editable={!ocupado}
         erro={erros.conceito} margemInferior={espacamentos.md} />
 
-      <FormField rotulo="Valor" placeholder="R$ 85,00"
+      <FormField rotulo={t('grupo2.g125')} placeholder="R$ 85,00"
         value={valor} onChangeText={texto => setValor(limparValor(texto))}
         keyboardType="decimal-pad" editable={!ocupado}
         erro={erros.valor} margemInferior={espacamentos.md} />
 
-      <CampoSelecao rotulo="Categoria"
+      <CampoSelecao formatarOpcao={valor => rotuloCatalogo(valor, t)} rotulo={t('grupo2.g113')}
         opcoes={categorias.map(item => item.nome)}
         valor={categorias.find(item => item.id === categoriaId)?.nome ?? 'Selecione'}
         aoMudar={nome => setCategoriaId(
@@ -153,12 +156,12 @@ export function FormularioGasto({
         </Text>
       )}
 
-      <FormField rotulo="Data" placeholder="dd/mm/aaaa"
+      <FormField rotulo={t('grupo2.g126')} placeholder="dd/mm/aaaa"
         value={data} onChangeText={texto => setData(mascaraData(texto))}
         keyboardType="number-pad" maxLength={10} editable={!ocupado}
         erro={erros.data} margemInferior={espacamentos.md} />
 
-      <FormField rotulo="Descrição" value={descricao}
+      <FormField rotulo={t('grupo2.g087')} value={descricao}
         onChangeText={setDescricao} multiline numberOfLines={3}
         maxLength={3000} editable={!ocupado}
         erro={erros.descricao} margemInferior={espacamentos.md} />
@@ -178,7 +181,7 @@ export function FormularioGasto({
 
         {aoExcluir && (
           <View style={estilos.botao}>
-            <Button titulo="Excluir" variante="contorno"
+            <Button titulo={t('grupo2.g024')} variante="contorno"
               aoPressionar={aoExcluir} carregando={excluindo}
               desabilitado={ocupado} />
           </View>

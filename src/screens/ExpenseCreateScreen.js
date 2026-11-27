@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Novo gasto
 
 import { useRef, useState } from 'react';
@@ -6,6 +7,7 @@ import { FormularioGasto } from '../components/organisms/FormularioGasto';
 import { criarGasto } from '../services/gastos';
 
 export function ExpenseCreateScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const bloqueio = useRef(false);
@@ -22,7 +24,7 @@ export function ExpenseCreateScreen({ navigation, route }) {
 
       if (navigation.isFocused()) navigation.goBack();
     } catch (e) {
-      setErro(e.message || 'Não foi possível registrar o gasto.');
+      setErro(e.message || t('grupo2.g034'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);
@@ -30,12 +32,12 @@ export function ExpenseCreateScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Novo gasto"
+    <ScreenTemplate titulo={t('grupo2.g035')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
       <FormularioGasto
         dataInicial={route.params?.dataInicial}
-        rotuloEnviar="Registrar gasto"
+        rotuloEnviar={t('grupo2.g036')}
         aoEnviar={registrar}
         carregando={salvando}
         erroGeral={erro}

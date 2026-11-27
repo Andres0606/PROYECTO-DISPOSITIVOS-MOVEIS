@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Detalhe da tarefa
 
@@ -16,6 +17,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function TaskDetailScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const { tarefaId } = route.params;
   const [tarefa, setTarefa] = useState(null);
@@ -46,13 +48,13 @@ export function TaskDetailScreen({ navigation, route }) {
       setEstados(listaEstados);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar esta tarefa.');
+        setErro(t('grupo2.g019'));
         setTarefa(null);
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [tarefaId]);
+  }, [t, tarefaId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -84,7 +86,7 @@ export function TaskDetailScreen({ navigation, route }) {
       }
     } catch {
       if (consulta === consultaAtual.current) {
-        Alert.alert('Tarefa', 'Não foi possível concluir a operação.');
+        Alert.alert(t('grupo2.g032'), t('grupo2.g020'));
       }
 
       setRevisao(atual => atual + 1);
@@ -106,12 +108,12 @@ export function TaskDetailScreen({ navigation, route }) {
     if (bloqueio.current) return;
 
     Alert.alert(
-      'Excluir tarefa',
-      'Esta ação não pode ser desfeita. Deseja continuar?',
+      t('grupo2.g021'),
+      t('grupo2.g022'),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('grupo2.g023'), style: 'cancel' },
         {
-          text: 'Excluir', style: 'destructive',
+          text: t('grupo2.g024'), style: 'destructive',
           onPress: () => executar(() => excluirTarefa(tarefaId), 'excluir'),
         },
       ]
@@ -119,10 +121,10 @@ export function TaskDetailScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Detalhe da tarefa"
+    <ScreenTemplate titulo={t('grupo2.g033')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}
       acaoCabecalho={!carregando && !erro && tarefa && !ocupado ? (
-        <BotaoIcone nome="pencil-outline" rotulo="Editar tarefa"
+        <BotaoIcone nome="pencil-outline" rotulo={t('grupo2.g025')}
           tamanho={18} aoPressionar={() => {
             if (!bloqueio.current) {
               navigation.navigate('EditarTarefa', { tarefaId });
@@ -135,9 +137,9 @@ export function TaskDetailScreen({ navigation, route }) {
       ) : erro || !tarefa ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>
-            {erro || 'Tarefa não encontrada.'}
+            {erro || t('grupo2.g026')}
           </Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (

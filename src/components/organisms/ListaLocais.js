@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — ListaLocais
 
 import {
@@ -23,6 +24,7 @@ export function ListaLocais({
   locais,
   aoAbrirLocal,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   if (locais.length === 0) {
@@ -35,7 +37,7 @@ export function ListaLocais({
           },
         ]}
       >
-        Nenhum local encontrado.
+        {t('grupo2.g060')}
       </Text>
     );
   }

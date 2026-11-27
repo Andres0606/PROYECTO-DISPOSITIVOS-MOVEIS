@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Nova tarefa
 
@@ -7,6 +8,7 @@ import { FormularioTarefa } from '../components/organisms/FormularioTarefa';
 import { criarTarefa } from '../services/tarefas';
 
 export function TaskCreateScreen({ navigation }) {
+  const { t } = usePreferencias();
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const bloqueio = useRef(false);
@@ -25,7 +27,7 @@ export function TaskCreateScreen({ navigation }) {
         navigation.navigate('TarefasLista', { etapa: nova.etapa });
       }
     } catch (e) {
-      setErro(e.message || 'Não foi possível criar a tarefa.');
+      setErro(e.message || t('grupo2.g007'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);
@@ -33,10 +35,10 @@ export function TaskCreateScreen({ navigation }) {
   }
 
   return (
-    <ScreenTemplate titulo="Nova tarefa"
+    <ScreenTemplate titulo={t('grupo2.g002')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
-      <FormularioTarefa rotuloEnviar="Criar tarefa"
+      <FormularioTarefa rotuloEnviar={t('grupo2.g008')}
         aoEnviar={criar} carregando={salvando} erroGeral={erro} />
     </ScreenTemplate>
   );

@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — EstatisticasGastos
 
@@ -15,21 +17,22 @@ const VISOES = [
   { valor: 'categoria', titulo: 'Categoria' },
 ];
 
-function textoComparacao(variacao) {
+function textoComparacao(variacao, t) {
   if (variacao === null) {
-    return 'Sem gastos no mês anterior para comparar.';
+    return t('grupo2.g114');
   }
 
-  return `Comparado com o mês anterior: ${variacao > 0 ? '+' : ''}${variacao} %.`;
+  return t('grupo2.g159', { v0: variacao > 0 ? '+' : '', v1: variacao });
 }
 
-function porcentagem(valor) {
-  return `${(valor * 100).toFixed(1).replace('.', ',')}% dos gastos do mês`;
+function porcentagem(valor, t) {
+  return t('grupo2.g160', { v0: (valor * 100).toFixed(1).replace('.', ',') });
 }
 
 export function EstatisticasGastos({
   estatisticas, categoriasDisponiveis, visao, aoMudarVisao,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [categoria, setCategoria] = useState('');
 
@@ -50,55 +53,55 @@ export function EstatisticasGastos({
 
   return (
     <View style={estilos.tela}>
-      <BotaoSegmentado opcoes={VISOES}
+      <BotaoSegmentado opcoes={VISOES.map(item => ({ ...item, titulo: item.valor === 'mes' ? t('grupo2.g112') : t('grupo2.g113') }))}
         valor={visao} aoMudar={aoMudarVisao} />
 
       {visao === 'mes' ? (
         <>
-          <CardInfo titulo="Total do mês" detalhe={formatarReais(gasto)}
-            texto={`Mês anterior: ${formatarReais(gastoAnterior)}`} />
+          <CardInfo titulo={t('grupo2.g115')} detalhe={formatarReais(gasto)}
+            texto={t('grupo2.g161', { v0: formatarReais(gastoAnterior) })} />
 
           {categorias.length === 0 ? (
             <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-              Nenhum gasto neste mês.
+              {t('grupo2.g105')}
             </Text>
           ) : (
             categorias.map(item => (
               <CardInfo key={item.categoria}
-                titulo={item.categoria}
+                titulo={rotuloCatalogo(item.categoria, t)}
                 detalhe={formatarReais(item.valor)}
                 progresso={item.participacao}
-                legenda={porcentagem(item.participacao)} />
+                legenda={porcentagem(item.participacao, t)} />
             ))
           )}
 
           <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-            {textoComparacao(variacao)}
+            {textoComparacao(variacao, t)}
           </Text>
         </>
       ) : (
         nomes.length > 0 ? (
           <>
-            <CampoSelecao rotulo="Categoria" opcoes={nomes}
+            <CampoSelecao formatarOpcao={valor => rotuloCatalogo(valor, t)} rotulo={t('grupo2.g113')} opcoes={nomes}
               valor={selecionada} aoMudar={setCategoria} />
 
             <CardInfo
-              titulo={selecionada}
+              titulo={rotuloCatalogo(selecionada, t)}
               detalhe={formatarReais(dadosCategoria.valor)}
               progresso={dadosCategoria.participacao}
-              legenda={porcentagem(dadosCategoria.participacao)}
-              texto={`Total do mês: ${formatarReais(gasto)}`}
+              legenda={porcentagem(dadosCategoria.participacao, t)}
+              texto={t('grupo2.g162', { v0: formatarReais(gasto) })}
             />
 
             {dadosCategoria.valor === 0 && (
               <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-                Nenhum gasto nesta categoria durante o mês.
+                {t('grupo2.g116')}
               </Text>
             )}
           </>
         ) : (
           <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
-            Nenhuma categoria disponível.
+            {t('grupo2.g117')}
           </Text>
         )
       )}

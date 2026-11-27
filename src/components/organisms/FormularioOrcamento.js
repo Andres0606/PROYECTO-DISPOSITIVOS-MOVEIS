@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — FormularioOrcamento
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ export function FormularioOrcamento({
   valorInicial, aoSalvar, aoCancelar,
   salvando = false, erroGeral = '',
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [valor, setValor] = useState(
     valorInicial === null ? '' : numeroParaValor(valorInicial)
@@ -24,7 +26,7 @@ export function FormularioOrcamento({
     if (salvando) return;
 
     if (!valorMonetarioValido(valor)) {
-      setErro('Informe um orçamento válido e maior que zero.');
+      setErro(t('grupo2.g127'));
       return;
     }
 
@@ -34,7 +36,7 @@ export function FormularioOrcamento({
 
   return (
     <View style={estilos.formulario}>
-      <FormField rotulo="Orçamento mensal"
+      <FormField rotulo={t('grupo2.g128')}
         placeholder="R$ 2.000,00"
         value={valor}
         onChangeText={texto => {
@@ -51,10 +53,10 @@ export function FormularioOrcamento({
         </Text>
       )}
 
-      <Button titulo="Guardar orçamento" variante="escuro"
+      <Button titulo={t('grupo2.g129')} variante="escuro"
         aoPressionar={salvar} carregando={salvando} />
 
-      <Button titulo="Cancelar" variante="contorno"
+      <Button titulo={t('grupo2.g023')} variante="contorno"
         aoPressionar={aoCancelar} desabilitado={salvando} />
     </View>
   );

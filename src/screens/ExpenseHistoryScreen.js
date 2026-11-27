@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Histórico de gastos
 
@@ -21,6 +22,7 @@ const FILTROS = [
 ];
 
 export function ExpenseHistoryScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [periodo, setPeriodo] = useState(
     () => route.params?.periodo ?? periodoAtual()
@@ -46,12 +48,12 @@ export function ExpenseHistoryScreen({ navigation, route }) {
       if (consulta === consultaAtual.current) setGastos(lista);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar o histórico.');
+        setErro(t('grupo2.g043'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [filtro, periodo.ano, periodo.mes]);
+  }, [t, filtro, periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
@@ -75,11 +77,11 @@ export function ExpenseHistoryScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Histórico"
+    <ScreenTemplate titulo={t('grupo2.g044')}
       aoVoltar={() => navigation.goBack()}>
 
       <View style={estilos.filtros}>
-        <BotaoSegmentado opcoes={FILTROS} valor={filtro}
+        <BotaoSegmentado opcoes={FILTROS.map(item => ({ ...item, titulo: item.valor === 'todos' ? t('grupo2.g041') : t('grupo2.g042') }))} valor={filtro}
           aoMudar={mudarFiltro} />
 
         {filtro === 'mes' && (
@@ -93,7 +95,7 @@ export function ExpenseHistoryScreen({ navigation, route }) {
       ) : erro ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (

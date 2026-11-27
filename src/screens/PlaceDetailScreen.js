@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Detalhe do lugar
 
 import {
@@ -40,6 +41,7 @@ export function PlaceDetailScreen({
   navigation,
   route,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -90,13 +92,13 @@ export function PlaceDetailScreen({
     } catch (e) {
       setErro(
         e.message ||
-        'Não foi possível carregar este local.'
+        t('grupo2.g009')
       );
 
     } finally {
       setCarregando(false);
     }
-  }, [localId]);
+  }, [t, localId]);
 
 useFocusEffect(
   useCallback(() => {
@@ -126,9 +128,9 @@ useFocusEffect(
 
     } catch (e) {
       Alert.alert(
-        'Favoritos',
+        t('grupo2.g010'),
         e.message ||
-        'Não foi possível atualizar o favorito.'
+        t('grupo2.g011')
       );
 
     } finally {
@@ -165,8 +167,8 @@ useFocusEffect(
 
     Linking.openURL(url).catch(() =>
       Alert.alert(
-        'Mapa',
-        'Não foi possível abrir o mapa.'
+        t('grupo2.g012'),
+        t('grupo2.g013')
       )
     );
   }
@@ -177,7 +179,7 @@ useFocusEffect(
 
   return (
     <ScreenTemplate
-      titulo="Detalhe do lugar"
+      titulo={t('grupo2.g014')}
       aoVoltar={() => navigation.goBack()}
     >
 
@@ -196,7 +198,7 @@ useFocusEffect(
           </Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={t('grupo2.g006')}
             variante="secundario"
             aoPressionar={carregar}
           />

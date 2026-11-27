@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — MapaLocais
 
@@ -14,6 +15,7 @@ export function MapaLocais({
   aoAbrirLocal,
   altura = 350,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const mapa = useRef(null);
   const [pronto, setPronto] = useState(false);
@@ -89,7 +91,7 @@ export function MapaLocais({
               title={local.nome}
               description={
                 aoAbrirLocal
-                  ? 'Toque para ver detalhes'
+                  ? t('grupo2.g061')
                   : local.categoria
               }
               onCalloutPress={() => aoAbrirLocal?.(local)}
@@ -103,7 +105,7 @@ export function MapaLocais({
           estilos.aviso,
           { color: cores.textoSecundario },
         ]}>
-          Nenhum local com coordenadas disponível.
+          {t('grupo2.g062')}
         </Text>
       )}
 
@@ -112,7 +114,7 @@ export function MapaLocais({
           estilos.aviso,
           { color: cores.textoSecundario },
         ]}>
-          Alguns locais estão disponíveis apenas na lista.
+          {t('grupo2.g063')}
         </Text>
       )}
     </View>

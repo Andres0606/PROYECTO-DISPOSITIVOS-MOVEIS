@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Meu intercâmbio
 
@@ -15,6 +16,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function TaskListScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [tarefas, setTarefas] = useState([]);
   const [etapas, setEtapas] = useState([]);
@@ -55,12 +57,12 @@ export function TaskListScreen({ navigation, route }) {
       );
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar as tarefas. Tente novamente.');
+        setErro(t('grupo2.g004'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -98,7 +100,7 @@ export function TaskListScreen({ navigation, route }) {
       }
     } catch {
       if (consulta === consultaAtual.current) {
-        Alert.alert('Tarefas', 'Não foi possível atualizar a tarefa.');
+        Alert.alert(t('grupo2.g003'), t('grupo2.g005'));
       }
 
       setRevisao(atual => atual + 1);
@@ -116,9 +118,9 @@ export function TaskListScreen({ navigation, route }) {
   const tarefasDaEtapa = tarefas.filter(item => item.etapa === etapa);
 
   return (
-    <ScreenTemplate titulo="Meu intercâmbio"
+    <ScreenTemplate titulo={t('grupo2.g001')}
       flutuante={
-        <BotaoFlutuante rotulo="Nova tarefa"
+        <BotaoFlutuante rotulo={t('grupo2.g002')}
           aoPressionar={() => navegar('CriarTarefa')} />
       }>
 
@@ -127,7 +129,7 @@ export function TaskListScreen({ navigation, route }) {
       ) : erro ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (

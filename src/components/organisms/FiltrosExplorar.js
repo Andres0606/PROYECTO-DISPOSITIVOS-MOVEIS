@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — FiltrosExplorar
 
@@ -24,6 +25,7 @@ export function FiltrosExplorar({
   aoMudarCategoria,
   categorias = [],
 }) {
+  const { t } = usePreferencias();
   const opcoes = [
     { id: CATEGORIA_TODOS, nome: 'Todos' },
     ...categorias,
@@ -34,11 +36,11 @@ export function FiltrosExplorar({
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
-        placeholder="Buscar lugares..."
+        placeholder={t('grupo2.g076')}
       />
 
       <BotaoSegmentado
-        opcoes={VISOES}
+        opcoes={VISOES.map(item => ({ ...item, titulo: item.valor === 'lista' ? t('grupo2.g075') : t('grupo2.g012') }))}
         valor={visao}
         aoMudar={aoMudarVisao}
       />
@@ -47,7 +49,7 @@ export function FiltrosExplorar({
         {opcoes.map(item => (
           <Pill
             key={item.id}
-            titulo={item.nome}
+            titulo={item.id === CATEGORIA_TODOS ? t('grupo2.g041') : item.nome}
             selecionado={item.id === categoria}
             aoPressionar={() => aoMudarCategoria(item.id)}
           />

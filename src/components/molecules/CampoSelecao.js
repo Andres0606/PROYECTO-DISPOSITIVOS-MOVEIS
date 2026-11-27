@@ -9,6 +9,7 @@ import { useTema } from '../../theme/useTema';
 
 export function CampoSelecao({
   rotulo,
+  formatarOpcao = valor => valor,
   opcoes,
   valor,
   aoMudar,
@@ -52,7 +53,7 @@ export function CampoSelecao({
         ]}
       >
         <Text style={[estilos.valor, { color: cores.texto }]}>
-          {valor}
+          {formatarOpcao(valor)}
         </Text>
 
         <Ionicons
@@ -96,7 +97,7 @@ export function CampoSelecao({
                   { color: cores.texto },
                   selecionada && estilos.textoSelecionado,
                 ]}>
-                  {opcao}
+                  {formatarOpcao(opcao)}
                 </Text>
 
                 {selecionada && (

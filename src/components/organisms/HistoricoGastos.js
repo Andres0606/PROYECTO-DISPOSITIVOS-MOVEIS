@@ -1,3 +1,5 @@
+import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — HistoricoGastos
 
 import { StyleSheet, Text, View } from 'react-native';
@@ -24,6 +26,7 @@ export function HistoricoGastos({
   aoMudarBusca,
   aoAbrirGasto,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const buscando = busca.trim() !== '';
@@ -34,7 +37,7 @@ export function HistoricoGastos({
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
-        placeholder="Buscar gasto..."
+        placeholder={t('grupo2.g109')}
       />
 
       {gastos.length === 0 ? (
@@ -45,8 +48,8 @@ export function HistoricoGastos({
           ]}
         >
           {buscando
-            ? 'Nenhum gasto encontrado.'
-            : 'Nenhum gasto registrado ainda.'}
+            ? t('grupo2.g110')
+            : t('grupo2.g111')}
         </Text>
       ) : (
         <View style={estilos.lista}>
@@ -55,7 +58,7 @@ export function HistoricoGastos({
             <CardGasto
               key={gasto.id}
               conceito={gasto.conceito}
-              detalhe={`${gasto.categoria} · ${isoParaBr(gasto.data)}`}
+              detalhe={`${rotuloCatalogo(gasto.categoria, t)} · ${isoParaBr(gasto.data)}`}
               valor={formatarReais(gasto.valor)}
               icone={
                 ICONES_CATEGORIA_GASTO[gasto.categoria]

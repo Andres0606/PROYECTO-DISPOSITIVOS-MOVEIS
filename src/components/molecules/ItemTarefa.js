@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — ItemTarefa
 
@@ -11,6 +12,7 @@ export function ItemTarefa({
   titulo, concluida, estado, ocupado = false,
   aoAlternar, aoAbrir, aoEditar,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -36,12 +38,12 @@ export function ItemTarefa({
             estilos.estado,
             { color: cores.textoSecundario },
           ]}>
-            Em andamento
+            {t('grupo2.g130')}
           </Text>
         )}
       </Pressable>
 
-      <BotaoIcone nome="pencil-outline" rotulo="Editar tarefa"
+      <BotaoIcone nome="pencil-outline" rotulo={t('grupo2.g025')}
         aoPressionar={() => { if (!ocupado) aoEditar?.(); }} />
     </View>
   );

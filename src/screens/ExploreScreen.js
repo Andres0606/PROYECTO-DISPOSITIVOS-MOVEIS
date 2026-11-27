@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Explorar Chapecó
 
@@ -23,6 +24,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ExploreScreen({ navigation }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
 
@@ -62,12 +64,12 @@ export function ExploreScreen({ navigation }) {
       });
     } catch (e) {
       setErro(
-        e.message || 'Não foi possível carregar os locais.'
+        e.message || t('grupo2.g015')
       );
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -87,7 +89,7 @@ export function ExploreScreen({ navigation }) {
   }
 
   return (
-    <ScreenTemplate titulo="Explorar Chapecó">
+    <ScreenTemplate titulo={t('grupo2.g016')}>
 
       <View style={estilos.filtros}>
         <FiltrosExplorar
@@ -113,7 +115,7 @@ export function ExploreScreen({ navigation }) {
           <Text style={estilos.erro}>{erro}</Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={t('grupo2.g006')}
             variante="secundario"
             aoPressionar={carregar}
           />

@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Meus gastos
 
@@ -14,6 +15,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ExpenseSummaryScreen({ navigation }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [periodo, setPeriodo] = useState(periodoAtual);
   const [resumo, setResumo] = useState(null);
@@ -38,12 +40,12 @@ export function ExpenseSummaryScreen({ navigation }) {
       if (consulta === consultaAtual.current) setResumo(resultado);
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar seus gastos.');
+        setErro(t('grupo2.g028'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [periodo.ano, periodo.mes]);
+  }, [t, periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
@@ -75,7 +77,7 @@ export function ExpenseSummaryScreen({ navigation }) {
       setEditando(false);
       setRevisao(atual => atual + 1);
     } catch (e) {
-      setErroOrcamento(e.message || 'Não foi possível guardar o orçamento.');
+      setErroOrcamento(e.message || t('grupo2.g029'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);
@@ -98,7 +100,7 @@ export function ExpenseSummaryScreen({ navigation }) {
   }
 
   return (
-    <ScreenTemplate titulo="Meus gastos">
+    <ScreenTemplate titulo={t('grupo2.g030')}>
       <SeletorMes periodo={periodo} aoMudar={mudarPeriodo}
         desabilitado={salvando || carregando} />
 
@@ -107,9 +109,9 @@ export function ExpenseSummaryScreen({ navigation }) {
       ) : erro || !resumo ? (
         <View style={estilos.centro}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>
-            {erro || 'Resumo não encontrado.'}
+            {erro || t('grupo2.g031')}
           </Text>
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo2.g006')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (
