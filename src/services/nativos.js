@@ -193,10 +193,8 @@ export async function obterPosicao() {
     );
   }
 
-  const provedores =
-    await Location.getProviderStatusAsync();
 
-  console.log('Provedores GPS:', provedores);
+  
 
   let posicao;
 
@@ -206,7 +204,7 @@ export async function obterPosicao() {
       mayShowUserSettingsDialog: false,
     });
   } catch (erro) {
-    console.log('Erro GPS:', erro.message);
+    console.warn('Falha na localização atual. Tentando última posição conhecida.');
 
     posicao = await Location.getLastKnownPositionAsync({
       maxAge: 60000,

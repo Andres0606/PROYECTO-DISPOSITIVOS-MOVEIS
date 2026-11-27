@@ -23,7 +23,7 @@ export function PerfilScreen({ navigation, route }) {
         const usuarioSalvo = await obterUsuario();
         if (ativo && usuarioSalvo) setUsuario(usuarioSalvo);
       } catch (erro) {
-        console.log('Erro ao carregar perfil:', erro);
+        console.log('Erro ao carregar perfil:', erro.name);
       }
     }
     carregarPerfil();
@@ -67,7 +67,7 @@ export function PerfilScreen({ navigation, route }) {
       const navegacaoRaiz = navigation.getParent()?.getParent();
       navegacaoRaiz?.reset({ index: 0, routes: [{ name: 'Login' }] });
     } catch (erro) {
-      console.log('Erro ao encerrar sessão:', erro);
+      console.log('Erro ao encerrar sessão:', erro.name);
     }
   }
 

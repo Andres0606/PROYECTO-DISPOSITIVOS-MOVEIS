@@ -71,7 +71,7 @@ export function LoginScreen({ navigation }) {
       } catch (e) {
         console.log(
           'Erro ao verificar sessão:',
-          e
+          e.name
         );
 
       } finally {
