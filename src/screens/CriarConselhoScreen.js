@@ -43,7 +43,7 @@ export function CriarConselhoScreen({ navigation }) {
 
       navigation.goBack();
     } catch (erro) {
-      setErro(erro.message || t('grupo3.g019'));
+      setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g019'));
     } finally {
       if (!publicou) {
         bloqueio.current = false;

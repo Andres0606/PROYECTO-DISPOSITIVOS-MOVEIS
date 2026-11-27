@@ -7,6 +7,7 @@ import { capturarFoto, configurarNotificacoes, escolherImagem, enviarAvisoLocal,
 import { obterFotoLocal, obterLocalizacaoSalva, salvarFotoLocal, salvarLocalizacao } from '../services/storage';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 function rotuloPermissao(status) {
   if (status === 'granted') return 'Concedida';
@@ -20,6 +21,7 @@ function formatarGps(coords) {
   return `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
 }
 export function RecursosScreen({ navigation }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const [fotoUri, setFotoUri] = useState(null);
@@ -31,15 +33,15 @@ export function RecursosScreen({ navigation }) {
     try {
       const resultado = await statusPermissoes();
       setPermissoes(resultado);
-    } catch (e) { setErro('Não foi possível consultar as permissões.'); }
-  }, []);
+    } catch (e) { setErro(t('mensagens.servidor', { mensagem: 'Não foi possível consultar as permissões.' })); }
+  }, [t]);
   const carregarDadosSalvos = useCallback(async () => {
     try {
       const [fotoSalva, localizacaoSalva] = await Promise.all([obterFotoLocal(), obterLocalizacaoSalva()]);
       if (fotoSalva) setFotoUri(fotoSalva);
       if (localizacaoSalva) setCoords(localizacaoSalva);
-    } catch (e) { setErro('Não foi possível carregar os dados salvos.'); }
-  }, []);
+    } catch (e) { setErro(t('mensagens.servidor', { mensagem: 'Não foi possível carregar os dados salvos.' })); }
+  }, [t]);
   useEffect(() => {
     configurarNotificacoes();
     atualizarPermissoes();
@@ -49,7 +51,7 @@ export function RecursosScreen({ navigation }) {
     setErro('');
     setOcupado(chave);
     try { await acao(); await atualizarPermissoes(); }
-    catch (e) { setErro(e.message); }
+    catch (e) { setErro(t('mensagens.servidor', { mensagem: e.message })); }
     finally { setOcupado(''); }
   }
   function tirarFoto() {

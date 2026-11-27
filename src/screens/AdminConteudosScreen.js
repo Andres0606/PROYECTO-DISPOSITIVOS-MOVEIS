@@ -73,7 +73,7 @@ export function AdminConteudosScreen({ route }) {
       }
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || t('grupo4.g042'));
+        setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g042'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
@@ -139,7 +139,7 @@ export function AdminConteudosScreen({ route }) {
             await acao();
             await carregar();
           } catch (erro) {
-            Alert.alert(t('grupo4.g027'), erro.message);
+            Alert.alert(t('grupo4.g027'), t('mensagens.servidor', { mensagem: erro.message }));
             await carregar();
           } finally {
             bloqueio.current = false;
@@ -210,7 +210,7 @@ export function AdminConteudosScreen({ route }) {
       await carregar();
 
       if (resultado.aviso) {
-        Alert.alert(t('grupo4.g051'), resultado.aviso);
+        Alert.alert(t('grupo4.g051'), t('mensagens.servidor', { mensagem: resultado.aviso }));
       } else {
         Alert.alert(t('grupo4.g026'), t('grupo4.g052'));
       }

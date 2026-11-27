@@ -60,7 +60,7 @@ export function ExpenseEditScreen({ navigation, route }) {
 
       if (navigation.isFocused()) navigation.goBack();
     } catch (e) {
-      setErro(e.message || t('grupo2.g020'));
+      setErro(t('mensagens.servidor', { mensagem: e.message, opcional: true }) || t('grupo2.g020'));
     } finally {
       bloqueio.current = false;
       setOcupado('');

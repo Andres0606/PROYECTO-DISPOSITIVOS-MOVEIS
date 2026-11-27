@@ -98,7 +98,7 @@ export function FormularioAdmin({
         setRemoverImagem(false);
       }
     } catch (erro) {
-      Alert.alert(t('grupo4.g027'), erro.message);
+      Alert.alert(t('grupo4.g027'), t('mensagens.servidor', { mensagem: erro.message }));
     }
   }
 
@@ -177,7 +177,7 @@ export function FormularioAdmin({
     } catch (erro) {
       Alert.alert(
         t('grupo4.g027'),
-        erro.message || t('grupo4.g099')
+        t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g099')
       );
     } finally {
       setSalvando(false);

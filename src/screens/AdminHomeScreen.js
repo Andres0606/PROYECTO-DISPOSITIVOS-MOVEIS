@@ -48,7 +48,7 @@ export function AdminHomeScreen({ navigation, route }) {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setResumo(null);
-        setErro(erro.message || t('grupo4.g024'));
+        setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g024'));
       }
     } finally {
       if (consulta === consultaAtual.current) {

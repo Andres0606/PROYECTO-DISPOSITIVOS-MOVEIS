@@ -68,7 +68,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
       }
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || t('grupo4.g042'));
+        setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g042'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
@@ -120,7 +120,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
         .catch(erro => {
           if (ativo) {
             setErroComentarios(
-              erro.message || t('grupo4.g062')
+              t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g062')
             );
           }
         })
@@ -154,7 +154,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
             await carregar();
           } catch (erro) {
             if (navigation.isFocused()) {
-              Alert.alert(t('grupo4.g027'), erro.message || t('grupo4.g063'));
+              Alert.alert(t('grupo4.g027'), t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g063'));
             }
 
             await carregar();

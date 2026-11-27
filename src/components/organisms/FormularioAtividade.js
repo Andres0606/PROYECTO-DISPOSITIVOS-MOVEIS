@@ -77,7 +77,7 @@ export function FormularioAtividade({
       const resultado = origem === 'camera' ? await capturarFoto() : await escolherImagem();
       if (resultado?.uri) setImagem(resultado);
     } catch (erro) {
-      Alert.alert(t('grupo3.g025'), erro.message || t('grupo3.g099'));
+      Alert.alert(t('grupo3.g025'), t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g099'));
     } finally {
       setSelecionandoImagem(false);
     }

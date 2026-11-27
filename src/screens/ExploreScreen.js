@@ -64,7 +64,7 @@ export function ExploreScreen({ navigation }) {
       });
     } catch (e) {
       setErro(
-        e.message || t('grupo2.g015')
+        t('mensagens.servidor', { mensagem: e.message, opcional: true }) || t('grupo2.g015')
       );
     } finally {
       setCarregando(false);

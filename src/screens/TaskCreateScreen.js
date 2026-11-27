@@ -27,7 +27,7 @@ export function TaskCreateScreen({ navigation }) {
         navigation.navigate('TarefasLista', { etapa: nova.etapa });
       }
     } catch (e) {
-      setErro(e.message || t('grupo2.g007'));
+      setErro(t('mensagens.servidor', { mensagem: e.message, opcional: true }) || t('grupo2.g007'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);

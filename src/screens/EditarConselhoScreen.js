@@ -57,7 +57,7 @@ export function EditarConselhoScreen({ navigation, route }) {
 
       navigation.goBack();
     } catch (erro) {
-      setErro(erro.message || t('grupo3.g047'));
+      setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g047'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);
@@ -88,7 +88,7 @@ export function EditarConselhoScreen({ navigation, route }) {
       await excluirConselho(conselho.id);
       navigation.pop(2);
     } catch (erro) {
-      setErro(erro.message || t('grupo3.g050'));
+      setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g050'));
     } finally {
       bloqueio.current = false;
       setExcluindo(false);

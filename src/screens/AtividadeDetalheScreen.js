@@ -66,7 +66,7 @@ export function AtividadeDetalheScreen({ navigation, route }) {
       } : atual);
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        Alert.alert(t('grupo3.g063'), erro.message || t('grupo3.g064'));
+        Alert.alert(t('grupo3.g063'), t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g064'));
         await carregar();
       }
     } finally {

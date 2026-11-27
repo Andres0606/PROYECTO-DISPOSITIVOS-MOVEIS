@@ -91,7 +91,7 @@ export function PlaceDetailScreen({
 
     } catch (e) {
       setErro(
-        e.message ||
+        t('mensagens.servidor', { mensagem: e.message, opcional: true }) ||
         t('grupo2.g009')
       );
 
@@ -129,7 +129,7 @@ useFocusEffect(
     } catch (e) {
       Alert.alert(
         t('grupo2.g010'),
-        e.message ||
+        t('mensagens.servidor', { mensagem: e.message, opcional: true }) ||
         t('grupo2.g011')
       );
 

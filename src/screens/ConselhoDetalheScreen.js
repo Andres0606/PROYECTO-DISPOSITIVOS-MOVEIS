@@ -83,7 +83,7 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       await carregarComentarios();
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || t('grupo3.g035'));
+        setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g035'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
@@ -113,7 +113,7 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       return true;
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErroAcao(erro.message || mensagemErro);
+        setErroAcao(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || mensagemErro);
       }
       return false;
     } finally {

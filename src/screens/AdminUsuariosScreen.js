@@ -58,7 +58,7 @@ export function AdminUsuariosScreen() {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setUsuarios([]);
-        setErro(erro.message || t('grupo4.g025'));
+        setErro(t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g025'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
@@ -110,7 +110,7 @@ export function AdminUsuariosScreen() {
     } catch (erro) {
       Alert.alert(
         t('grupo4.g027'),
-        erro.message || t('grupo4.g030')
+        t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo4.g030')
       );
 
       await carregar();

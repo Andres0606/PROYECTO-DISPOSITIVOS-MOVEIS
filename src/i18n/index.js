@@ -1,6 +1,7 @@
 import ptBR from './pt-BR';
 import es from './es';
 import en from './en';
+import { traduzirMensagem } from './catalogosMensagens';
 
 export const IDIOMA_PADRAO = 'pt-BR';
 
@@ -25,6 +26,13 @@ export function normalizarIdioma(idioma) {
 
 export function traduzir(idioma, chave, parametros = {}) {
   const idiomaValido = normalizarIdioma(idioma);
+
+  // Mensagens externas são traduzidas somente na apresentação.
+  if (chave === 'mensagens.servidor') {
+    return traduzirMensagem(
+      parametros.mensagem, idiomaValido, IDIOMAS[idiomaValido], parametros.opcional
+    );
+  }
 
   const valor = obterValor(
     IDIOMAS[idiomaValido],

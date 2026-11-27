@@ -36,7 +36,7 @@ export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
         setPaises(listaPaises);
         setUniversidadesDestino(listaUniversidadesDestino);
       } catch (erro) {
-        setErroDados(erro.message);
+        setErroDados(grupo1Traducao('mensagens.servidor', { mensagem: erro.message }));
       } finally {
         setCarregandoDados(false);
       }
@@ -54,7 +54,7 @@ export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
       const universidades = await obterUniversidadesPorPais(pais.id);
       setUniversidadesOrigem(universidades);
     } catch (erro) {
-      setErroDados(erro.message);
+      setErroDados(grupo1Traducao('mensagens.servidor', { mensagem: erro.message }));
     }
   }
   function selecionarUniversidadeOrigem(nomeUniversidade) {

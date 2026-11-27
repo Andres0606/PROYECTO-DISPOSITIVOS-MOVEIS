@@ -89,7 +89,7 @@ export function FormularioConselho({
 
       if (resultado?.uri) setImagem(resultado);
     } catch (erro) {
-      Alert.alert(t('grupo3.g025'), erro.message || t('grupo3.g099'));
+      Alert.alert(t('grupo3.g025'), t('mensagens.servidor', { mensagem: erro.message, opcional: true }) || t('grupo3.g099'));
     } finally {
       setSelecionandoImagem(false);
     }

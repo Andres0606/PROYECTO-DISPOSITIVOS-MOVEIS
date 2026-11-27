@@ -77,7 +77,7 @@ export function ExpenseSummaryScreen({ navigation }) {
       setEditando(false);
       setRevisao(atual => atual + 1);
     } catch (e) {
-      setErroOrcamento(e.message || t('grupo2.g029'));
+      setErroOrcamento(t('mensagens.servidor', { mensagem: e.message, opcional: true }) || t('grupo2.g029'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);

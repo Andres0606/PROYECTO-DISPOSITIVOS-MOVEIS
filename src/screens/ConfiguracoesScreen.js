@@ -153,7 +153,7 @@ const estilos = useMemo(
       }
     } catch (erro) {
       setErro(
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_carregar_as_configuracoes')
       );
     }
@@ -190,7 +190,7 @@ const estilos = useMemo(
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_atualizar_as_configuracoes')
       );
 
@@ -306,7 +306,7 @@ const estilos = useMemo(
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.notificacoes'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_enviar_a_notificacao')
       );
     } finally {
@@ -336,7 +336,7 @@ const estilos = useMemo(
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_localizacao')
       );
     } finally {
@@ -375,7 +375,7 @@ const estilos = useMemo(
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.localizacao'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_obter_sua_localizacao')
       );
     } finally {

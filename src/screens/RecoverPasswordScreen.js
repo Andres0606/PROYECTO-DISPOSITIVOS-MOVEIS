@@ -26,10 +26,10 @@ export function RecoverPasswordScreen({ navigation }) {
     try {
       const resultado = await recuperarSenha(endereco);
       setEmail(endereco.trim().toLowerCase());
-      setMensagem(resultado.mensagem || grupo1Traducao('grupo1.se_o_e_mail_estiver_cadastrado_voce_recebera_um_codigo'));
+      setMensagem(grupo1Traducao('mensagens.servidor', { mensagem: resultado.mensagem, opcional: true }) || grupo1Traducao('grupo1.se_o_e_mail_estiver_cadastrado_voce_recebera_um_codigo'));
       setEtapa('codigo');
     } catch (e) {
-      setErro(e.message || grupo1Traducao('grupo1.nao_foi_possivel_solicitar_a_recuperacao'));
+      setErro(grupo1Traducao('mensagens.servidor', { mensagem: e.message, opcional: true }) || grupo1Traducao('grupo1.nao_foi_possivel_solicitar_a_recuperacao'));
     } finally {
       ocupado.current = false;
       setCarregando(false);
@@ -46,7 +46,7 @@ export function RecoverPasswordScreen({ navigation }) {
       await redefinirSenha(token, novaSenha);
       setEtapa('sucesso');
     } catch (e) {
-      setErro(e.message || grupo1Traducao('grupo1.nao_foi_possivel_redefinir_a_senha'));
+      setErro(grupo1Traducao('mensagens.servidor', { mensagem: e.message, opcional: true }) || grupo1Traducao('grupo1.nao_foi_possivel_redefinir_a_senha'));
     } finally {
       ocupado.current = false;
       setCarregando(false);

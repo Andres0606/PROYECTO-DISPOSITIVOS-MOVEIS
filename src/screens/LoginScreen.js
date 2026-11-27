@@ -107,7 +107,7 @@ export function LoginScreen({ navigation }) {
       });
 
     } catch (e) {
-      setErro(e.message);
+      setErro(grupo1Traducao('mensagens.servidor', { mensagem: e.message }));
 
     } finally {
       setCarregando(false);

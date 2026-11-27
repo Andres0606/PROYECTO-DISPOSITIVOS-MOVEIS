@@ -130,7 +130,7 @@ export function EditarPerfilScreen({ navigation, route }) {
       } catch (erro) {
         Alert.alert(
           grupo1Traducao('grupo1.erro'),
-          erro?.message ??
+          grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
             grupo1Traducao('grupo1.nao_foi_possivel_carregar_os_dados')
         );
       } finally {
@@ -178,7 +178,7 @@ export function EditarPerfilScreen({ navigation, route }) {
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_carregar_as_universidades')
       );
     }
@@ -249,7 +249,7 @@ export function EditarPerfilScreen({ navigation, route }) {
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_foto')
       );
     } finally {
@@ -275,7 +275,7 @@ export function EditarPerfilScreen({ navigation, route }) {
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_atualizar_a_foto')
       );
     } finally {
@@ -315,7 +315,7 @@ export function EditarPerfilScreen({ navigation, route }) {
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_remover_a_foto')
       );
     } finally {
@@ -412,7 +412,7 @@ export function EditarPerfilScreen({ navigation, route }) {
     } catch (erro) {
       Alert.alert(
         grupo1Traducao('grupo1.erro'),
-        erro?.message ??
+        grupo1Traducao('mensagens.servidor', { mensagem: erro?.message, opcional: true }) ??
           grupo1Traducao('grupo1.nao_foi_possivel_atualizar_o_perfil')
       );
     } finally {
