@@ -1,14 +1,22 @@
 
 // SCREEN — Moderação administrativa
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { CardAdmin } from '../components/molecules/CardAdmin';
 import { ListaAdmin } from '../components/organisms/ListaAdmin';
 import { BotaoSegmentado } from '../components/molecules/BotaoSegmentado';
 import { Button } from '../components/atoms/Button';
+
+import {
+  obterGestaoModeracaoAdmin,
+  alterarEstadoModeracaoAdmin,
+  obterComentariosAdmin,
+  excluirComentarioAdmin,
+} from '../services/admin';
 
 import { useTema } from '../theme/useTema';
 import { espacamentos, tipografia } from '../theme';
@@ -18,27 +26,67 @@ const TIPOS = [
   { titulo: 'Atividades', valor: 'atividades' },
 ];
 
-export function AdminModeracaoScreen({
-  route, conselhos = [], atividades = [],
-  carregando, erro, aoRecarregar,
-  aoAlterarEstado, aoObterComentarios, aoExcluirComentario,
-}) {
+export function AdminModeracaoScreen({ route, navigation }) {
   const { cores } = useTema();
 
+  const [conselhos, setConselhos] = useState([]);
+  const [atividades, setAtividades] = useState([]);
   const [tipo, setTipo] = useState('conselhos');
   const [selecionado, setSelecionado] = useState(null);
+
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+
   const [comentarios, setComentarios] = useState([]);
   const [carregandoComentarios, setCarregandoComentarios] = useState(false);
   const [erroComentarios, setErroComentarios] = useState('');
-  const [ocupado, setOcupado] = useState(false);
   const [revisaoComentarios, setRevisaoComentarios] = useState(0);
+
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
+
+  // Carregar conteúdos
+
+  const carregar = useCallback(async () => {
+    const consulta = ++consultaAtual.current;
+
+    setCarregando(true);
+    setErro('');
+
+    try {
+      const resultado = await obterGestaoModeracaoAdmin();
+
+      if (consulta === consultaAtual.current) {
+        setConselhos(resultado.conselhos);
+        setAtividades(resultado.atividades);
+      }
+    } catch (erro) {
+      if (consulta === consultaAtual.current) {
+        setErro(erro.message || 'Não foi possível carregar os conteúdos.');
+      }
+    } finally {
+      if (consulta === consultaAtual.current) {
+        setCarregando(false);
+      }
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    carregar();
+
+    return () => {
+      consultaAtual.current += 1;
+    };
+  }, [carregar]));
 
   // Atalhos do painel
 
   useEffect(() => {
     const destino = route.params?.tipo;
 
-    if (TIPOS.some(item => item.valor === destino)) {
+    if (!bloqueio.current &&
+        TIPOS.some(item => item.valor === destino)) {
       setTipo(destino);
       setSelecionado(null);
     }
@@ -46,25 +94,30 @@ export function AdminModeracaoScreen({
 
   const itens = tipo === 'conselhos' ? conselhos : atividades;
   const detalhes = itens.find(item => item.id === selecionado);
+  const indisponivel = ocupado || carregando || !!erro;
 
   // Carregar comentários
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     let ativo = true;
 
     setComentarios([]);
     setErroComentarios('');
     setCarregandoComentarios(false);
 
-    if (tipo === 'conselhos' && selecionado && aoObterComentarios) {
+    if (tipo === 'conselhos' && selecionado) {
       setCarregandoComentarios(true);
 
-      aoObterComentarios(selecionado)
+      obterComentariosAdmin(selecionado)
         .then(resultado => {
           if (ativo) setComentarios(resultado);
         })
         .catch(erro => {
-          if (ativo) setErroComentarios(erro.message);
+          if (ativo) {
+            setErroComentarios(
+              erro.message || 'Não foi possível carregar os comentários.'
+            );
+          }
         })
         .finally(() => {
           if (ativo) setCarregandoComentarios(false);
@@ -72,12 +125,12 @@ export function AdminModeracaoScreen({
     }
 
     return () => { ativo = false; };
-  }, [tipo, selecionado, aoObterComentarios, revisaoComentarios]);
+  }, [tipo, selecionado, revisaoComentarios]));
 
   // Confirmar operações
 
   function confirmar(titulo, mensagem, acao) {
-    if (ocupado) return;
+    if (indisponivel || bloqueio.current) return;
 
     Alert.alert(titulo, mensagem, [
       { text: 'Cancelar', style: 'cancel' },
@@ -85,13 +138,23 @@ export function AdminModeracaoScreen({
         text: 'Confirmar',
         style: 'destructive',
         onPress: async () => {
+          if (bloqueio.current) return;
+
+          bloqueio.current = true;
           setOcupado(true);
+          consultaAtual.current += 1;
 
           try {
             await acao();
+            await carregar();
           } catch (erro) {
-            Alert.alert('Erro', erro.message);
+            if (navigation.isFocused()) {
+              Alert.alert('Erro', erro.message || 'Não foi possível concluir a operação.');
+            }
+
+            await carregar();
           } finally {
+            bloqueio.current = false;
             setOcupado(false);
           }
         },
@@ -99,18 +162,43 @@ export function AdminModeracaoScreen({
     ]);
   }
 
+  // Ativar ou desativar conteúdos
+
   function alterarEstado(item) {
-    if (!aoAlterarEstado) return;
+    const tipoAtual = tipo;
+    const ativo = !item.ativo;
 
     confirmar(
-      item.ativo ? 'Desativar conteúdo' : 'Reativar conteúdo',
+      ativo ? 'Reativar conteúdo' : 'Desativar conteúdo',
       'Deseja alterar a visibilidade deste conteúdo para os estudantes?',
-      () => aoAlterarEstado(tipo, item.id, !item.ativo)
+      async () => {
+        const atualizado = await alterarEstadoModeracaoAdmin(
+          tipoAtual, item.id, ativo
+        );
+
+        const atualizarLista = tipoAtual === 'conselhos'
+          ? setConselhos : setAtividades;
+
+        atualizarLista(atuais => atuais.map(registro =>
+          registro.id === item.id ? atualizado : registro
+        ));
+
+        if (navigation.isFocused()) {
+          Alert.alert(
+            'Sucesso',
+            ativo
+              ? 'Conteúdo reativado com sucesso.'
+              : 'Conteúdo desativado com sucesso.'
+          );
+        }
+      }
     );
   }
 
+  // Excluir comentário
+
   function excluirComentario(comentario) {
-    if (!aoExcluirComentario) return;
+    if (carregandoComentarios || !selecionado) return;
 
     const conselhoId = selecionado;
 
@@ -118,11 +206,25 @@ export function AdminModeracaoScreen({
       'Excluir comentário',
       'Esta ação é permanente. Deseja continuar?',
       async () => {
-        await aoExcluirComentario(conselhoId, comentario.id);
+        const resultado = await excluirComentarioAdmin(
+          conselhoId, comentario.id
+        );
 
         setComentarios(atuais =>
           atuais.filter(item => item.id !== comentario.id)
         );
+
+        setConselhos(atuais => atuais.map(item =>
+          item.id === conselhoId
+            ? { ...item, comentarios: resultado.comentarios }
+            : item
+        ));
+
+        setRevisaoComentarios(atual => atual + 1);
+
+        if (navigation.isFocused()) {
+          Alert.alert('Sucesso', 'Comentário excluído com sucesso.');
+        }
       }
     );
   }
@@ -134,13 +236,12 @@ export function AdminModeracaoScreen({
       ...(mostrarDetalhes ? [{
         titulo: 'Detalhes',
         aoPressionar: () => setSelecionado(item.id),
-        desabilitado: ocupado,
+        desabilitado: indisponivel,
       }] : []),
       {
         titulo: item.ativo ? 'Desativar' : 'Reativar',
-        aoPressionar: aoAlterarEstado
-          ? () => alterarEstado(item) : undefined,
-        desabilitado: ocupado,
+        aoPressionar: () => alterarEstado(item),
+        desabilitado: indisponivel,
       },
     ];
   }
@@ -161,10 +262,25 @@ export function AdminModeracaoScreen({
           ? 'Detalhes do conselho'
           : 'Detalhes da atividade'}
         aoVoltar={() => {
-          if (!ocupado) setSelecionado(null);
+          if (!bloqueio.current) setSelecionado(null);
         }}>
 
         <View style={estilos.container}>
+
+          {carregando && (
+            <ActivityIndicator color={cores.primaria} />
+          )}
+
+          {!!erro && (
+            <>
+              <Text style={{ color: cores.perigo }}>{erro}</Text>
+
+              <Button titulo="Tentar novamente"
+                variante="contorno"
+                aoPressionar={carregar}
+                desabilitado={ocupado} />
+            </>
+          )}
 
           <CardAdmin
             titulo={detalhes.titulo || detalhes.nome}
@@ -179,6 +295,12 @@ export function AdminModeracaoScreen({
                 ? `${detalhes.curtidas ?? 0} curtidas`
                 : `${detalhes.interessados ?? 0} interessados`}
             </Text>
+
+            {tipo === 'conselhos' && (
+              <Text style={{ color: cores.textoSecundario }}>
+                {detalhes.comentarios ?? 0} comentários
+              </Text>
+            )}
 
             {tipo === 'atividades' && (
               <>
@@ -219,6 +341,7 @@ export function AdminModeracaoScreen({
                   <Button
                     titulo="Tentar novamente"
                     variante="contorno"
+                    desabilitado={ocupado}
                     aoPressionar={() =>
                       setRevisaoComentarios(atual => atual + 1)
                     }
@@ -238,9 +361,8 @@ export function AdminModeracaoScreen({
                     descricao={comentario.conteudo}
                     acoes={[{
                       titulo: 'Excluir comentário',
-                      aoPressionar: aoExcluirComentario
-                        ? () => excluirComentario(comentario) : undefined,
-                      desabilitado: ocupado,
+                      aoPressionar: () => excluirComentario(comentario),
+                      desabilitado: indisponivel,
                     }]}
                   />
                 ))
@@ -263,7 +385,7 @@ export function AdminModeracaoScreen({
           opcoes={TIPOS}
           valor={tipo}
           aoMudar={valor => {
-            if (!ocupado) {
+            if (!bloqueio.current) {
               setTipo(valor);
               setSelecionado(null);
             }
@@ -275,7 +397,7 @@ export function AdminModeracaoScreen({
           itens={itens}
           carregando={carregando}
           erro={erro}
-          aoRecarregar={aoRecarregar}
+          aoRecarregar={carregar}
           camposBusca={item => [
             item.titulo,
             item.nome,
@@ -284,6 +406,7 @@ export function AdminModeracaoScreen({
             item.autor?.nomeCompleto,
             item.criador?.nomeCompleto,
             item.categoria?.nome,
+            item.local,
           ]}
           renderItem={item => (
             <CardAdmin
