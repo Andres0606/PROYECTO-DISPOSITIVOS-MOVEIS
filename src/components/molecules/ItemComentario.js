@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — ItemComentario
 
@@ -10,6 +11,7 @@ import { useTema } from '../../theme/useTema';
 export function ItemComentario({
   comentario, aoEditar, aoExcluir, ocupado = false,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -27,17 +29,17 @@ export function ItemComentario({
           </Text>
 
           <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-            {comentario.tempo}{comentario.editado ? ' · Editado' : ''}
+            {comentario.tempo}{comentario.editado ? t('grupo3.g138') : ''}
           </Text>
         </View>
 
         {comentario.meuComentario && !ocupado && (
           <View style={estilos.acoes}>
             <BotaoIcone nome="create-outline" tamanho={19}
-              rotulo="Editar comentário" aoPressionar={aoEditar} />
+              rotulo={t('grupo3.g093')} aoPressionar={aoEditar} />
 
             <BotaoIcone nome="trash-outline" tamanho={19}
-              rotulo="Excluir comentário" aoPressionar={aoExcluir} />
+              rotulo={t('grupo3.g038')} aoPressionar={aoExcluir} />
           </View>
         )}
       </View>

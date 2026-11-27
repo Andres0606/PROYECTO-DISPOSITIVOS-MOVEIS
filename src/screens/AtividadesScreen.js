@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Atividades e planos
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
@@ -19,6 +20,7 @@ const OPCOES_ORDENACAO = [
 ];
 
 export function AtividadesScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const apenasMinhas = route.params?.apenasMinhas === true;
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
@@ -38,12 +40,12 @@ export function AtividadesScreen({ navigation, route }) {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setAtividades([]);
-        setErro('Não foi possível carregar as atividades.');
+        setErro(t('grupo3.g054'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [ordenacao]);
+  }, [t, ordenacao]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -59,12 +61,12 @@ export function AtividadesScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo={apenasMinhas ? 'Minhas atividades' : 'Atividades e planos'}
+    <ScreenTemplate titulo={apenasMinhas ? t('grupo3.g053') : t('grupo3.g055')}
       aoVoltar={() => navigation.goBack()}
-      flutuante={<BotaoFlutuante aoPressionar={criarAtividade} rotulo="Adicionar atividade" />}>
+      flutuante={<BotaoFlutuante aoPressionar={criarAtividade} rotulo={t('grupo3.g056')} />}>
       {!apenasMinhas && (
         <View style={estilos.ordenacao}>
-          <BotaoSegmentado opcoes={OPCOES_ORDENACAO} valor={ordenacao} aoMudar={setOrdenacao} />
+          <BotaoSegmentado opcoes={OPCOES_ORDENACAO.map(item => ({ ...item, titulo: item.valor === 'populares' ? t('grupo3.g023') : item.valor === 'minhas' ? t('grupo3.g053') : t('grupo3.g052') }))} valor={ordenacao} aoMudar={setOrdenacao} />
         </View>
       )}
       {carregando ? (
@@ -73,18 +75,18 @@ export function AtividadesScreen({ navigation, route }) {
         <View style={estilos.estadoVazio}>
           <Ionicons name="alert-circle-outline" size={40} color={cores.perigo} />
           <Text style={estilos.erro}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="secundario" aoPressionar={carregar} />
+          <Button titulo={t('grupo3.g002')} variante="secundario" aoPressionar={carregar} />
         </View>
       ) : atividades.length === 0 ? (
         <View style={estilos.estadoVazio}>
           <Ionicons name="calendar-outline" size={48} color={cores.textoSecundario} />
           <Text style={estilos.tituloVazio}>
-            {ordenacao === 'minhas' ? 'Você ainda não criou atividades' : 'Nenhuma atividade disponível'}
+            {ordenacao === 'minhas' ? t('grupo3.g057') : t('grupo3.g058')}
           </Text>
           <Text style={estilos.textoVazio}>
-            Que tal criar uma atividade e convidar outros estudantes?
+            {t('grupo3.g059')}
           </Text>
-          <Button titulo="Criar atividade" variante="escuro" aoPressionar={criarAtividade} />
+          <Button titulo={t('grupo3.g060')} variante="escuro" aoPressionar={criarAtividade} />
         </View>
       ) : (
         <View style={estilos.lista}>

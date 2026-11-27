@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Editar atividade
 
@@ -37,6 +38,7 @@ export function EditarAtividadeScreen({
   navigation,
   route,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const atividade = route.params?.atividade;
@@ -63,7 +65,7 @@ export function EditarAtividadeScreen({
   if (!atividade || !atividade.minhaAtividade) {
     return (
       <ScreenTemplate
-        titulo="Editar atividade"
+        titulo={t('grupo3.g071')}
         aoVoltar={() => {
           if (!salvando && !excluindo) navigation.goBack();
         }}
@@ -76,8 +78,8 @@ export function EditarAtividadeScreen({
           ]}
         >
           {!atividade
-            ? 'Atividade não encontrada.'
-            : 'Você não tem permissão para editar esta atividade.'}
+            ? t('grupo3.g061')
+            : t('grupo3.g072')}
         </Text>
 
       </ScreenTemplate>
@@ -105,14 +107,14 @@ export function EditarAtividadeScreen({
       }
     } catch (erro) {
       setErro(
-        'Os dados foram salvos, mas não foi possível atualizar a foto. Tente novamente.'
+        t('grupo3.g046')
       );
       return;
     }
 
     navigation.goBack();
   } catch (erro) {
-    setErro('Não foi possível atualizar a atividade. Tente novamente.');
+    setErro(t('grupo3.g073'));
   } finally {
     setSalvando(false);
   }
@@ -127,18 +129,18 @@ export function EditarAtividadeScreen({
     if (salvando || excluindo) return;
 
     Alert.alert(
-      'Excluir atividade',
+      t('grupo3.g074'),
 
-      'Tem certeza que deseja excluir esta atividade?',
+      t('grupo3.g075'),
 
       [
         {
-          text: 'Cancelar',
+          text: t('grupo3.g040'),
           style: 'cancel',
         },
 
         {
-          text: 'Excluir',
+          text: t('grupo3.g041'),
           style: 'destructive',
           onPress: excluirAtividadeAtual,
         },
@@ -165,7 +167,7 @@ export function EditarAtividadeScreen({
 
     } catch (erro) {
       setErro(
-        'Não foi possível excluir a atividade. Tente novamente.'
+        t('grupo3.g076')
       );
 
     } finally {
@@ -179,7 +181,7 @@ export function EditarAtividadeScreen({
 
   return (
     <ScreenTemplate
-      titulo="Editar atividade"
+      titulo={t('grupo3.g071')}
       aoVoltar={() => navigation.goBack()}
     >
 
@@ -188,7 +190,7 @@ export function EditarAtividadeScreen({
 
         valoresIniciais={atividade}
 
-        rotuloEnviar="Guardar alterações"
+        rotuloEnviar={t('grupo3.g051')}
 
         aoEnviar={salvarAlteracoes}
 

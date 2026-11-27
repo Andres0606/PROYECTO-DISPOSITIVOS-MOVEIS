@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — DetalheConselho
 
@@ -13,6 +15,7 @@ import { useTema } from '../../theme/useTema';
 export function DetalheConselho({
   conselho, aoCurtir, aoEditar, ocupado = false,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -40,7 +43,7 @@ export function DetalheConselho({
       </Text>
 
       <View style={estilos.categoria}>
-        <Etiqueta titulo={conselho.categoria} />
+        <Etiqueta titulo={rotuloCatalogo3(conselho.categoria, t)} />
       </View>
 
       <Text style={[estilos.descricao, { color: cores.texto }]}>
@@ -52,14 +55,14 @@ export function DetalheConselho({
       )}
 
       {conselho.meuConselho && (
-        <Button titulo="Editar" variante="secundario"
+        <Button titulo={t('grupo3.g085')} variante="secundario"
           aoPressionar={aoEditar} desabilitado={ocupado} />
       )}
 
       <View style={estilos.rodape}>
         <Pressable onPress={aoCurtir} disabled={ocupado}
           hitSlop={10} accessibilityRole="button"
-          accessibilityLabel={conselho.curtido ? 'Remover curtida' : 'Curtir conselho'}
+          accessibilityLabel={conselho.curtido ? t('grupo3.g086') : t('grupo3.g087')}
           accessibilityState={{ selected: conselho.curtido, disabled: ocupado }}
           style={({ pressed }) => [
             estilos.interacao,
@@ -82,7 +85,7 @@ export function DetalheConselho({
 
           <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
             {conselho.comentarios}{' '}
-            {conselho.comentarios === 1 ? 'Comentário' : 'Comentários'}
+            {conselho.comentarios === 1 ? t('grupo3.g088') : t('grupo3.g089')}
           </Text>
         </View>
       </View>

@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Conselhos de estudantes de intercâmbio
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
@@ -18,6 +19,7 @@ const OPCOES_ORDENACAO = [
 ];
 
 export function ConselhosScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const apenasMeus = route.params?.apenasMeus === true;
   const { cores } = useTema();
   const [ordenacao, setOrdenacao] = useState(apenasMeus ? 'meus' : 'recentes');
@@ -39,12 +41,12 @@ export function ConselhosScreen({ navigation, route }) {
     } catch (erro) {
       if (consulta === consultaAtual.current) {
         setConselhos([]);
-        setErro('Não foi possível carregar os conselhos.');
+        setErro(t('grupo3.g024'));
       }
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [ordenacao]);
+  }, [t, ordenacao]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -74,7 +76,7 @@ export function ConselhosScreen({ navigation, route }) {
         setRevisao(atual => atual + 1);
       }
     } catch (erro) {
-      if (navigation.isFocused()) Alert.alert('Erro', 'Não foi possível atualizar a curtida.');
+      if (navigation.isFocused()) Alert.alert(t('grupo3.g025'), t('grupo3.g026'));
       setRevisao(atual => atual + 1);
     } finally {
       bloqueio.current = false;
@@ -87,12 +89,12 @@ export function ConselhosScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo={apenasMeus ? 'Meus conselhos' : 'Conselhos de estudantes de intercâmbio'}
+    <ScreenTemplate titulo={apenasMeus ? t('grupo3.g027') : t('grupo3.g028')}
       aoVoltar={() => navigation.goBack()}
-      flutuante={<BotaoFlutuante aoPressionar={criarConselho} rotulo="Adicionar conselho" />}>
+      flutuante={<BotaoFlutuante aoPressionar={criarConselho} rotulo={t('grupo3.g029')} />}>
       {!apenasMeus && (
         <View style={estilos.ordenacao}>
-          <BotaoSegmentado opcoes={OPCOES_ORDENACAO} valor={ordenacao} aoMudar={setOrdenacao} />
+          <BotaoSegmentado opcoes={OPCOES_ORDENACAO.map(item => ({ ...item, titulo: item.valor === 'populares' ? t('grupo3.g023') : item.valor === 'minhas' ? t('grupo3.g053') : t('grupo3.g022') }))} valor={ordenacao} aoMudar={setOrdenacao} />
         </View>
       )}
       {carregando ? (
@@ -101,18 +103,18 @@ export function ConselhosScreen({ navigation, route }) {
         <View style={estilos.estado}>
           <Ionicons name="alert-circle-outline" size={40} color={cores.perigo} />
           <Text style={[estilos.mensagem, { color: cores.perigo }]}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="secundario" aoPressionar={carregar} />
+          <Button titulo={t('grupo3.g002')} variante="secundario" aoPressionar={carregar} />
         </View>
       ) : conselhos.length === 0 ? (
         <View style={estilos.estado}>
           <Ionicons name="chatbubbles-outline" size={48} color={cores.textoSecundario} />
           <Text style={[estilos.mensagem, { color: cores.texto }]}>
-            {apenasMeus ? 'Você ainda não publicou conselhos.' : 'Nenhum conselho disponível.'}
+            {apenasMeus ? t('grupo3.g030') : t('grupo3.g031')}
           </Text>
           <Text style={[estilos.mensagem, { color: cores.textoSecundario }]}>
-            Compartilhe suas experiências com outros estudantes.
+            {t('grupo3.g032')}
           </Text>
-          <Button titulo="Publicar conselho" variante="escuro" aoPressionar={criarConselho} />
+          <Button titulo={t('grupo3.g021')} variante="escuro" aoPressionar={criarConselho} />
         </View>
       ) : (
         <View style={estilos.lista}>

@@ -1,4 +1,3 @@
-
 // ORGANISM — Formulário administrativo
 
 import { useState } from 'react';
@@ -26,11 +25,16 @@ const CAMPOS = {
     ['latitude', 'Latitude', 30],
     ['longitude', 'Longitude', 30],
   ],
+
   frases: [
     ['frasePortugues', 'Frase em português', 300, true, true],
     ['traducaoEspanhol', 'Tradução em espanhol', 300, true, true],
-    ['explicacao', 'Explicação e contexto', 3000, true, true],
+    ['traducaoIngles', 'Tradução em inglês', 300, true, true],
+    ['explicacaoPortugues', 'Contexto de uso em português', 3000, true, true],
+    ['explicacao', 'Contexto de uso em espanhol', 3000, true, true],
+    ['explicacaoIngles', 'Contexto de uso em inglês', 3000, true, true],
   ],
+
   categorias: [
     ['nome', 'Nome da categoria', 60, true],
   ],
@@ -42,8 +46,11 @@ const ESTADOS = [
 ];
 
 export function FormularioAdmin({
-  tipo, registro, categorias = [],
-  aoSalvar, aoCancelar,
+  tipo,
+  registro,
+  categorias = [],
+  aoSalvar,
+  aoCancelar,
 }) {
   const campos = CAMPOS[tipo];
 
@@ -65,8 +72,15 @@ export function FormularioAdmin({
   // Atualizar campos
 
   function alterar(campo, valor) {
-    setDados(atual => ({ ...atual, [campo]: valor }));
-    setErros(atual => ({ ...atual, [campo]: '' }));
+    setDados(atual => ({
+      ...atual,
+      [campo]: valor,
+    }));
+
+    setErros(atual => ({
+      ...atual,
+      [campo]: '',
+    }));
   }
 
   // Selecionar fotografia
@@ -128,7 +142,9 @@ export function FormularioAdmin({
         ['longitude', 180],
       ]) {
         if (valores[campo] !== null) {
-          const numero = Number(valores[campo].replace(',', '.'));
+          const numero = Number(
+            valores[campo].replace(',', '.')
+          );
 
           if (!Number.isFinite(numero) || Math.abs(numero) > limite) {
             falhas[campo] = 'Coordenada inválida.';
@@ -155,7 +171,10 @@ export function FormularioAdmin({
         removerImagem,
       });
     } catch (erro) {
-      Alert.alert('Erro', erro.message || 'Não foi possível salvar.');
+      Alert.alert(
+        'Erro',
+        erro.message || 'Não foi possível salvar.'
+      );
     } finally {
       setSalvando(false);
     }
@@ -169,7 +188,10 @@ export function FormularioAdmin({
       {tipo === 'lugares' && (
         <SeletorImagem
           rotulo="Foto do lugar (opcional)"
-          uri={imagem?.uri || (!removerImagem ? registro?.imagemUrl : null)}
+          uri={
+            imagem?.uri ||
+            (!removerImagem ? registro?.imagemUrl : null)
+          }
           aoCapturar={() => selecionarImagem(capturarFoto)}
           aoEscolher={() => selecionarImagem(escolherImagem)}
           aoRemover={() => {
@@ -180,7 +202,13 @@ export function FormularioAdmin({
         />
       )}
 
-      {campos.map(([campo, rotulo, limite, obrigatorio, multiline]) => (
+      {campos.map(([
+        campo,
+        rotulo,
+        limite,
+        obrigatorio,
+        multiline,
+      ]) => (
         <FormField
           key={campo}
           rotulo={`${rotulo}${obrigatorio ? ' *' : ''}`}
@@ -198,15 +226,22 @@ export function FormularioAdmin({
         <>
           <CampoSelecao
             rotulo="Categoria"
-            valor={categorias.find(item =>
-              item.id === dados.categoriaId
-            )?.nome ?? (tipo === 'lugares' ? 'Sem categoria' : 'Selecione')}
-            opcoes={tipo === 'lugares'
-              ? ['Sem categoria', ...opcoes]
-              : opcoes}
+            valor={
+              categorias.find(item =>
+                item.id === dados.categoriaId
+              )?.nome ??
+              (tipo === 'lugares' ? 'Sem categoria' : 'Selecione')
+            }
+            opcoes={
+              tipo === 'lugares'
+                ? ['Sem categoria', ...opcoes]
+                : opcoes
+            }
             aoMudar={nome => alterar(
               'categoriaId',
-              categorias.find(item => item.nome === nome)?.id ?? null
+              categorias.find(item =>
+                item.nome === nome
+              )?.id ?? null
             )}
             erro={erros.categoriaId}
             desabilitado={salvando}
@@ -216,7 +251,9 @@ export function FormularioAdmin({
             opcoes={ESTADOS}
             valor={dados.ativo}
             aoMudar={valor => {
-              if (!salvando) alterar('ativo', valor);
+              if (!salvando) {
+                alterar('ativo', valor);
+              }
             }}
           />
         </>

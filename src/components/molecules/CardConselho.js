@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — CardConselho
 
@@ -11,6 +13,7 @@ import { useTema } from '../../theme/useTema';
 export function CardConselho({
   conselho, aoCurtir, aoAbrir, desabilitado = false,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -42,7 +45,7 @@ export function CardConselho({
         </Text>
 
         <View style={estilos.categoria}>
-          <Etiqueta titulo={conselho.categoria} />
+          <Etiqueta titulo={rotuloCatalogo3(conselho.categoria, t)} />
         </View>
       </Pressable>
 
@@ -52,7 +55,7 @@ export function CardConselho({
           disabled={desabilitado}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={conselho.curtido ? 'Remover curtida' : 'Curtir conselho'}
+          accessibilityLabel={conselho.curtido ? t('grupo3.g086') : t('grupo3.g087')}
           accessibilityState={{ selected: conselho.curtido, disabled: desabilitado }}
           style={({ pressed }) => [
             estilos.interacao,
@@ -71,7 +74,7 @@ export function CardConselho({
         </Pressable>
 
         <Pressable onPress={aoAbrir} style={estilos.interacao}
-          accessibilityRole="button" accessibilityLabel="Ver comentários">
+          accessibilityRole="button" accessibilityLabel={t('grupo3.g139')}>
           <Ionicons name="chatbubble-outline" size={19} color={cores.texto} />
           <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
             {conselho.comentarios}

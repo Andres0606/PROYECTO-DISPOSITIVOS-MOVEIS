@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — CardAtividade
 
@@ -9,6 +11,7 @@ import { espacamentos, raios, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function CardAtividade({ atividade, aoAbrir, mostrarEstado = false }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
 
@@ -34,17 +37,17 @@ export function CardAtividade({ atividade, aoAbrir, mostrarEstado = false }) {
 
           <Text style={estilos.detalhes}>
             {atividade.data}{' · '}{atividade.horario}
-            {' · '}{atividade.interessados}{' '}interessados
+            {' · '}{atividade.interessados}{' '}{t('grupo3.g140')}
           </Text>
 
           {mostrarEstado && (
             <View style={estilos.estado}>
-              <Etiqueta titulo={atividade.vencida ? 'Encerrada' : 'Próxima'} />
+              <Etiqueta titulo={atividade.vencida ? t('grupo3.g115') : t('grupo3.g141')} />
             </View>
           )}
         </View>
 
-        <Etiqueta titulo={atividade.categoria} />
+        <Etiqueta titulo={rotuloCatalogo3(atividade.categoria, t)} />
       </View>
     </Pressable>
   );

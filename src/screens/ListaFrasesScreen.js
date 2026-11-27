@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../i18n/catalogosGrupo3';
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Lista de frases por categoria
 
@@ -19,6 +21,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ListaFrasesScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const categoria = route.params?.categoria;
 
@@ -39,7 +42,7 @@ export function ListaFrasesScreen({ navigation, route }) {
     setErro('');
 
     try {
-      if (!categoria?.id) throw new Error('Categoria não encontrada.');
+      if (!categoria?.id) throw new Error(t('grupo3.g004'));
 
       const [lista, guardadas] = await Promise.all([
         obterFrasesPorCategoria(categoria.id),
@@ -52,14 +55,14 @@ export function ListaFrasesScreen({ navigation, route }) {
       setFavoritas(guardadas.map(item => item.id));
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar as frases.');
+        setErro(t('grupo3.g005'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, [categoria?.id]);
+  }, [t, categoria?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,7 +94,7 @@ export function ListaFrasesScreen({ navigation, route }) {
       }
     } catch {
       if (navigation.isFocused()) {
-        Alert.alert('Favoritos', 'Não foi possível atualizar o favorito.');
+        Alert.alert(t('grupo3.g006'), t('grupo3.g007'));
       }
 
       setRevisao(atual => atual + 1);
@@ -104,7 +107,7 @@ export function ListaFrasesScreen({ navigation, route }) {
   const filtradas = filtrarFrases(frases, busca);
 
   return (
-    <ScreenTemplate titulo={categoria?.nome ?? 'Frases'}
+    <ScreenTemplate titulo={rotuloCatalogo3(categoria?.nome, t) ?? t('grupo3.g008')}
       aoVoltar={() => navigation.goBack()}>
 
       {carregando ? (
@@ -115,19 +118,19 @@ export function ListaFrasesScreen({ navigation, route }) {
             {erro}
           </Text>
 
-          <Button titulo="Tentar novamente" variante="secundario"
+          <Button titulo={t('grupo3.g002')} variante="secundario"
             aoPressionar={carregar} />
         </View>
       ) : (
         <View style={estilos.lista}>
           <BarraBusca valor={busca} aoMudar={setBusca}
-            placeholder="Buscar frase..." />
+            placeholder={t('grupo3.g009')} />
 
           {filtradas.length === 0 ? (
             <Text style={[estilos.texto, { color: cores.textoSecundario }]}>
               {busca.trim()
-                ? 'Nenhuma frase encontrada.'
-                : 'Nenhuma frase disponível nesta categoria.'}
+                ? t('grupo3.g010')
+                : t('grupo3.g011')}
             </Text>
           ) : (
             filtradas.map(frase => (

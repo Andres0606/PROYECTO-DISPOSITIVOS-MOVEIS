@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Editar conselho
 
@@ -13,6 +14,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function EditarConselhoScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const conselho = route.params?.conselho;
   const [salvando, setSalvando] = useState(false);
@@ -22,11 +24,11 @@ export function EditarConselhoScreen({ navigation, route }) {
 
   if (!conselho || !conselho.meuConselho) {
     return (
-      <ScreenTemplate titulo="Editar conselho" aoVoltar={() => navigation.goBack()}>
+      <ScreenTemplate titulo={t('grupo3.g044')} aoVoltar={() => navigation.goBack()}>
         <Text style={[estilos.erro, { color: cores.perigo }]}>
           {!conselho
-            ? 'Conselho não encontrado.'
-            : 'Você não tem permissão para editar este conselho.'}
+            ? t('grupo3.g034')
+            : t('grupo3.g045')}
         </Text>
       </ScreenTemplate>
     );
@@ -49,13 +51,13 @@ export function EditarConselhoScreen({ navigation, route }) {
           await removerFotoConselho(conselho.id);
         }
       } catch (erro) {
-        setErro('Os dados foram salvos, mas não foi possível atualizar a foto. Tente novamente.');
+        setErro(t('grupo3.g046'));
         return;
       }
 
       navigation.goBack();
     } catch (erro) {
-      setErro(erro.message || 'Não foi possível atualizar o conselho.');
+      setErro(erro.message || t('grupo3.g047'));
     } finally {
       bloqueio.current = false;
       setSalvando(false);
@@ -66,11 +68,11 @@ export function EditarConselhoScreen({ navigation, route }) {
     if (bloqueio.current) return;
 
     Alert.alert(
-      'Excluir conselho',
-      'Tem certeza que deseja excluir este conselho?',
+      t('grupo3.g048'),
+      t('grupo3.g049'),
       [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Excluir', style: 'destructive', onPress: excluirConselhoAtual },
+        { text: t('grupo3.g040'), style: 'cancel' },
+        { text: t('grupo3.g041'), style: 'destructive', onPress: excluirConselhoAtual },
       ]
     );
   }
@@ -86,7 +88,7 @@ export function EditarConselhoScreen({ navigation, route }) {
       await excluirConselho(conselho.id);
       navigation.pop(2);
     } catch (erro) {
-      setErro(erro.message || 'Não foi possível excluir o conselho.');
+      setErro(erro.message || t('grupo3.g050'));
     } finally {
       bloqueio.current = false;
       setExcluindo(false);
@@ -94,13 +96,13 @@ export function EditarConselhoScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Editar conselho"
+    <ScreenTemplate titulo={t('grupo3.g044')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
       <FormularioConselho
         key={conselho.id}
         valoresIniciais={conselho}
-        rotuloEnviar="Guardar alterações"
+        rotuloEnviar={t('grupo3.g051')}
         aoEnviar={salvarAlteracoes}
         aoExcluir={confirmarExclusao}
         carregando={salvando}

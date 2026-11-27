@@ -1,4 +1,3 @@
-
 // ORGANISM — DetalheFrase
 
 import { StyleSheet, Text, View } from 'react-native';
@@ -12,6 +11,14 @@ import { Button } from '../atoms/Button';
 import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
+
+import {
+  obterTraducaoFrase,
+  obterContextoFrase,
+} from '../../utils/frases';
+
 export function DetalheFrase({
   frase,
   favorita,
@@ -20,14 +27,27 @@ export function DetalheFrase({
   aoAlternarFavorita,
   aoPronunciar,
 }) {
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
+
+  // CONTEÚDO CONFORME O IDIOMA
+
+  const traducao = obterTraducaoFrase(frase, idioma);
+
+  const contexto = obterContextoFrase(frase, idioma);
+
+  const rotuloTraducao =
+    idioma === 'en' ? 'English' : t('grupo3.g081');
 
   return (
     <View style={estilos.tela}>
 
       <View style={estilos.cabecalho}>
         <Etiqueta
-          titulo={frase.categoria?.nome ?? 'Português'}
+          titulo={
+            rotuloCatalogo3(frase.categoria?.nome, t)
+            ?? t('grupo3.g078')
+          }
         />
 
         <BotaoIcone
@@ -35,8 +55,8 @@ export function DetalheFrase({
           tamanho={24}
           rotulo={
             favorita
-              ? 'Remover dos favoritos'
-              : 'Adicionar aos favoritos'
+              ? t('grupo3.g079')
+              : t('grupo3.g080')
           }
           aoPressionar={
             ocupado ? undefined : aoAlternarFavorita
@@ -45,11 +65,14 @@ export function DetalheFrase({
       </View>
 
       <Card>
+
+        {/* FRASE ORIGINAL EM PORTUGUÊS */}
+
         <Text style={[
           estilos.idioma,
           { color: cores.textoSecundario },
         ]}>
-          Português
+          {t('grupo3.g078')}
         </Text>
 
         <Text style={[
@@ -64,59 +87,74 @@ export function DetalheFrase({
           { backgroundColor: cores.borda },
         ]} />
 
+        {/* TRADUÇÃO CONFORME O IDIOMA */}
+
         <Text style={[
           estilos.idioma,
           { color: cores.textoSecundario },
         ]}>
-          Español
+          {rotuloTraducao}
         </Text>
 
         <Text style={[
           estilos.traducao,
           { color: cores.texto },
         ]}>
-          {frase.espanhol}
+          {traducao}
         </Text>
+
       </Card>
+
+      {/* PRONÚNCIA EM PORTUGUÊS */}
 
       <Button
         titulo={
           falando
-            ? 'Parar áudio'
-            : 'Ouvir pronúncia'
+            ? t('grupo3.g082')
+            : t('grupo3.g083')
         }
         variante="secundario"
         aoPressionar={aoPronunciar}
         icone={
           <Ionicons
-            name={falando ? 'stop-circle-outline' : 'volume-high-outline'}
+            name={
+              falando
+                ? 'stop-circle-outline'
+                : 'volume-high-outline'
+            }
             size={22}
             color={cores.texto}
           />
         }
       />
 
-      {!!frase.explicacao && (
+      {/* CONTEXTO DE USO TRADUZIDO */}
+
+      {!!contexto && (
         <Card>
+
           <Text style={[
             estilos.titulo,
             { color: cores.texto },
           ]}>
-            Contexto de uso
+            {t('grupo3.g084')}
           </Text>
 
           <Text style={[
             estilos.explicacao,
             { color: cores.textoSecundario },
           ]}>
-            {frase.explicacao}
+            {contexto}
           </Text>
+
         </Card>
       )}
 
     </View>
   );
 }
+
+// ESTILOS
 
 const estilos = StyleSheet.create({
   tela: {

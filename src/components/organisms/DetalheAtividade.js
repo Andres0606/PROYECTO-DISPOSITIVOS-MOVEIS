@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — DetalheAtividade
 
 import { useMemo } from 'react';
@@ -12,21 +14,22 @@ export function DetalheAtividade({
   atividade, ordenacao = 'recentes', salvandoInteresse = false,
   salvandoFavorito = false, aoAlternarInteresse, aoAlternarGuardado, aoEditar,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const ocupado = salvandoInteresse || salvandoFavorito;
   const tituloInteresse = atividade.interessado
-    ? (atividade.vencida ? 'Retirar interesse' : 'Interessado')
-    : (atividade.vencida ? 'Encerrada' : 'Me interessa');
+    ? (atividade.vencida ? t('grupo3.g113') : t('grupo3.g114'))
+    : (atividade.vencida ? t('grupo3.g115') : t('grupo3.g116'));
 
   return (
     <View>
       {(!atividade.vencida || ordenacao === 'minhas') && (
         <View style={estilos.segmentado}>
           {[
-            { titulo: 'Próximas', valor: 'recentes' },
-            { titulo: 'Populares', valor: 'populares' },
-            { titulo: 'Minhas atividades', valor: 'minhas' },
+            { titulo: t('grupo3.g052'), valor: 'recentes' },
+            { titulo: t('grupo3.g023'), valor: 'populares' },
+            { titulo: t('grupo3.g053'), valor: 'minhas' },
           ].map((opcao) => (
             <View
               key={opcao.valor}
@@ -49,14 +52,14 @@ export function DetalheAtividade({
       )}
       <FotoLocal imagem={atividade.imagem ? { uri: atividade.imagem } : undefined} style={estilos.imagem} />
       <Text style={estilos.titulo}>{atividade.titulo}</Text>
-      <View style={estilos.categoria}><Etiqueta titulo={atividade.categoria} /></View>
+      <View style={estilos.categoria}><Etiqueta titulo={rotuloCatalogo3(atividade.categoria, t)} /></View>
       {atividade.vencida && (
-        <View style={estilos.estado}><Etiqueta titulo="Atividade encerrada" /></View>
+        <View style={estilos.estado}><Etiqueta titulo={t('grupo3.g117')} /></View>
       )}
       <Text style={estilos.informacao}>{atividade.dataCompleta ?? atividade.data}{' · '}{atividade.horario}</Text>
       <Text style={estilos.informacao}>{atividade.local}</Text>
       <Text style={estilos.interessados}>
-        {atividade.interessados}{' '}{atividade.interessados === 1 ? 'pessoa interessada' : 'pessoas interessadas'}
+        {atividade.interessados}{' '}{atividade.interessados === 1 ? t('grupo3.g118') : t('grupo3.g119')}
       </Text>
       <View style={estilos.descricaoBox}><Text style={estilos.descricao}>{atividade.descricao}</Text></View>
       <View style={estilos.botoes}>
@@ -67,7 +70,7 @@ export function DetalheAtividade({
             desabilitado={salvandoFavorito || (atividade.vencida && !atividade.interessado)} />
         </View>
         <View style={estilos.botao}>
-          <Button titulo={atividade.guardado ? 'Guardado' : 'Guardar'}
+          <Button titulo={atividade.guardado ? t('grupo3.g120') : t('grupo3.g121')}
             variante={atividade.guardado ? 'secundario' : 'contorno'}
             aoPressionar={aoAlternarGuardado} carregando={salvandoFavorito}
             desabilitado={salvandoInteresse} />
@@ -75,7 +78,7 @@ export function DetalheAtividade({
       </View>
       {atividade.minhaAtividade && (
         <View style={estilos.areaEditar}>
-          <Button titulo="Editar" variante="secundario" aoPressionar={aoEditar} desabilitado={ocupado} />
+          <Button titulo={t('grupo3.g085')} variante="secundario" aoPressionar={aoEditar} desabilitado={ocupado} />
         </View>
       )}
     </View>

@@ -7,10 +7,39 @@ export function formatarFrase(frase) {
     ...frase,
     portugues: frase.frasePortugues,
     espanhol: frase.traducaoEspanhol,
+    ingles: frase.traducaoIngles ?? '',
     explicacao: frase.explicacao ?? '',
+    explicacaoIngles: frase.explicacaoIngles ?? '',
+    explicacaoPortugues: frase.explicacaoPortugues ?? '',
     guardado: !!frase.guardado,
   };
 }
+
+// Tradução conforme o idioma selecionado
+
+export function obterTraducaoFrase(frase, idioma) {
+  if (idioma === 'en') {
+    return frase.ingles || frase.traducaoIngles || '—';
+  }
+
+  return frase.espanhol || frase.traducaoEspanhol || '—';
+}
+
+// Contexto conforme o idioma selecionado
+
+export function obterContextoFrase(frase, idioma) {
+  if (idioma === 'en') {
+    return frase.explicacaoIngles || '';
+  }
+
+  if (idioma === 'pt-BR') {
+    return frase.explicacaoPortugues || '';
+  }
+
+  return frase.explicacao || '';
+}
+
+// Busca nos três idiomas
 
 export function filtrarFrases(frases, busca) {
   const termo = normalizarTexto(busca.trim());
@@ -18,8 +47,15 @@ export function filtrarFrases(frases, busca) {
   if (!termo) return frases;
 
   return frases.filter(frase =>
-    normalizarTexto(frase.portugues).includes(termo) ||
-    normalizarTexto(frase.espanhol).includes(termo) ||
-    normalizarTexto(frase.explicacao ?? '').includes(termo)
+    [
+      frase.portugues,
+      frase.espanhol,
+      frase.ingles,
+      frase.explicacao,
+      frase.explicacaoIngles,
+      frase.explicacaoPortugues,
+    ].some(texto =>
+      normalizarTexto(texto ?? '').includes(termo)
+    )
   );
 }

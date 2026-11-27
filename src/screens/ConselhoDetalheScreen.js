@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Detalhes do conselho
 
@@ -17,6 +18,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ConselhoDetalheScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const id = route.params?.conselhoId ?? route.params?.conselho?.id;
 
@@ -50,14 +52,14 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       );
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErroComentarios('Não foi possível carregar os comentários.');
+        setErroComentarios(t('grupo3.g033'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregandoComentarios(false);
       }
     }
-  }, [id]);
+  }, [t, id]);
 
   const carregar = useCallback(async () => {
     const consulta = ++consultaAtual.current;
@@ -70,7 +72,7 @@ export function ConselhoDetalheScreen({ navigation, route }) {
     setComentarios([]);
 
     try {
-      if (!id) throw new Error('Conselho não encontrado.');
+      if (!id) throw new Error(t('grupo3.g034'));
 
       const resultado = await obterConselhoPorId(id);
 
@@ -81,14 +83,14 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       await carregarComentarios();
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        setErro(erro.message || 'Não foi possível carregar o conselho.');
+        setErro(erro.message || t('grupo3.g035'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, [id, carregarComentarios]);
+  }, [t, id, carregarComentarios]);
 
   useFocusEffect(
     useCallback(() => {
@@ -133,7 +135,7 @@ export function ConselhoDetalheScreen({ navigation, route }) {
         curtido: resultado.curtido,
         curtidas: resultado.curtidas,
       }));
-    }, 'Não foi possível atualizar a curtida.');
+    }, t('grupo3.g026'));
   }
 
   async function publicarComentario(conteudo) {
@@ -143,7 +145,7 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       if (consulta === consultaAtual.current) {
         await carregarComentarios();
       }
-    }, 'Não foi possível publicar o comentário.');
+    }, t('grupo3.g036'));
   }
 
   async function editarComentario(comentarioId, conteudo) {
@@ -153,19 +155,19 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       if (consulta === consultaAtual.current) {
         await carregarComentarios();
       }
-    }, 'Não foi possível atualizar o comentário.');
+    }, t('grupo3.g037'));
   }
 
   function confirmarExclusao(comentario) {
     if (bloqueio.current || !comentario.meuComentario) return;
 
     Alert.alert(
-      'Excluir comentário',
-      'Tem certeza que deseja excluir este comentário?',
+      t('grupo3.g038'),
+      t('grupo3.g039'),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('grupo3.g040'), style: 'cancel' },
         {
-          text: 'Excluir',
+          text: t('grupo3.g041'),
           style: 'destructive',
           onPress: () => excluirComentario(comentario.id),
         },
@@ -180,11 +182,11 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       if (consulta === consultaAtual.current) {
         await carregarComentarios();
       }
-    }, 'Não foi possível excluir o comentário.');
+    }, t('grupo3.g042'));
   }
 
   return (
-    <ScreenTemplate titulo="Conselhos"
+    <ScreenTemplate titulo={t('grupo3.g043')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
       {carregando ? (
@@ -192,10 +194,10 @@ export function ConselhoDetalheScreen({ navigation, route }) {
       ) : erro || !conselho ? (
         <View style={estilos.estado}>
           <Text style={[estilos.erro, { color: cores.perigo }]}>
-            {erro || 'Conselho não encontrado.'}
+            {erro || t('grupo3.g034')}
           </Text>
 
-          <Button titulo="Tentar novamente" variante="contorno"
+          <Button titulo={t('grupo3.g002')} variante="contorno"
             aoPressionar={carregar} />
         </View>
       ) : (

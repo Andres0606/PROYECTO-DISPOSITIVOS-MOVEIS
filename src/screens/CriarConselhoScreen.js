@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Criar conselho
 
@@ -8,6 +9,7 @@ import { FormularioConselho } from '../components/organisms/FormularioConselho';
 import { criarConselho, atualizarFotoConselho } from '../services/conselhos';
 
 export function CriarConselhoScreen({ navigation }) {
+  const { t } = usePreferencias();
   const [publicando, setPublicando] = useState(false);
   const [erro, setErro] = useState('');
   const bloqueio = useRef(false);
@@ -30,8 +32,8 @@ export function CriarConselhoScreen({ navigation }) {
           await atualizarFotoConselho(conselho.id, imagem);
         } catch (erro) {
           Alert.alert(
-            'Conselho publicado',
-            'O conselho foi publicado, mas não foi possível enviar a foto. Você pode adicioná-la ao editar o conselho.',
+            t('grupo3.g017'),
+            t('grupo3.g018'),
             [{ text: 'OK', onPress: () => navigation.goBack() }],
             { cancelable: false }
           );
@@ -41,7 +43,7 @@ export function CriarConselhoScreen({ navigation }) {
 
       navigation.goBack();
     } catch (erro) {
-      setErro(erro.message || 'Não foi possível publicar o conselho.');
+      setErro(erro.message || t('grupo3.g019'));
     } finally {
       if (!publicou) {
         bloqueio.current = false;
@@ -51,11 +53,11 @@ export function CriarConselhoScreen({ navigation }) {
   }
 
   return (
-    <ScreenTemplate titulo="Novo conselho"
+    <ScreenTemplate titulo={t('grupo3.g020')}
       aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
       <FormularioConselho
-        rotuloEnviar="Publicar conselho"
+        rotuloEnviar={t('grupo3.g021')}
         aoEnviar={publicarConselho}
         carregando={publicando}
         erroGeral={erro}

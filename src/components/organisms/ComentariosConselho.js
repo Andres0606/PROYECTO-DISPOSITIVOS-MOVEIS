@@ -1,3 +1,4 @@
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — ComentariosConselho
 
@@ -14,6 +15,7 @@ export function ComentariosConselho({
   comentarios, carregando, erro, erroAcao,
   ocupado, aoRecarregar, aoPublicar, aoAtualizar, aoExcluir,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [conteudo, setConteudo] = useState('');
   const [editandoId, setEditandoId] = useState(null);
@@ -44,12 +46,12 @@ export function ComentariosConselho({
     if (desabilitado) return;
 
     if (!campoObrigatorio(conteudo)) {
-      setErroCampo('O comentário não pode estar vazio.');
+      setErroCampo(t('grupo3.g090'));
       return;
     }
 
     if (conteudo.trim().length > 1000) {
-      setErroCampo('O comentário deve ter no máximo 1000 caracteres.');
+      setErroCampo(t('grupo3.g091'));
       return;
     }
 
@@ -63,7 +65,7 @@ export function ComentariosConselho({
   return (
     <View style={estilos.container}>
       <Text style={[estilos.titulo, { color: cores.texto }]}>
-        Comentários
+        {t('grupo3.g089')}
       </Text>
 
       {carregando ? (
@@ -74,12 +76,12 @@ export function ComentariosConselho({
             {erro}
           </Text>
 
-          <Button titulo="Tentar novamente" variante="contorno"
+          <Button titulo={t('grupo3.g002')} variante="contorno"
             aoPressionar={aoRecarregar} desabilitado={ocupado} />
         </View>
       ) : comentarios.length === 0 ? (
         <Text style={[estilos.mensagem, { color: cores.textoSecundario }]}>
-          Ainda não há comentários. Seja o primeiro a comentar!
+          {t('grupo3.g092')}
         </Text>
       ) : (
         <View style={estilos.lista}>
@@ -96,8 +98,8 @@ export function ComentariosConselho({
       )}
 
       <FormField
-        rotulo={editandoId ? 'Editar comentário' : 'Novo comentário'}
-        placeholder="Escreva seu comentário..."
+        rotulo={editandoId ? t('grupo3.g093') : t('grupo3.g094')}
+        placeholder={t('grupo3.g095')}
         value={conteudo}
         onChangeText={alterarConteudo}
         multiline
@@ -119,14 +121,14 @@ export function ComentariosConselho({
       )}
 
       <Button
-        titulo={editandoId ? 'Guardar alterações' : 'Publicar comentário'}
+        titulo={editandoId ? t('grupo3.g051') : t('grupo3.g096')}
         variante="escuro"
         aoPressionar={enviar}
         desabilitado={desabilitado}
       />
 
       {editandoId && (
-        <Button titulo="Cancelar edição" variante="contorno"
+        <Button titulo={t('grupo3.g097')} variante="contorno"
           aoPressionar={limparFormulario} desabilitado={ocupado} />
       )}
     </View>

@@ -12,7 +12,8 @@ import { CardAdmin } from '../components/molecules/CardAdmin';
 import { BotaoSegmentado } from '../components/molecules/BotaoSegmentado';
 import { CampoSelecao } from '../components/molecules/CampoSelecao';
 import { Button } from '../components/atoms/Button';
-
+import { usePreferencias } from '../contexts/PreferenciasContext';
+import { obterTraducaoFrase } from '../utils/frases';
 import {
   obterGestaoConteudosAdmin,
   salvarConteudoAdmin,
@@ -36,6 +37,7 @@ const CATEGORIAS = {
 };
 
 export function AdminConteudosScreen({ route }) {
+  const { idioma } = usePreferencias();
   const [lugares, setLugares] = useState([]);
   const [frases, setFrases] = useState([]);
   const [categorias, setCategorias] = useState({});
@@ -92,7 +94,7 @@ export function AdminConteudosScreen({ route }) {
     const destino = route.params?.tipo;
 
     if (!bloqueio.current &&
-        TIPOS.some(item => item.valor === destino)) {
+      TIPOS.some(item => item.valor === destino)) {
       setTipo(destino);
       setFormulario(null);
     }
@@ -282,8 +284,11 @@ export function AdminConteudosScreen({ route }) {
             item.nome,
             item.frasePortugues,
             item.traducaoEspanhol,
+            item.traducaoIngles,
             item.descricao,
             item.explicacao,
+            item.explicacaoIngles,
+            item.explicacaoPortugues,
             item.categoria?.nome,
             item.endereco,
           ]}
@@ -292,7 +297,7 @@ export function AdminConteudosScreen({ route }) {
               titulo={item.nome || item.frasePortugues}
               subtitulo={item.categoria?.nome}
               descricao={tipo === 'frases'
-                ? item.traducaoEspanhol
+                ? obterTraducaoFrase(item, idioma)
                 : item.descricao}
               imagemUrl={item.imagemUrl}
               ativo={item.ativo}

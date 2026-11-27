@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Criar atividade
 
@@ -13,6 +14,7 @@ import {
 } from '../services/atividades';
 
 export function CriarAtividadeScreen({ navigation }) {
+  const { t } = usePreferencias();
   const [criando, setCriando] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -30,8 +32,8 @@ export function CriarAtividadeScreen({ navigation }) {
           await atualizarFotoAtividade(atividade.id, imagem);
         } catch (erro) {
           Alert.alert(
-            'Atividade criada',
-            'A atividade foi criada, mas não foi possível enviar a foto. Você pode adicioná-la ao editar a atividade.',
+            t('grupo3.g067'),
+            t('grupo3.g068'),
             [{ text: 'OK', onPress: () => navigation.goBack() }],
             { cancelable: false }
           );
@@ -41,7 +43,7 @@ export function CriarAtividadeScreen({ navigation }) {
 
       navigation.goBack();
     } catch (erro) {
-      setErro('Não foi possível criar a atividade. Tente novamente.');
+      setErro(t('grupo3.g069'));
     } finally {
       setCriando(false);
     }
@@ -49,13 +51,13 @@ export function CriarAtividadeScreen({ navigation }) {
 
   return (
     <ScreenTemplate
-      titulo="Nova atividade"
+      titulo={t('grupo3.g070')}
       aoVoltar={() => {
         if (!criando) navigation.goBack();
       }}
     >
       <FormularioAtividade
-        rotuloEnviar="Criar atividade"
+        rotuloEnviar={t('grupo3.g060')}
         aoEnviar={salvarAtividade}
         carregando={criando}
         erroGeral={erro}

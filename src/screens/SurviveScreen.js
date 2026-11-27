@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Sobrevive em Português
 
 import {
@@ -24,6 +25,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function SurviveScreen({ navigation }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -55,13 +57,13 @@ export function SurviveScreen({ navigation }) {
 
     } catch (e) {
       setErro(
-        'Não foi possível carregar as categorias. Tente novamente.'
+        t('grupo3.g003')
       );
 
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     carregar();
@@ -83,7 +85,7 @@ export function SurviveScreen({ navigation }) {
 
   return (
     <ScreenTemplate
-      titulo="Sobrevive em Português"
+      titulo={t('grupo3.g001')}
       aoVoltar={() => navigation.goBack()}
     >
 
@@ -102,7 +104,7 @@ export function SurviveScreen({ navigation }) {
           </Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={t('grupo3.g002')}
             variante="secundario"
             aoPressionar={carregar}
           />

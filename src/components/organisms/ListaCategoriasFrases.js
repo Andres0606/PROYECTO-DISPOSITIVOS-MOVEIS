@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — ListaCategoriasFrases
 
 import {
@@ -11,14 +13,15 @@ import { CardLinha } from '../molecules/CardLinha';
 import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
-function rotuloFrases(total) {
-  return `${total} ${total === 1 ? 'frase' : 'frases'}`;
+function rotuloFrases(total, t) {
+  return `${total} ${total === 1 ? t('grupo3.g142') : t('grupo3.g143')}`;
 }
 
 export function ListaCategoriasFrases({
   categorias,
   aoAbrirCategoria,
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   if (categorias.length === 0) {
@@ -29,7 +32,7 @@ export function ListaCategoriasFrases({
           { color: cores.textoSecundario },
         ]}
       >
-        Nenhuma categoria disponível.
+        {t('grupo3.g077')}
       </Text>
     );
   }
@@ -40,9 +43,9 @@ export function ListaCategoriasFrases({
       {categorias.map((categoria) => (
         <CardLinha
           key={categoria.id}
-          titulo={categoria.nome}
+          titulo={rotuloCatalogo3(categoria.nome, t)}
           detalhe={
-            rotuloFrases(categoria.totalFrases)
+            rotuloFrases(categoria.totalFrases, t)
           }
           aoPressionar={() =>
             aoAbrirCategoria?.(categoria)

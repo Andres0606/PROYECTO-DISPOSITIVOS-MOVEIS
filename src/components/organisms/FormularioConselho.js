@@ -1,3 +1,5 @@
+import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — FormularioConselho
 
@@ -14,10 +16,11 @@ import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function FormularioConselho({
-  valoresIniciais, rotuloEnviar = 'Publicar conselho',
+  valoresIniciais, rotuloEnviar,
   aoEnviar, aoExcluir, carregando = false,
   excluindo = false, erroGeral = '',
 }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const [titulo, setTitulo] = useState(valoresIniciais?.texto ?? '');
   const [conteudo, setConteudo] = useState(valoresIniciais?.descricao ?? '');
@@ -49,12 +52,12 @@ export function FormularioConselho({
         setCategoriaId(atual => resultado.some(item => item.id === atual) ? atual : '');
 
         if (!resultado.length) {
-          setErroCategorias('Nenhuma categoria disponível.');
+          setErroCategorias(t('grupo3.g077'));
         }
       } catch (erro) {
         if (!ativo) return;
         setCategorias([]);
-        setErroCategorias('Não foi possível carregar as categorias.');
+        setErroCategorias(t('grupo3.g098'));
       } finally {
         if (ativo) setCarregandoCategorias(false);
       }
@@ -62,7 +65,7 @@ export function FormularioConselho({
 
     carregarCategorias();
     return () => { ativo = false; };
-  }, [tentativa]);
+  }, [t, tentativa]);
 
   function selecionarCategoria(nome) {
     if (ocupado || carregandoCategorias) return;
@@ -86,7 +89,7 @@ export function FormularioConselho({
 
       if (resultado?.uri) setImagem(resultado);
     } catch (erro) {
-      Alert.alert('Erro', erro.message || 'Não foi possível selecionar a imagem.');
+      Alert.alert(t('grupo3.g025'), erro.message || t('grupo3.g099'));
     } finally {
       setSelecionandoImagem(false);
     }
@@ -96,19 +99,19 @@ export function FormularioConselho({
     const novosErros = {};
 
     if (!campoObrigatorio(titulo)) {
-      novosErros.titulo = 'Informe um título.';
+      novosErros.titulo = t('grupo3.g100');
     } else if (titulo.trim().length > 150) {
-      novosErros.titulo = 'O título deve ter no máximo 150 caracteres.';
+      novosErros.titulo = t('grupo3.g101');
     }
 
     if (!categoriaSelecionada) {
-      novosErros.categoria = 'Selecione uma categoria.';
+      novosErros.categoria = t('grupo3.g102');
     }
 
     if (!campoObrigatorio(conteudo)) {
-      novosErros.conteudo = 'Informe o conteúdo do conselho.';
+      novosErros.conteudo = t('grupo3.g103');
     } else if (conteudo.trim().length > 5000) {
-      novosErros.conteudo = 'O conteúdo deve ter no máximo 5000 caracteres.';
+      novosErros.conteudo = t('grupo3.g104');
     }
 
     setErros(novosErros);
@@ -128,23 +131,23 @@ export function FormularioConselho({
 
   return (
     <View style={estilos.formulario}>
-      <FormField rotulo="Título" placeholder="Ex: Leve roupa de frio."
+      <FormField rotulo={t('grupo3.g105')} placeholder={t('grupo3.g106')}
         value={titulo} onChangeText={setTitulo} maxLength={150}
         editable={!ocupado} erro={erros.titulo}
         margemInferior={espacamentos.md} />
 
       {erroCategorias ? (
-        <FormField rotulo="Categoria" erro={erroCategorias}
+        <FormField rotulo={t('grupo3.g107')} erro={erroCategorias}
           margemInferior={espacamentos.md}>
-          <Button titulo="Tentar novamente" variante="contorno"
+          <Button titulo={t('grupo3.g002')} variante="contorno"
             aoPressionar={() => setTentativa(atual => atual + 1)}
             desabilitado={ocupado} />
         </FormField>
       ) : (
         <>
-          <CampoSelecao rotulo="Categoria"
+          <CampoSelecao formatarOpcao={valor => rotuloCatalogo3(valor, t)} rotulo={t('grupo3.g107')}
             opcoes={carregandoCategorias || ocupado ? [] : categorias.map(item => item.nome)}
-            valor={carregandoCategorias ? 'Carregando categorias...' : categoriaSelecionada?.nome ?? 'Selecione uma categoria'}
+            valor={carregandoCategorias ? t('grupo3.g108') : categoriaSelecionada?.nome ?? t('grupo3.g109')}
             aoMudar={selecionarCategoria}
             margemInferior={espacamentos.md} />
 
@@ -156,13 +159,13 @@ export function FormularioConselho({
         </>
       )}
 
-      <FormField rotulo="Conteúdo" placeholder="Escreva seu conselho..."
+      <FormField rotulo={t('grupo3.g110')} placeholder={t('grupo3.g111')}
         value={conteudo} onChangeText={setConteudo}
         multiline numberOfLines={5} textAlignVertical="top"
         maxLength={5000} editable={!ocupado}
         erro={erros.conteudo} margemInferior={espacamentos.md} />
 
-      <SeletorImagem rotulo="Foto do conselho (opcional)"
+      <SeletorImagem rotulo={t('grupo3.g112')}
         uri={imagemUri}
         aoCapturar={() => selecionarImagem('camera')}
         aoEscolher={() => selecionarImagem('galeria')}
@@ -177,14 +180,14 @@ export function FormularioConselho({
 
       <View style={aoExcluir ? estilos.linhaBotoes : estilos.areaBotao}>
         <View style={aoExcluir ? estilos.botao : undefined}>
-          <Button titulo={rotuloEnviar} variante="escuro"
+          <Button titulo={rotuloEnviar ?? t('grupo3.g021')} variante="escuro"
             aoPressionar={enviar} carregando={carregando}
             desabilitado={ocupado || carregandoCategorias || !!erroCategorias} />
         </View>
 
         {aoExcluir && (
           <View style={estilos.botao}>
-            <Button titulo="Excluir" variante="secundario"
+            <Button titulo={t('grupo3.g041')} variante="secundario"
               aoPressionar={aoExcluir} carregando={excluindo}
               desabilitado={ocupado} />
           </View>

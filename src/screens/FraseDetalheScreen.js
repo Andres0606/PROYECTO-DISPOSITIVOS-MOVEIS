@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 
 // SCREEN — Detalhe de uma frase
 
@@ -28,6 +29,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function FraseDetalheScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
 
   const fraseId =
@@ -58,7 +60,7 @@ export function FraseDetalheScreen({ navigation, route }) {
 
     try {
       if (!fraseId) {
-        throw new Error('Frase não encontrada.');
+        throw new Error(t('grupo3.g012'));
       }
 
       const [resultado, favorito] = await Promise.all([
@@ -73,14 +75,14 @@ export function FraseDetalheScreen({ navigation, route }) {
 
     } catch {
       if (consulta === consultaAtual.current) {
-        setErro('Não foi possível carregar esta frase.');
+        setErro(t('grupo3.g013'));
       }
     } finally {
       if (consulta === consultaAtual.current) {
         setCarregando(false);
       }
     }
-  }, [fraseId]);
+  }, [t, fraseId]);
 
   // Atualizar ao retornar à tela
 
@@ -134,8 +136,8 @@ export function FraseDetalheScreen({ navigation, route }) {
     } catch {
       if (navigation.isFocused()) {
         Alert.alert(
-          'Favoritos',
-          'Não foi possível atualizar o favorito.'
+          t('grupo3.g006'),
+          t('grupo3.g007')
         );
       }
 
@@ -180,8 +182,8 @@ export function FraseDetalheScreen({ navigation, route }) {
 
       if (navigation.isFocused()) {
         Alert.alert(
-          'Pronúncia',
-          'Não foi possível reproduzir o áudio. Verifique a configuração de voz do dispositivo.'
+          t('grupo3.g014'),
+          t('grupo3.g015')
         );
       }
     }
@@ -229,7 +231,7 @@ export function FraseDetalheScreen({ navigation, route }) {
 
   return (
     <ScreenTemplate
-      titulo="Frase"
+      titulo={t('grupo3.g016')}
       aoVoltar={() => navigation.goBack()}
     >
 
@@ -244,11 +246,11 @@ export function FraseDetalheScreen({ navigation, route }) {
             estilos.erro,
             { color: cores.perigo },
           ]}>
-            {erro || 'Frase não encontrada.'}
+            {erro || t('grupo3.g012')}
           </Text>
 
           <Button
-            titulo="Tentar novamente"
+            titulo={t('grupo3.g002')}
             variante="secundario"
             aoPressionar={carregar}
           />

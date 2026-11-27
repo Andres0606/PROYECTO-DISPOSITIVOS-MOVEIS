@@ -1,3 +1,4 @@
+import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Detalhes da atividade
 
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -14,6 +15,7 @@ import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function AtividadeDetalheScreen({ navigation, route }) {
+  const { t } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const atividadeId = route.params?.atividadeId ?? route.params?.atividade?.id;
@@ -31,17 +33,17 @@ export function AtividadeDetalheScreen({ navigation, route }) {
     setCarregando(true);
     setErro('');
     try {
-      if (!atividadeId) throw new Error('Atividade não encontrada.');
+      if (!atividadeId) throw new Error(t('grupo3.g061'));
       const resultado = await obterAtividadePorId(atividadeId);
       if (consulta === consultaAtual.current) setAtividade(resultado);
     } catch (erro) {
       if (consulta !== consultaAtual.current) return;
       setAtividade(null);
-      setErro('Não foi possível carregar a atividade.');
+      setErro(t('grupo3.g062'));
     } finally {
       if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, [atividadeId]);
+  }, [t, atividadeId]);
 
   useFocusEffect(useCallback(() => {
     carregar();
@@ -64,7 +66,7 @@ export function AtividadeDetalheScreen({ navigation, route }) {
       } : atual);
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        Alert.alert('Interesse', erro.message || 'Não foi possível atualizar o interesse. Tente novamente.');
+        Alert.alert(t('grupo3.g063'), erro.message || t('grupo3.g064'));
         await carregar();
       }
     } finally {
@@ -86,7 +88,7 @@ export function AtividadeDetalheScreen({ navigation, route }) {
       setAtividade(atual => atual?.id === atividadeId ? { ...atual, guardado } : atual);
     } catch (erro) {
       if (consulta === consultaAtual.current) {
-        Alert.alert('Favoritos', 'Não foi possível atualizar o favorito. Tente novamente.');
+        Alert.alert(t('grupo3.g006'), t('grupo3.g065'));
       }
     } finally {
       bloqueio.current = false;
@@ -100,13 +102,13 @@ export function AtividadeDetalheScreen({ navigation, route }) {
   }
 
   return (
-    <ScreenTemplate titulo="Detalhes" aoVoltar={() => navigation.goBack()}>
+    <ScreenTemplate titulo={t('grupo3.g066')} aoVoltar={() => navigation.goBack()}>
       {carregando ? (
         <ActivityIndicator color={cores.primaria} style={estilos.centro} />
       ) : erro ? (
         <View style={estilos.centro}>
           <Text style={estilos.erro}>{erro}</Text>
-          <Button titulo="Tentar novamente" variante="secundario" aoPressionar={carregar} />
+          <Button titulo={t('grupo3.g002')} variante="secundario" aoPressionar={carregar} />
         </View>
       ) : atividade ? (
         <DetalheAtividade atividade={atividade} ordenacao={ordenacao}
