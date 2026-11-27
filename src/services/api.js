@@ -851,3 +851,54 @@ export async function removerFotoConselhoApi(token, id) {
     token, `/conselhos/${encodeURIComponent(id)}/foto`, 'DELETE'
   );
 }
+
+
+// TAREFAS DO INTERCÂMBIO
+
+export async function obterEtapasTarefaApi(token) {
+  return requisicaoAutenticada(token, '/tarefas/etapas');
+}
+
+export async function obterEstadosTarefaApi(token) {
+  return requisicaoAutenticada(token, '/tarefas/estados');
+}
+
+export async function obterPrioridadesTarefaApi(token) {
+  return requisicaoAutenticada(token, '/tarefas/prioridades');
+}
+
+export async function obterTarefasApi(token, etapaId) {
+  const rota = etapaId
+    ? `/tarefas?etapaId=${encodeURIComponent(etapaId)}`
+    : '/tarefas';
+
+  return requisicaoAutenticada(token, rota);
+}
+
+export async function obterTarefaApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/tarefas/${encodeURIComponent(id)}`
+  );
+}
+
+export async function criarTarefaApi(token, dados) {
+  return requisicaoAutenticada(token, '/tarefas', 'POST', dados);
+}
+
+export async function atualizarTarefaApi(token, id, dados) {
+  return requisicaoAutenticada(
+    token, `/tarefas/${encodeURIComponent(id)}`, 'PUT', dados
+  );
+}
+
+export async function atualizarEstadoTarefaApi(token, id, estadoId) {
+  return requisicaoAutenticada(
+    token, `/tarefas/${encodeURIComponent(id)}/estado`, 'PATCH', { estadoId }
+  );
+}
+
+export async function excluirTarefaApi(token, id) {
+  return requisicaoAutenticada(
+    token, `/tarefas/${encodeURIComponent(id)}`, 'DELETE'
+  );
+}
