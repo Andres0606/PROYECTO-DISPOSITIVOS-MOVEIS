@@ -44,7 +44,7 @@ export function horaValida(texto) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(texto);
 }
 
-function agoraChapeco() {
+export function agoraChapeco() {
   const partes = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit',
     day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -67,4 +67,24 @@ export function dataHoraFuturaValida(data, hora) {
   if (!dataValida(data) || !horaValida(hora)) return false;
   const agora = agoraChapeco();
   return `${brParaIso(data)}T${hora}:00` > `${agora.data}T${agora.hora}`;
+}
+
+export function periodoAtual() {
+  const [ano, mes] = agoraChapeco().data.split('-').map(Number);
+  return { ano, mes };
+}
+
+export function deslocarMes(periodo, deslocamento) {
+  const data = new Date(Date.UTC(
+    periodo.ano, periodo.mes - 1 + deslocamento, 1
+  ));
+
+  const ano = data.getUTCFullYear();
+
+  if (ano < 2000 || ano > 9999) return periodo;
+
+  return {
+    ano,
+    mes: data.getUTCMonth() + 1,
+  };
 }

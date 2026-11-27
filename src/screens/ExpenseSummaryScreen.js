@@ -1,138 +1,139 @@
+
 // SCREEN — Meus gastos
 
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-
+import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { ResumoGastos } from '../components/organisms/ResumoGastos';
+import { SeletorMes } from '../components/molecules/SeletorMes';
 import { Button } from '../components/atoms/Button';
-
-import { obterResumoGastos } from '../services/gastos';
-
+import { obterResumoGastos, atualizarOrcamento } from '../services/gastos';
+import { agoraChapeco, periodoAtual } from '../utils/datas';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
 export function ExpenseSummaryScreen({ navigation }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
+  const [periodo, setPeriodo] = useState(periodoAtual);
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [erroOrcamento, setErroOrcamento] = useState('');
+  const [revisao, setRevisao] = useState(0);
 
-  const jaCarregou = useRef(false);
+  const consultaAtual = useRef(0);
+  const bloqueio = useRef(false);
 
   const carregar = useCallback(async () => {
-    const primeira = !jaCarregou.current;
-
-    if (primeira) {
-      setCarregando(true);
-    }
-
+    const consulta = ++consultaAtual.current;
+    setCarregando(true);
     setErro('');
 
     try {
-      setResumo(await obterResumoGastos());
+      const resultado = await obterResumoGastos(periodo.ano, periodo.mes);
 
-      jaCarregou.current = true;
-
-    } catch (e) {
-      if (primeira) {
-        setErro(
-          'Não foi possível carregar seus gastos. Tente novamente.'
-        );
+      if (consulta === consultaAtual.current) setResumo(resultado);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar seus gastos.');
       }
-
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, []);
+  }, [periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
       carregar();
-    }, [carregar])
+      return () => { consultaAtual.current += 1; };
+    }, [carregar, revisao])
   );
 
+  function mudarPeriodo(novoPeriodo) {
+    if (bloqueio.current) return;
+
+    consultaAtual.current += 1;
+    setResumo(null);
+    setCarregando(true);
+    setEditando(false);
+    setErroOrcamento('');
+    setPeriodo(novoPeriodo);
+  }
+
+  async function salvarOrcamento(valor) {
+    if (bloqueio.current || carregando) return;
+
+    bloqueio.current = true;
+    setSalvando(true);
+    setErroOrcamento('');
+
+    try {
+      await atualizarOrcamento(valor, periodo.ano, periodo.mes);
+      setEditando(false);
+      setRevisao(atual => atual + 1);
+    } catch (e) {
+      setErroOrcamento(e.message || 'Não foi possível guardar o orçamento.');
+    } finally {
+      bloqueio.current = false;
+      setSalvando(false);
+    }
+  }
+
+  function navegar(rota, parametros) {
+    if (!bloqueio.current) navigation.navigate(rota, parametros);
+  }
+
   function registrarGasto() {
-    navigation.navigate('RegistrarGasto');
-  }
+    const atual = periodoAtual();
+    const mesmoMes = atual.ano === periodo.ano && atual.mes === periodo.mes;
 
-  function abrirHistorico() {
-    navigation.navigate('Historico');
-  }
+    const dataInicial = mesmoMes
+      ? agoraChapeco().data
+      : `${periodo.ano}-${String(periodo.mes).padStart(2, '0')}-01`;
 
-  function abrirEstatisticas() {
-    navigation.navigate('Estatisticas');
+    navegar('RegistrarGasto', { dataInicial });
   }
 
   return (
     <ScreenTemplate titulo="Meus gastos">
+      <SeletorMes periodo={periodo} aoMudar={mudarPeriodo}
+        desabilitado={salvando || carregando} />
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
-
-      {!carregando && !!erro && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erro || !resumo ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erro}
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erro || 'Resumo não encontrado.'}
           </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && resumo && (
+      ) : (
         <ResumoGastos
           resumo={resumo}
+          editando={editando}
+          salvando={salvando}
+          erroOrcamento={erroOrcamento}
+          aoEditarOrcamento={() => {
+            setErroOrcamento('');
+            setEditando(atual => !atual);
+          }}
+          aoSalvarOrcamento={salvarOrcamento}
+          aoCancelarOrcamento={() => setEditando(false)}
           aoRegistrar={registrarGasto}
-          aoAbrirHistorico={abrirHistorico}
-          aoAbrirEstatisticas={abrirEstatisticas}
+          aoAbrirHistorico={() => navegar('Historico', { periodo })}
+          aoAbrirEstatisticas={() => navegar('Estatisticas', { periodo })}
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

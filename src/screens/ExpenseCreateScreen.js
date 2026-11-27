@@ -1,31 +1,40 @@
 // SCREEN — Novo gasto
-import { useState } from 'react';
+
+import { useRef, useState } from 'react';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { FormularioGasto } from '../components/organisms/FormularioGasto';
 import { criarGasto } from '../services/gastos';
 
-export function ExpenseCreateScreen({ navigation }) {
+export function ExpenseCreateScreen({ navigation, route }) {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const bloqueio = useRef(false);
 
   async function registrar(dados) {
+    if (bloqueio.current) return;
+
+    bloqueio.current = true;
     setErro('');
     setSalvando(true);
 
     try {
       await criarGasto(dados);
 
-      // Volta ao resumo, que se atualiza sozinho ao ganhar foco.
-      navigation.goBack();
+      if (navigation.isFocused()) navigation.goBack();
     } catch (e) {
-      setErro('Não foi possível registrar o gasto. Tente novamente.');
+      setErro(e.message || 'Não foi possível registrar o gasto.');
+    } finally {
+      bloqueio.current = false;
       setSalvando(false);
     }
   }
 
   return (
-    <ScreenTemplate titulo="Novo gasto" aoVoltar={() => navigation.goBack()}>
+    <ScreenTemplate titulo="Novo gasto"
+      aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
+
       <FormularioGasto
+        dataInicial={route.params?.dataInicial}
         rotuloEnviar="Registrar gasto"
         aoEnviar={registrar}
         carregando={salvando}

@@ -1,131 +1,101 @@
+
 // SCREEN — Estatísticas de gastos
 
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-
+import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { EstatisticasGastos } from '../components/organisms/EstatisticasGastos';
+import { SeletorMes } from '../components/molecules/SeletorMes';
 import { Button } from '../components/atoms/Button';
-
-import { obterEstatisticasGastos } from '../services/gastos';
-
+import {
+  obterEstatisticasGastos, obterCategoriasGasto,
+} from '../services/gastos';
+import { periodoAtual } from '../utils/datas';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function ExpenseStatsScreen({ navigation }) {
+export function ExpenseStatsScreen({ navigation, route }) {
   const { cores } = useTema();
 
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
+  const [periodo, setPeriodo] = useState(
+    () => route.params?.periodo ?? periodoAtual()
   );
-
   const [estatisticas, setEstatisticas] = useState(null);
+  const [categorias, setCategorias] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [visao, setVisao] = useState('mes');
 
-  const jaCarregou = useRef(false);
+  const consultaAtual = useRef(0);
 
   const carregar = useCallback(async () => {
-    const primeira = !jaCarregou.current;
-
-    if (primeira) {
-      setCarregando(true);
-    }
-
+    const consulta = ++consultaAtual.current;
+    setCarregando(true);
     setErro('');
 
     try {
-      setEstatisticas(
-        await obterEstatisticasGastos()
-      );
+      const [resultado, listaCategorias] = await Promise.all([
+        obterEstatisticasGastos(periodo.ano, periodo.mes),
+        obterCategoriasGasto(),
+      ]);
 
-      jaCarregou.current = true;
+      if (consulta !== consultaAtual.current) return;
 
-    } catch (e) {
-      if (primeira) {
-        setErro(
-          'Não foi possível carregar as estatísticas. Tente novamente.'
-        );
+      setEstatisticas(resultado);
+      setCategorias(listaCategorias);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar as estatísticas.');
       }
-
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, []);
+  }, [periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
       carregar();
+      return () => { consultaAtual.current += 1; };
     }, [carregar])
   );
 
+  function mudarPeriodo(novoPeriodo) {
+    consultaAtual.current += 1;
+    setCarregando(true);
+    setPeriodo(novoPeriodo);
+  }
+
   return (
-    <ScreenTemplate
-      titulo="Estatísticas"
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo="Estatísticas"
+      aoVoltar={() => navigation.goBack()}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
+      <SeletorMes periodo={periodo} aoMudar={mudarPeriodo}
+        desabilitado={carregando} />
 
-      {!carregando && !!erro && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erro || !estatisticas ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erro}
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erro || 'Estatísticas não encontradas.'}
           </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && estatisticas && (
+      ) : (
         <EstatisticasGastos
           estatisticas={estatisticas}
+          categoriasDisponiveis={categorias}
           visao={visao}
           aoMudarVisao={setVisao}
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

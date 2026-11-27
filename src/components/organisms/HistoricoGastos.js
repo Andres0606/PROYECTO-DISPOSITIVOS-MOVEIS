@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BarraBusca } from '../molecules/BarraBusca';
 import { CardGasto } from '../molecules/CardGasto';
+import { isoParaBr } from '../../utils/datas';
 
 import {
   ICONES_CATEGORIA_GASTO,
@@ -11,7 +12,6 @@ import {
 } from '../../constants/gastos';
 
 import {
-  formatarDiaMes,
   formatarReais,
 } from '../../utils/formatacao';
 
@@ -55,9 +55,7 @@ export function HistoricoGastos({
             <CardGasto
               key={gasto.id}
               conceito={gasto.conceito}
-              detalhe={
-                `${gasto.categoria} · ${formatarDiaMes(gasto.data)}`
-              }
+              detalhe={`${gasto.categoria} · ${isoParaBr(gasto.data)}`}
               valor={formatarReais(gasto.valor)}
               icone={
                 ICONES_CATEGORIA_GASTO[gasto.categoria]

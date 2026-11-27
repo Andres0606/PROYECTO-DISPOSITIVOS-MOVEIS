@@ -1,142 +1,117 @@
+
 // SCREEN — Histórico de gastos
 
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-
+import { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { HistoricoGastos } from '../components/organisms/HistoricoGastos';
+import { BotaoSegmentado } from '../components/molecules/BotaoSegmentado';
+import { SeletorMes } from '../components/molecules/SeletorMes';
 import { Button } from '../components/atoms/Button';
-
 import { obterGastos } from '../services/gastos';
 import { filtrarGastos } from '../utils/gastos';
-
+import { periodoAtual } from '../utils/datas';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function ExpenseHistoryScreen({ navigation }) {
+const FILTROS = [
+  { titulo: 'Todos', valor: 'todos' },
+  { titulo: 'Por mês', valor: 'mes' },
+];
+
+export function ExpenseHistoryScreen({ navigation, route }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
+  const [periodo, setPeriodo] = useState(
+    () => route.params?.periodo ?? periodoAtual()
   );
-
+  const [filtro, setFiltro] = useState('todos');
   const [gastos, setGastos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [busca, setBusca] = useState('');
 
-  const jaCarregou = useRef(false);
+  const consultaAtual = useRef(0);
 
   const carregar = useCallback(async () => {
-    const primeira = !jaCarregou.current;
-
-    if (primeira) {
-      setCarregando(true);
-    }
-
+    const consulta = ++consultaAtual.current;
+    setCarregando(true);
     setErro('');
 
     try {
-      setGastos(await obterGastos());
+      const lista = filtro === 'mes'
+        ? await obterGastos(periodo.ano, periodo.mes)
+        : await obterGastos();
 
-      jaCarregou.current = true;
-
-    } catch (e) {
-      if (primeira) {
-        setErro(
-          'Não foi possível carregar o histórico. Tente novamente.'
-        );
+      if (consulta === consultaAtual.current) setGastos(lista);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErro('Não foi possível carregar o histórico.');
       }
-
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
-  }, []);
+  }, [filtro, periodo.ano, periodo.mes]);
 
   useFocusEffect(
     useCallback(() => {
       carregar();
+      return () => { consultaAtual.current += 1; };
     }, [carregar])
   );
 
-  const gastosFiltrados = useMemo(
-    () => filtrarGastos(gastos, busca),
-    [gastos, busca]
-  );
+  function mudarFiltro(valor) {
+    if (valor === filtro) return;
 
-  function abrirGasto(gasto) {
-    navigation.navigate('EditarGasto', {
-      gastoId: gasto.id,
-    });
+    consultaAtual.current += 1;
+    setCarregando(true);
+    setFiltro(valor);
+  }
+
+  function mudarPeriodo(novoPeriodo) {
+    consultaAtual.current += 1;
+    setCarregando(true);
+    setPeriodo(novoPeriodo);
   }
 
   return (
-    <ScreenTemplate
-      titulo="Histórico"
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo="Histórico"
+      aoVoltar={() => navigation.goBack()}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
+      <View style={estilos.filtros}>
+        <BotaoSegmentado opcoes={FILTROS} valor={filtro}
+          aoMudar={mudarFiltro} />
 
-      {!carregando && !!erro && (
+        {filtro === 'mes' && (
+          <SeletorMes periodo={periodo} aoMudar={mudarPeriodo}
+            desabilitado={carregando} />
+        )}
+      </View>
+
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erro ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erro}
-          </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Text style={[estilos.erro, { color: cores.perigo }]}>{erro}</Text>
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erro && (
+      ) : (
         <HistoricoGastos
-          gastos={gastosFiltrados}
+          gastos={filtrarGastos(gastos, busca)}
           busca={busca}
           aoMudarBusca={setBusca}
-          aoAbrirGasto={abrirGasto}
+          aoAbrirGasto={gasto =>
+            navigation.navigate('EditarGasto', { gastoId: gasto.id })
+          }
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  filtros: { gap: espacamentos.md, marginBottom: espacamentos.md },
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

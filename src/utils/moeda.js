@@ -18,6 +18,11 @@ export function valorParaNumero(texto) {
   return Number.isFinite(numero) ? numero : NaN;
 }
 
+export function valorMonetarioValido(texto) {
+  return /^\d{1,10}([,.]\d{1,2})?$/.test(String(texto)) &&
+    valorParaNumero(texto) > 0;
+}
+
 // 45.5 -> "45,5" (usado para preencher o formulário na edição)
 export function numeroParaValor(numero) {
   return String(numero).replace('.', ',');

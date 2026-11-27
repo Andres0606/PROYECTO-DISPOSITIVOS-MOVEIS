@@ -1,197 +1,120 @@
+
 // SCREEN — Editar gasto
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { ScreenTemplate } from '../components/templates/ScreenTemplate';
 import { FormularioGasto } from '../components/organisms/FormularioGasto';
 import { Button } from '../components/atoms/Button';
-
-import {
-  atualizarGasto,
-  excluirGasto,
-  obterGasto,
-} from '../services/gastos';
-
+import { atualizarGasto, excluirGasto, obterGasto } from '../services/gastos';
 import { espacamentos, tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
-export function ExpenseEditScreen({
-  navigation,
-  route,
-}) {
+export function ExpenseEditScreen({ navigation, route }) {
   const { cores } = useTema();
-
-  const estilos = useMemo(
-    () => criarEstilos(cores),
-    [cores]
-  );
-
   const { gastoId } = route.params;
 
   const [gasto, setGasto] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erroCarga, setErroCarga] = useState('');
-  const [salvando, setSalvando] = useState(false);
-  const [excluindo, setExcluindo] = useState(false);
+  const [ocupado, setOcupado] = useState('');
   const [erro, setErro] = useState('');
 
-  // ==========================================================
-  // CARREGAR GASTO
-  // ==========================================================
+  const bloqueio = useRef(false);
+  const consultaAtual = useRef(0);
 
   const carregar = useCallback(async () => {
+    const consulta = ++consultaAtual.current;
     setCarregando(true);
     setErroCarga('');
 
     try {
-      setGasto(await obterGasto(gastoId));
+      const resultado = await obterGasto(gastoId);
 
-    } catch (e) {
-      setErroCarga(
-        'Não foi possível carregar este gasto. Tente novamente.'
-      );
-
+      if (consulta === consultaAtual.current) setGasto(resultado);
+    } catch {
+      if (consulta === consultaAtual.current) {
+        setErroCarga('Não foi possível carregar este gasto.');
+      }
     } finally {
-      setCarregando(false);
+      if (consulta === consultaAtual.current) setCarregando(false);
     }
   }, [gastoId]);
 
   useEffect(() => {
     carregar();
+    return () => { consultaAtual.current += 1; };
   }, [carregar]);
 
-  // ==========================================================
-  // SALVAR
-  // ==========================================================
+  async function executar(acao, operacao) {
+    if (bloqueio.current || carregando) return;
 
-  async function salvar(dados) {
+    bloqueio.current = true;
+    setOcupado(operacao);
     setErro('');
-    setSalvando(true);
 
     try {
-      await atualizarGasto(gastoId, dados);
+      await acao();
 
-      navigation.goBack();
-
+      if (navigation.isFocused()) navigation.goBack();
     } catch (e) {
-      setErro(
-        'Não foi possível salvar as alterações. Tente novamente.'
-      );
-
-      setSalvando(false);
+      setErro(e.message || 'Não foi possível concluir a operação.');
+    } finally {
+      bloqueio.current = false;
+      setOcupado('');
     }
   }
 
-  // ==========================================================
-  // EXCLUIR
-  // ==========================================================
-
-  async function excluir() {
-    setExcluindo(true);
-
-    try {
-      await excluirGasto(gastoId);
-
-      navigation.goBack();
-
-    } catch (e) {
-      setExcluindo(false);
-
-      Alert.alert(
-        'Gasto',
-        'Não foi possível excluir o gasto.'
-      );
-    }
+  function salvar(dados) {
+    executar(() => atualizarGasto(gastoId, dados), 'salvar');
   }
 
   function confirmarExclusao() {
+    if (bloqueio.current) return;
+
     Alert.alert(
       'Excluir gasto',
       'Esta ação não pode ser desfeita. Deseja continuar?',
       [
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: excluir,
+          text: 'Excluir', style: 'destructive',
+          onPress: () => executar(() => excluirGasto(gastoId), 'excluir'),
         },
       ]
     );
   }
 
   return (
-    <ScreenTemplate
-      titulo="Editar gasto"
-      aoVoltar={() => navigation.goBack()}
-    >
+    <ScreenTemplate titulo="Editar gasto"
+      aoVoltar={() => { if (!bloqueio.current) navigation.goBack(); }}>
 
-      {carregando && (
-        <ActivityIndicator
-          color={cores.primaria}
-          style={estilos.centro}
-        />
-      )}
-
-      {!carregando && !!erroCarga && (
+      {carregando ? (
+        <ActivityIndicator color={cores.primaria} style={estilos.centro} />
+      ) : erroCarga || !gasto ? (
         <View style={estilos.centro}>
-
-          <Text style={estilos.erro}>
-            {erroCarga}
+          <Text style={[estilos.erro, { color: cores.perigo }]}>
+            {erroCarga || 'Gasto não encontrado.'}
           </Text>
-
-          <Button
-            titulo="Tentar novamente"
-            variante="secundario"
-            aoPressionar={carregar}
-          />
-
+          <Button titulo="Tentar novamente" variante="secundario"
+            aoPressionar={carregar} />
         </View>
-      )}
-
-      {!carregando && !erroCarga && gasto && (
+      ) : (
         <FormularioGasto
           valoresIniciais={gasto}
-          semDescricao
           rotuloEnviar="Guardar alterações"
           aoEnviar={salvar}
           aoExcluir={confirmarExclusao}
-          carregando={salvando}
-          excluindo={excluindo}
+          carregando={ocupado === 'salvar'}
+          excluindo={ocupado === 'excluir'}
           erroGeral={erro}
         />
       )}
-
     </ScreenTemplate>
   );
 }
 
-function criarEstilos(cores) {
-  return StyleSheet.create({
-    centro: {
-      marginTop: espacamentos.xl,
-      gap: espacamentos.md,
-    },
-
-    erro: {
-      fontSize: tipografia.corpo,
-      textAlign: 'center',
-      color: cores.perigo,
-    },
-  });
-}
+const estilos = StyleSheet.create({
+  centro: { marginTop: espacamentos.xl, gap: espacamentos.md },
+  erro: { fontSize: tipografia.corpo, textAlign: 'center' },
+});

@@ -85,3 +85,11 @@ export function formatarDataCompleta(iso) {
 
   return `${dia} de ${MESES_COMPLETOS[mes - 1]}`;
 }
+
+export function formatarPeriodo(ano, mes) {
+  const nome = MESES_COMPLETOS[mes - 1];
+
+  if (!nome) return '';
+
+  return `${nome.charAt(0).toUpperCase()}${nome.slice(1)} de ${ano}`;
+}
