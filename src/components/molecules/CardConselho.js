@@ -1,3 +1,4 @@
+import { traduzirPais } from '../../i18n/catalogosPaises';
 /* grupo5.1 */
 import { formatarDataPublicacao } from '../../utils/formatacao';
 import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
@@ -37,7 +38,10 @@ export function CardConselho({
             </Text>
 
             <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-              {[conselho.pais, formatarDataPublicacao(conselho.data, idioma)].filter(Boolean).join(' · ')}
+              {[
+                traduzirPais(conselho.pais, idioma),
+                formatarDataPublicacao(conselho.data, idioma),
+              ].filter(Boolean).join(' · ')}
             </Text>
           </View>
         </View>

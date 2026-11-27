@@ -1,3 +1,4 @@
+import { traduzirPais } from '../i18n/catalogosPaises';
 import { usePreferencias } from '../contexts/PreferenciasContext';
 // SCREEN — Editar perfil
 
@@ -44,7 +45,7 @@ import {
 import { useTema } from '../theme/useTema';
 
 export function EditarPerfilScreen({ navigation, route }) {
-  const { t: grupo1Traducao } = usePreferencias();
+  const { t: grupo1Traducao, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -551,6 +552,7 @@ export function EditarPerfilScreen({ navigation, route }) {
         <CampoSelecao
           rotulo={grupo1Traducao('grupo1.pais_de_origem_89')}
           opcoes={paises.map((pais) => pais.nome)}
+          formatarOpcao={nome => traduzirPais(nome, idioma)}
           valor={
             paisSelecionado?.nome ||
             grupo1Traducao('grupo1.selecione_seu_pais')

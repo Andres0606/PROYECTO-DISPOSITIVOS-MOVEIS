@@ -1,3 +1,4 @@
+import { traduzirPais } from '../../i18n/catalogosPaises';
 /* grupo5.1 */
 import { formatarPeriodo, formatarDiaMes } from '../../utils/formatacao';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
@@ -162,7 +163,7 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
           texto={conselhoDestaque
             ? `“${conselhoDestaque.texto}” — ${[
               conselhoDestaque.autor,
-              conselhoDestaque.pais,
+              traduzirPais(conselhoDestaque.pais, idioma),
             ].filter(Boolean).join(', ')}.`
             : t('grupo2.g057')}
         />

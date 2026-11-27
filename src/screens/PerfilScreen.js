@@ -1,5 +1,5 @@
 // SCREEN — Perfil
-
+import { traduzirPais } from '../i18n/catalogosPaises';
 import {
   useCallback,
   useMemo,
@@ -40,6 +40,7 @@ export function PerfilScreen({ navigation, route }) {
   const {
     restaurarPreferencias,
     t,
+    idioma,
   } = usePreferencias();
 
   const estilos = useMemo(
@@ -87,7 +88,7 @@ export function PerfilScreen({ navigation, route }) {
     t('grupo1.usuario');
 
   const pais =
-    usuario?.paisOrigem?.nome ??
+    traduzirPais(usuario?.paisOrigem?.nome, idioma) ??
     t('grupo1.nao_informado');
 
   const universidadeOrigem =

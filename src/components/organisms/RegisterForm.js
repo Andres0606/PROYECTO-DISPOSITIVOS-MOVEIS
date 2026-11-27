@@ -9,9 +9,10 @@ import { campoObrigatorio, emailValido, senhaValida } from '../../utils/validaca
 import { obterPaises, obterUniversidadesPorPais, obterUniversidadesChapeco } from '../../services/api';
 import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
+import { traduzirPais } from '../../i18n/catalogosPaises';
 
 export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
-  const { t: grupo1Traducao } = usePreferencias();
+  const { t: grupo1Traducao, idioma } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const [nome, setNome] = useState('');
@@ -84,7 +85,7 @@ export function RegisterForm({ aoEnviar, carregando = false, erroGeral = '' }) {
   return (
     <View>
       <FormField rotulo={grupo1Traducao('grupo1.nome_completo')} placeholder="Laura Gomez" value={nome} onChangeText={setNome} autoCapitalize="words" erro={erros.nome} margemInferior={espacamentos.md} />
-      <CampoSelecao rotulo={grupo1Traducao('grupo1.pais_de_origem_89')} opcoes={paises.map((pais) => pais.nome)} valor={paisSelecionado?.nome || (carregandoDados ? grupo1Traducao('grupo1.carregando') : grupo1Traducao('grupo1.selecione_seu_pais'))} aoMudar={selecionarPais} margemInferior={espacamentos.md} />
+      <CampoSelecao rotulo={grupo1Traducao('grupo1.pais_de_origem_89')} opcoes={paises.map((pais) => pais.nome)} formatarOpcao={nome => traduzirPais(nome, idioma)} valor={paisSelecionado?.nome || (carregandoDados ? grupo1Traducao('grupo1.carregando') : grupo1Traducao('grupo1.selecione_seu_pais'))} aoMudar={selecionarPais} margemInferior={espacamentos.md} />
       {!!erros.pais && <Text style={estilos.erroCampo}>{erros.pais}</Text>}
       <CampoSelecao rotulo={grupo1Traducao('grupo1.universidade_de_origem_90')} opcoes={universidadesOrigem.map((universidade) => universidade.nome)} valor={universidadeOrigemSelecionada?.nome || (paisSelecionado ? grupo1Traducao('grupo1.selecione_sua_universidade') : grupo1Traducao('grupo1.selecione_primeiro_o_pais'))} aoMudar={selecionarUniversidadeOrigem} margemInferior={espacamentos.md} />
       {!!erros.universidadeOrigem && <Text style={estilos.erroCampo}>{erros.universidadeOrigem}</Text>}

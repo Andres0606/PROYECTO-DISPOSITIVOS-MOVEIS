@@ -1,3 +1,4 @@
+import { traduzirPais } from '../i18n/catalogosPaises';
 import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
 import { usePreferencias } from '../contexts/PreferenciasContext';
 
@@ -27,7 +28,7 @@ const PERFIS = [
 ];
 
 export function AdminUsuariosScreen() {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const [usuarios, setUsuarios] = useState([]);
@@ -173,7 +174,7 @@ export function AdminUsuariosScreen() {
 
           {[
             [t('grupo4.g036'), rotuloAdmin(detalhes.rol?.nome, t)],
-            [t('grupo4.g037'), detalhes.paisOrigem?.nome],
+            [t('grupo4.g037'), traduzirPais(detalhes.paisOrigem?.nome, idioma)],
             [t('grupo4.g038'), detalhes.universidadeOrigem?.nome],
             [t('grupo4.g039'), detalhes.universidadeDestino?.nome],
           ].map(([rotulo, valor]) => (
@@ -215,6 +216,7 @@ export function AdminUsuariosScreen() {
             item.nomeCompleto,
             item.email,
             item.paisOrigem?.nome,
+            traduzirPais(item.paisOrigem?.nome, idioma),
             item.universidadeDestino?.nome,
           ]}
           renderItem={item => (
