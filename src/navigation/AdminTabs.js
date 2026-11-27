@@ -1,12 +1,18 @@
+
 // NAVIGATION — Administração
+
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+
 import { AdminHomeScreen } from '../screens/AdminHomeScreen';
+import { AdminUsuariosScreen } from '../screens/AdminUsuariosScreen';
+import { AdminConteudosScreen } from '../screens/AdminConteudosScreen';
+import { AdminModeracaoScreen } from '../screens/AdminModeracaoScreen';
 import { AdminPerfilScreen } from '../screens/AdminPerfilScreen';
 import { ConfiguracoesScreen } from '../screens/ConfiguracoesScreen';
-import { PlaceholderScreen } from '../screens/PlaceholderScreen';
+
 import { tipografia } from '../theme';
 import { useTema } from '../theme/useTema';
 
@@ -31,22 +37,33 @@ function opcoesAba(rotulo, nome) {
   };
 }
 
+// Navegação do perfil administrativo
+
 function AdminPerfilStack({ route }) {
   const { cores } = useTema();
+
   return (
     <Stack.Navigator screenOptions={{
       headerShown: false,
       contentStyle: { backgroundColor: cores.fundo },
     }}>
+
       <Stack.Screen
         name="AdminPerfilPrincipal"
         component={AdminPerfilScreen}
         initialParams={{ usuario: route.params?.usuario }}
       />
-      <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
+
+      <Stack.Screen
+        name="Configuracoes"
+        component={ConfiguracoesScreen}
+      />
+
     </Stack.Navigator>
   );
 }
+
+// Navegação principal
 
 export function AdminTabs({ route }) {
   const usuario = route.params?.usuario;
@@ -65,23 +82,52 @@ export function AdminTabs({ route }) {
           borderTopColor: cores.borda,
         }],
         tabBarHideOnKeyboard: true,
-      }}
-    >
-      <Tab.Screen name="Painel" component={AdminHomeScreen}
-        initialParams={{ usuario }} options={opcoesAba('Painel', 'Painel')} />
-      <Tab.Screen name="Usuarios" component={PlaceholderScreen}
-        initialParams={{ titulo: 'Usuários' }} options={opcoesAba('Usuários', 'Usuarios')} />
-      <Tab.Screen name="Conteudos" component={PlaceholderScreen}
-        initialParams={{ titulo: 'Conteúdos' }} options={opcoesAba('Conteúdos', 'Conteudos')} />
-      <Tab.Screen name="Moderacao" component={PlaceholderScreen}
-        initialParams={{ titulo: 'Moderação' }} options={opcoesAba('Moderação', 'Moderacao')} />
-      <Tab.Screen name="Perfil" component={AdminPerfilStack}
-        initialParams={{ usuario }} options={opcoesAba('Perfil', 'Perfil')} />
+      }}>
+
+      <Tab.Screen
+        name="Painel"
+        component={AdminHomeScreen}
+        initialParams={{ usuario }}
+        options={opcoesAba('Painel', 'Painel')}
+      />
+
+      <Tab.Screen
+        name="Usuarios"
+        component={AdminUsuariosScreen}
+        options={opcoesAba('Usuários', 'Usuarios')}
+      />
+
+      <Tab.Screen
+        name="Conteudos"
+        component={AdminConteudosScreen}
+        options={opcoesAba('Conteúdos', 'Conteudos')}
+      />
+
+      <Tab.Screen
+        name="Moderacao"
+        component={AdminModeracaoScreen}
+        options={opcoesAba('Moderação', 'Moderacao')}
+      />
+
+      <Tab.Screen
+        name="Perfil"
+        component={AdminPerfilStack}
+        initialParams={{ usuario }}
+        options={opcoesAba('Perfil', 'Perfil')}
+      />
+
     </Tab.Navigator>
   );
 }
 
 const estilos = StyleSheet.create({
-  barra: { borderTopWidth: StyleSheet.hairlineWidth, elevation: 0, paddingTop: 6 },
-  rotulo: { fontSize: tipografia.legenda, fontWeight: '500' },
+  barra: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    elevation: 0,
+    paddingTop: 6,
+  },
+  rotulo: {
+    fontSize: tipografia.legenda,
+    fontWeight: '500',
+  },
 });
