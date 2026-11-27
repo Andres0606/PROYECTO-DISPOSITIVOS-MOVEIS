@@ -6,7 +6,12 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
 } from 'react';
+
+import { ActivityIndicator, View } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   atualizarConfiguracoes,
@@ -20,6 +25,8 @@ import {
 
 // CONFIGURAÇÕES PADRÃO
 
+const CHAVE_IDIOMA = 'interchapeco_idioma';
+
 const preferenciasPadrao = {
   idioma: IDIOMA_PADRAO,
   tema: 'claro',
@@ -27,22 +34,93 @@ const preferenciasPadrao = {
 
 const PreferenciasContext = createContext(null);
 
+// ARMAZENAMENTO DO IDIOMA
+
+let filaIdioma = Promise.resolve();
+
+function salvarIdiomaLocal(idioma) {
+  filaIdioma = filaIdioma
+    .then(() =>
+      AsyncStorage.setItem(
+        CHAVE_IDIOMA,
+        normalizarIdioma(idioma)
+      )
+    )
+    .catch(() => {
+      console.warn('Não foi possível salvar o idioma local.');
+    });
+
+  return filaIdioma;
+}
+
 // PROVIDER
 
 export function PreferenciasProvider({ children }) {
   const [preferencias, setPreferencias] =
     useState(preferenciasPadrao);
 
-  // CARREGAR PREFERÊNCIAS
+  const [inicializado, setInicializado] =
+    useState(false);
 
-  const carregarPreferencias = useCallback((usuario) => {
-    setPreferencias({
-      idioma: normalizarIdioma(usuario?.idioma),
-      tema: usuario?.tema ?? 'claro',
-    });
+  // CARREGAR IDIOMA LOCAL
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarIdiomaLocal() {
+      try {
+        const idiomaSalvo =
+          await AsyncStorage.getItem(CHAVE_IDIOMA);
+
+        if (ativo && idiomaSalvo) {
+          setPreferencias(atual => ({
+            ...atual,
+            idioma: normalizarIdioma(idiomaSalvo),
+          }));
+        }
+      } catch {
+        console.warn('Não foi possível carregar o idioma local.');
+      } finally {
+        if (ativo) {
+          setInicializado(true);
+        }
+      }
+    }
+
+    carregarIdiomaLocal();
+
+    return () => {
+      ativo = false;
+    };
   }, []);
 
-  // ALTERAR IDIOMA
+  // ALTERAR IDIOMA ANTES DO LOGIN
+
+  const alterarIdiomaLocal = useCallback(async (idioma) => {
+    const idiomaValido = normalizarIdioma(idioma);
+
+    setPreferencias(atual => ({
+      ...atual,
+      idioma: idiomaValido,
+    }));
+
+    await salvarIdiomaLocal(idiomaValido);
+  }, []);
+
+  // CARREGAR PREFERÊNCIAS DA CONTA
+
+  const carregarPreferencias = useCallback((usuario) => {
+    const idioma = normalizarIdioma(usuario?.idioma);
+
+    setPreferencias({
+      idioma,
+      tema: usuario?.tema ?? 'claro',
+    });
+
+    salvarIdiomaLocal(idioma);
+  }, []);
+
+  // ALTERAR IDIOMA DA CONTA
 
   const alterarIdioma = useCallback(async (idioma) => {
     const resultado =
@@ -50,10 +128,15 @@ export function PreferenciasProvider({ children }) {
         idioma: normalizarIdioma(idioma),
       });
 
+    const idiomaValido =
+      normalizarIdioma(resultado.idioma);
+
     setPreferencias({
-      idioma: normalizarIdioma(resultado.idioma),
+      idioma: idiomaValido,
       tema: resultado.tema,
     });
+
+    await salvarIdiomaLocal(idiomaValido);
 
     return resultado;
   }, []);
@@ -66,18 +149,26 @@ export function PreferenciasProvider({ children }) {
         tema,
       });
 
+    const idiomaValido =
+      normalizarIdioma(resultado.idioma);
+
     setPreferencias({
-      idioma: normalizarIdioma(resultado.idioma),
+      idioma: idiomaValido,
       tema: resultado.tema,
     });
+
+    await salvarIdiomaLocal(idiomaValido);
 
     return resultado;
   }, []);
 
-  // RESTAURAR PREFERÊNCIAS
+  // RESTAURAR PREFERÊNCIAS SEM PERDER O IDIOMA
 
   const restaurarPreferencias = useCallback(() => {
-    setPreferencias(preferenciasPadrao);
+    setPreferencias(atual => ({
+      ...preferenciasPadrao,
+      idioma: atual.idioma,
+    }));
   }, []);
 
   // TRADUÇÃO
@@ -106,6 +197,8 @@ export function PreferenciasProvider({ children }) {
 
     alterarIdioma,
 
+    alterarIdiomaLocal,
+
     alterarTema,
 
     restaurarPreferencias,
@@ -115,10 +208,31 @@ export function PreferenciasProvider({ children }) {
     preferencias,
     carregarPreferencias,
     alterarIdioma,
+    alterarIdiomaLocal,
     alterarTema,
     restaurarPreferencias,
     t,
   ]);
+
+  // AGUARDAR O CARREGAMENTO INICIAL
+
+  if (!inicializado) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+        }}
+      >
+        <ActivityIndicator
+          size="large"
+          color="#333333"
+        />
+      </View>
+    );
+  }
 
   return (
     <PreferenciasContext.Provider value={valor}>

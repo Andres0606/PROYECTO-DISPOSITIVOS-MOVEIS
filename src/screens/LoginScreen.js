@@ -16,6 +16,7 @@ import { useTema } from '../theme/useTema';
 import { CenteredTemplate } from '../components/templates/CenteredTemplate';
 import { LoginForm } from '../components/organisms/LoginForm';
 import { Logo } from '../components/atoms/Logo';
+import { BotaoSegmentado } from '../components/molecules/BotaoSegmentado';
 
 import {
   fazerLogin,
@@ -28,11 +29,21 @@ import {
   tipografia,
 } from '../theme';
 
+// IDIOMAS DISPONÍVEIS
+
+const IDIOMAS_ACESSO = [
+  { titulo: 'PT', valor: 'pt-BR' },
+  { titulo: 'ES', valor: 'es' },
+  { titulo: 'EN', valor: 'en' },
+];
+
 export function LoginScreen({ navigation }) {
-  const { t: grupo1Traducao } = usePreferencias();
   const { cores } = useTema();
 
   const {
+    t: grupo1Traducao,
+    idioma,
+    alterarIdiomaLocal,
     carregarPreferencias,
     restaurarPreferencias,
   } = usePreferencias();
@@ -89,6 +100,18 @@ export function LoginScreen({ navigation }) {
   ]);
 
   // ==========================================================
+  // ALTERAR IDIOMA
+  // ==========================================================
+
+  async function selecionarIdioma(novoIdioma) {
+    if (carregando || idioma === novoIdioma) return;
+
+    setErro('');
+
+    await alterarIdiomaLocal(novoIdioma);
+  }
+
+  // ==========================================================
   // REALIZAR LOGIN
   // ==========================================================
 
@@ -107,7 +130,11 @@ export function LoginScreen({ navigation }) {
       });
 
     } catch (e) {
-      setErro(grupo1Traducao('mensagens.servidor', { mensagem: e.message }));
+      setErro(
+        grupo1Traducao('mensagens.servidor', {
+          mensagem: e.message,
+        })
+      );
 
     } finally {
       setCarregando(false);
@@ -121,7 +148,9 @@ export function LoginScreen({ navigation }) {
   function emBreve() {
     Alert.alert(
       grupo1Traducao('grupo1.em_breve'),
-      grupo1Traducao('grupo1.esta_funcao_estara_disponivel_em_uma_proxima_etapa')
+      grupo1Traducao(
+        'grupo1.esta_funcao_estara_disponivel_em_uma_proxima_etapa'
+      )
     );
   }
 
@@ -150,7 +179,9 @@ export function LoginScreen({ navigation }) {
                 color: cores.textoSecundario,
               },
             ]}
-          >{grupo1Traducao('grupo1.verificando_sessao')}{' '}</Text>
+          >
+            {grupo1Traducao('grupo1.verificando_sessao')}
+          </Text>
 
         </View>
 
@@ -166,6 +197,14 @@ export function LoginScreen({ navigation }) {
     <CenteredTemplate>
 
       <Logo style={estilos.logo} />
+
+      <View style={estilos.idiomas}>
+        <BotaoSegmentado
+          opcoes={IDIOMAS_ACESSO}
+          valor={idioma}
+          aoMudar={selecionarIdioma}
+        />
+      </View>
 
       <LoginForm
         aoEnviar={entrar}
@@ -196,8 +235,13 @@ export function LoginScreen({ navigation }) {
 const estilos = StyleSheet.create({
   logo: {
     alignSelf: 'center',
-    marginBottom:
-      espacamentos.xl + espacamentos.xs,
+    marginBottom: espacamentos.md,
+  },
+
+  idiomas: {
+    alignSelf: 'center',
+    width: '65%',
+    marginBottom: espacamentos.lg,
   },
 
   verificacao: {
