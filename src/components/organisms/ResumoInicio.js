@@ -1,15 +1,31 @@
+
 // ORGANISM — ResumoInicio
 
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Chip } from '../atoms/Chip';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
 import { CardInfo } from '../molecules/CardInfo';
-import { espacamentos } from '../../theme';
+
+import { espacamentos, raios, tipografia } from '../../theme';
+import { useTema } from '../../theme/useTema';
 import { formatarReais } from '../../utils/formatacao';
 
 const ATALHOS = [
-  { chave: 'portugues', titulo: 'Português' },
-  { chave: 'conselhos', titulo: 'Conselhos' },
-  { chave: 'atividades', titulo: 'Atividades' },
+  {
+    chave: 'portugues',
+    titulo: 'Português útil',
+    icone: 'language-outline',
+  },
+  {
+    chave: 'conselhos',
+    titulo: 'Conselhos úteis',
+    icone: 'chatbubbles-outline',
+  },
+  {
+    chave: 'atividades',
+    titulo: 'Atividades e planos',
+    icone: 'calendar-outline',
+  },
 ];
 
 function calcularProporcao(parte, total) {
@@ -17,7 +33,14 @@ function calcularProporcao(parte, total) {
 }
 
 export function ResumoInicio({ resumo, aoAbrirAtalho }) {
-  const { tarefas, gastos, conselhoDestaque, proximaAtividade } = resumo;
+  const { cores } = useTema();
+
+  const {
+    tarefas,
+    gastos,
+    conselhoDestaque,
+    proximaAtividade,
+  } = resumo;
 
   const temOrcamento = gastos.orcamento !== null;
   const excedido = temOrcamento && gastos.disponivel < 0;
@@ -25,19 +48,30 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
   return (
     <View style={estilos.lista}>
 
-      <Pressable onPress={() => aoAbrirAtalho('tarefas')}
-        accessibilityRole="button">
+      {/* RESUMO DO INTERCÂMBIO */}
+
+      <Pressable
+        onPress={() => aoAbrirAtalho('tarefas')}
+        accessibilityRole="button"
+      >
         <CardInfo
           titulo="Seu intercâmbio em Chapecó"
-          progresso={calcularProporcao(tarefas.concluidas, tarefas.total)}
+          progresso={calcularProporcao(
+            tarefas.concluidas,
+            tarefas.total
+          )}
           legenda={tarefas.total
             ? `${tarefas.concluidas} de ${tarefas.total} tarefas concluídas`
             : 'Nenhuma tarefa cadastrada.'}
         />
       </Pressable>
 
-      <Pressable onPress={() => aoAbrirAtalho('gastos')}
-        accessibilityRole="button">
+      {/* RESUMO DOS GASTOS */}
+
+      <Pressable
+        onPress={() => aoAbrirAtalho('gastos')}
+        accessibilityRole="button"
+      >
         <CardInfo
           titulo={`Gastos — ${gastos.periodo}`}
           detalhe={formatarReais(gastos.gasto)}
@@ -56,18 +90,69 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         />
       </Pressable>
 
-      <View style={estilos.atalhos}>
-        {ATALHOS.map(atalho => (
-          <Chip key={atalho.chave}
-            titulo={atalho.titulo}
-            aoPressionar={() => aoAbrirAtalho(atalho.chave)} />
-        ))}
+      {/* ACESSO RÁPIDO */}
+
+      <View style={estilos.secaoAtalhos}>
+
+        <Text style={[
+          estilos.tituloAtalhos,
+          { color: cores.texto },
+        ]}>
+          Acesso rápido
+        </Text>
+
+        <View style={estilos.atalhos}>
+
+          {ATALHOS.map(atalho => (
+            <Pressable
+              key={atalho.chave}
+              accessibilityRole="button"
+              accessibilityLabel={atalho.titulo}
+              onPress={() => aoAbrirAtalho(atalho.chave)}
+              style={({ pressed }) => [
+                estilos.cartaoAtalho,
+                {
+                  backgroundColor: cores.superficie,
+                  borderColor: cores.borda,
+                },
+                pressed && estilos.pressionado,
+              ]}
+            >
+
+              <View style={[
+                estilos.iconeAtalho,
+                { backgroundColor: cores.decoracao },
+              ]}>
+                <Ionicons
+                  name={atalho.icone}
+                  size={23}
+                  color={cores.texto}
+                />
+              </View>
+
+              <Text style={[
+                estilos.textoAtalho,
+                { color: cores.texto },
+              ]}>
+                {atalho.titulo}
+              </Text>
+
+            </Pressable>
+          ))}
+
+        </View>
+
       </View>
 
-      <Pressable accessibilityRole="button"
+      {/* CONSELHO EM DESTAQUE */}
+
+      <Pressable
+        accessibilityRole="button"
         onPress={() => aoAbrirAtalho(
-          'conselhoDetalhe', conselhoDestaque?.id
-        )}>
+          'conselhoDetalhe',
+          conselhoDestaque?.id
+        )}
+      >
         <CardInfo
           titulo="Conselho em destaque"
           texto={conselhoDestaque
@@ -79,10 +164,15 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         />
       </Pressable>
 
-      <Pressable accessibilityRole="button"
+      {/* PRÓXIMA ATIVIDADE */}
+
+      <Pressable
+        accessibilityRole="button"
         onPress={() => aoAbrirAtalho(
-          'atividadeDetalhe', proximaAtividade?.id
-        )}>
+          'atividadeDetalhe',
+          proximaAtividade?.id
+        )}
+      >
         <CardInfo
           titulo="Próxima atividade"
           detalhe={proximaAtividade?.data}
@@ -95,12 +185,57 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
   );
 }
 
+// ESTILOS
+
 const estilos = StyleSheet.create({
-  lista: { gap: espacamentos.md },
+  lista: {
+    gap: espacamentos.md,
+  },
+
+  secaoAtalhos: {
+    gap: espacamentos.sm,
+  },
+
+  tituloAtalhos: {
+    fontSize: tipografia.corpo,
+    fontWeight: '600',
+  },
+
   atalhos: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: espacamentos.sm,
-    rowGap: espacamentos.md,
+    alignItems: 'stretch',
+    gap: espacamentos.sm,
+  },
+
+  cartaoAtalho: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 112,
+    borderWidth: 1,
+    borderRadius: raios.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: espacamentos.md,
+    gap: 10,
+  },
+
+  iconeAtalho: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  textoAtalho: {
+    fontSize: tipografia.legenda,
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
+  pressionado: {
+    opacity: 0.65,
   },
 });
