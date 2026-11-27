@@ -1,3 +1,4 @@
+/* grupo5.1 */
 import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
@@ -32,7 +33,7 @@ function porcentagem(valor, t) {
 export function EstatisticasGastos({
   estatisticas, categoriasDisponiveis, visao, aoMudarVisao,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
   const [categoria, setCategoria] = useState('');
 
@@ -58,8 +59,8 @@ export function EstatisticasGastos({
 
       {visao === 'mes' ? (
         <>
-          <CardInfo titulo={t('grupo2.g115')} detalhe={formatarReais(gasto)}
-            texto={t('grupo2.g161', { v0: formatarReais(gastoAnterior) })} />
+          <CardInfo titulo={t('grupo2.g115')} detalhe={formatarReais(gasto, idioma)}
+            texto={t('grupo2.g161', { v0: formatarReais(gastoAnterior, idioma) })} />
 
           {categorias.length === 0 ? (
             <Text style={[estilos.aviso, { color: cores.textoSecundario }]}>
@@ -69,7 +70,7 @@ export function EstatisticasGastos({
             categorias.map(item => (
               <CardInfo key={item.categoria}
                 titulo={rotuloCatalogo(item.categoria, t)}
-                detalhe={formatarReais(item.valor)}
+                detalhe={formatarReais(item.valor, idioma)}
                 progresso={item.participacao}
                 legenda={porcentagem(item.participacao, t)} />
             ))
@@ -87,10 +88,10 @@ export function EstatisticasGastos({
 
             <CardInfo
               titulo={rotuloCatalogo(selecionada, t)}
-              detalhe={formatarReais(dadosCategoria.valor)}
+              detalhe={formatarReais(dadosCategoria.valor, idioma)}
               progresso={dadosCategoria.participacao}
               legenda={porcentagem(dadosCategoria.participacao, t)}
-              texto={t('grupo2.g162', { v0: formatarReais(gasto) })}
+              texto={t('grupo2.g162', { v0: formatarReais(gasto, idioma) })}
             />
 
             {dadosCategoria.valor === 0 && (

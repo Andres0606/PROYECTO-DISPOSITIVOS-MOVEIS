@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarPeriodo, formatarDiaMes } from '../../utils/formatacao';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // ORGANISM — ResumoInicio
@@ -34,7 +36,7 @@ function calcularProporcao(parte, total) {
 }
 
 export function ResumoInicio({ resumo, aoAbrirAtalho }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const {
@@ -75,19 +77,19 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
         accessibilityRole="button"
       >
         <CardInfo
-          titulo={t('grupo2.g153', { v0: gastos.periodo })}
-          detalhe={formatarReais(gastos.gasto)}
+          titulo={t('grupo2.g153', { v0: formatarPeriodo(gastos.ano, gastos.mes, idioma) })}
+          detalhe={formatarReais(gastos.gasto, idioma)}
           progresso={temOrcamento
             ? calcularProporcao(gastos.gasto, gastos.orcamento)
             : undefined}
           alerta={excedido}
           legenda={!temOrcamento
             ? t('grupo2.g053')
-            : t('grupo2.g154', { v0: formatarReais(gastos.orcamento) })}
+            : t('grupo2.g154', { v0: formatarReais(gastos.orcamento, idioma) })}
           texto={temOrcamento
             ? excedido
-              ? t('grupo2.g155', { v0: formatarReais(-gastos.disponivel) })
-              : t('grupo2.g156', { v0: formatarReais(gastos.disponivel) })
+              ? t('grupo2.g155', { v0: formatarReais(-gastos.disponivel, idioma) })
+              : t('grupo2.g156', { v0: formatarReais(gastos.disponivel, idioma) })
             : t('grupo2.g054')}
         />
       </Pressable>
@@ -177,7 +179,7 @@ export function ResumoInicio({ resumo, aoAbrirAtalho }) {
       >
         <CardInfo
           titulo={t('grupo2.g058')}
-          detalhe={proximaAtividade?.data}
+          detalhe={proximaAtividade ? [formatarDiaMes(proximaAtividade.dataAtividade, idioma), proximaAtividade.horario].filter(Boolean).join(' · ') : undefined}
           texto={proximaAtividade?.titulo
             ?? t('grupo2.g059')}
         />

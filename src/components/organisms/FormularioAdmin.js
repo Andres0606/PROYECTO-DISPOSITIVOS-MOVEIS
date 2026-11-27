@@ -1,3 +1,4 @@
+import { traduzirCategoriaLocal } from '../../i18n/catalogosLocais';
 import { rotuloAdmin, rotuloCategoriaAdmin } from '../../i18n/catalogosGrupo4';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — Formulário administrativo
@@ -54,7 +55,7 @@ export function FormularioAdmin({
   aoSalvar,
   aoCancelar,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const campos = CAMPOS[tipo].map(([campo, rotulo, ...resto]) => [campo, rotuloAdmin(rotulo, t), ...resto]);
 
   const [dados, setDados] = useState(() => ({
@@ -229,8 +230,11 @@ export function FormularioAdmin({
         <>
           <CampoSelecao
             rotulo={t('grupo4.g101')}
-            formatarOpcao={valor => rotuloCategoriaAdmin(rotuloAdmin(valor, t), t)}
-            valor={
+            formatarOpcao={valor =>
+              tipo === 'lugares'
+                ? rotuloAdmin(traduzirCategoriaLocal(valor, idioma), t)
+                : rotuloCategoriaAdmin(rotuloAdmin(valor, t), t)
+            } valor={
               categorias.find(item =>
                 item.id === dados.categoriaId
               )?.nome ??

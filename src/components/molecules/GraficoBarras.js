@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { usePreferencias } from '../../contexts/PreferenciasContext';
 // MOLECULE — GraficoBarras
 
 import { useMemo } from 'react';
@@ -14,6 +16,7 @@ export function GraficoBarras({
   dados,
   alturaMaxima = 87,
 }) {
+  const { idioma } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -52,7 +55,7 @@ export function GraficoBarras({
               <View
                 accessible
                 accessibilityLabel={
-                  `${item.rotulo}: ${formatarReais(item.valor)}`
+                  `${item.rotulo}: ${formatarReais(item.valor, idioma)}`
                 }
                 style={[
                   estilos.barra,

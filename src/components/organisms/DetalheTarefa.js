@@ -1,3 +1,4 @@
+/* grupo5.1 */
 import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — DetalheTarefa
@@ -23,7 +24,7 @@ export function DetalheTarefa({
   aoAlternar,
   aoExcluir,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const estilos = useMemo(
@@ -32,7 +33,7 @@ export function DetalheTarefa({
   );
 
   const prazo = tarefa.prazo
-    ? formatarDataCurta(tarefa.prazo)
+    ? formatarDataCurta(tarefa.prazo, idioma)
     : '';
 
   return (

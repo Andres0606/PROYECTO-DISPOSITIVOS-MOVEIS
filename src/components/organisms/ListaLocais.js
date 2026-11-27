@@ -1,3 +1,4 @@
+/* grupo5.1 */
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — ListaLocais
 
@@ -24,7 +25,7 @@ export function ListaLocais({
   locais,
   aoAbrirLocal,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   if (locais.length === 0) {
@@ -52,7 +53,7 @@ export function ListaLocais({
 
           local.distanciaKm != null
             ? formatarDistancia(
-                local.distanciaKm
+                local.distanciaKm, idioma
               )
             : null,
 

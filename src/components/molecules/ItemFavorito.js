@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataNumerica } from '../../utils/formatacao';
 // MOLECULE — ItemFavorito
 
 import { useMemo } from 'react';
@@ -52,7 +54,7 @@ export function ItemFavorito({
     tipo === 'frases'
       ? obterTraducaoFrase(item, idioma)
       : tipo === 'atividades'
-        ? [item.data, item.horario]
+        ? [formatarDataNumerica(item.dataAtividade, idioma), item.horario]
             .filter(Boolean)
             .join(' · ')
         : item.descricao;

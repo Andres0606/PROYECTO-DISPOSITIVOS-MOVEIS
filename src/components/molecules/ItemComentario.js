@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataPublicacao } from '../../utils/formatacao';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
 // MOLECULE — ItemComentario
@@ -11,7 +13,7 @@ import { useTema } from '../../theme/useTema';
 export function ItemComentario({
   comentario, aoEditar, aoExcluir, ocupado = false,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -29,7 +31,7 @@ export function ItemComentario({
           </Text>
 
           <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-            {comentario.tempo}{comentario.editado ? t('grupo3.g138') : ''}
+            {formatarDataPublicacao(comentario.data, idioma)}{comentario.editado ? t('grupo3.g138') : ''}
           </Text>
         </View>
 

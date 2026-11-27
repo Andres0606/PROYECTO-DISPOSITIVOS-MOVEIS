@@ -1,3 +1,4 @@
+import { traduzirCategoriaLocal } from '../i18n/catalogosLocais';
 import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
 
 // SCREEN — Gestão de conteúdos
@@ -102,6 +103,14 @@ export function AdminConteudosScreen({ route }) {
   }, [route.params?.tipo, route.params?.atalho]);
 
   const grupoCategoria = CATEGORIAS[grupo];
+  function traduzirCategoria(nome) {
+    if (tipo === 'lugares' ||
+      (tipo === 'categorias' && grupoCategoria === 'lugares')) {
+      return traduzirCategoriaLocal(nome, idioma);
+    }
+
+    return rotuloCategoriaAdmin(nome, t);
+  }
 
   const itens = tipo === 'categorias'
     ? categorias[grupoCategoria] ?? []
@@ -170,7 +179,7 @@ export function AdminConteudosScreen({ route }) {
 
     confirmar(
       t('grupo4.g049'),
-      t('grupo4.g112', { nome: rotuloCategoriaAdmin(item.nome, t) }),
+      t('grupo4.g112', { nome: traduzirCategoria(item.nome) }),
       async () => {
         await excluirCategoriaAdmin(grupoAtual, item.id);
         Alert.alert(t('grupo4.g026'), t('grupo4.g050'));
@@ -292,12 +301,18 @@ export function AdminConteudosScreen({ route }) {
             item.explicacaoIngles,
             item.explicacaoPortugues,
             item.categoria?.nome,
+            traduzirCategoria(item.categoria?.nome),
+            tipo === 'categorias' ? traduzirCategoria(item.nome) : '',
             item.endereco,
           ]}
           renderItem={item => (
             <CardAdmin
-              titulo={tipo === 'categorias' ? rotuloCategoriaAdmin(item.nome, t) : item.nome || item.frasePortugues}
-              subtitulo={rotuloCategoriaAdmin(item.categoria?.nome, t)}
+              titulo={
+                tipo === 'categorias'
+                  ? traduzirCategoria(item.nome)
+                  : item.nome || item.frasePortugues
+              }
+              subtitulo={traduzirCategoria(item.categoria?.nome)}
               descricao={tipo === 'frases'
                 ? obterTraducaoFrase(item, idioma)
                 : item.descricao}

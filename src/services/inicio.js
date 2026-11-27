@@ -27,6 +27,8 @@ export async function obterResumoInicio() {
       total: tarefas.length,
     },
     gastos: {
+      ano: gastos.ano,
+      mes: gastos.mes,
       periodo: formatarPeriodo(gastos.ano, gastos.mes),
       gasto: gastos.gasto,
       orcamento: gastos.orcamento,
@@ -41,6 +43,8 @@ export async function obterResumoInicio() {
     proximaAtividade: atividade ? {
       id: atividade.id,
       titulo: atividade.titulo,
+      dataAtividade: atividade.dataAtividade,
+      horario: atividade.horario,
       data: `${formatarDiaMes(atividade.dataAtividade)} · ${atividade.horario}`,
     } : null,
   };

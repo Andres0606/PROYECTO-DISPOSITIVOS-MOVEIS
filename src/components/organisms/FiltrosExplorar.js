@@ -1,5 +1,3 @@
-import { usePreferencias } from '../../contexts/PreferenciasContext';
-
 // ORGANISM — FiltrosExplorar
 
 import { StyleSheet, View } from 'react-native';
@@ -10,6 +8,9 @@ import { BotaoSegmentado } from '../molecules/BotaoSegmentado';
 
 import { CATEGORIA_TODOS } from '../../constants/locais';
 import { espacamentos } from '../../theme';
+
+import { usePreferencias } from '../../contexts/PreferenciasContext';
+import { traduzirCategoriaLocal } from '../../i18n/catalogosLocais';
 
 const VISOES = [
   { valor: 'lista', titulo: 'Lista' },
@@ -25,7 +26,8 @@ export function FiltrosExplorar({
   aoMudarCategoria,
   categorias = [],
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
+
   const opcoes = [
     { id: CATEGORIA_TODOS, nome: 'Todos' },
     ...categorias,
@@ -33,6 +35,7 @@ export function FiltrosExplorar({
 
   return (
     <View style={estilos.bloco}>
+
       <BarraBusca
         valor={busca}
         aoMudar={aoMudarBusca}
@@ -40,21 +43,34 @@ export function FiltrosExplorar({
       />
 
       <BotaoSegmentado
-        opcoes={VISOES.map(item => ({ ...item, titulo: item.valor === 'lista' ? t('grupo2.g075') : t('grupo2.g012') }))}
+        opcoes={VISOES.map(item => ({
+          ...item,
+          titulo:
+            item.valor === 'lista'
+              ? t('grupo2.g075')
+              : t('grupo2.g012'),
+        }))}
         valor={visao}
         aoMudar={aoMudarVisao}
       />
 
       <View style={estilos.pills}>
+
         {opcoes.map(item => (
           <Pill
             key={item.id}
-            titulo={item.id === CATEGORIA_TODOS ? t('grupo2.g041') : item.nome}
+            titulo={
+              item.id === CATEGORIA_TODOS
+                ? t('grupo2.g041')
+                : traduzirCategoriaLocal(item.nome, idioma)
+            }
             selecionado={item.id === categoria}
             aoPressionar={() => aoMudarCategoria(item.id)}
           />
         ))}
+
       </View>
+
     </View>
   );
 }

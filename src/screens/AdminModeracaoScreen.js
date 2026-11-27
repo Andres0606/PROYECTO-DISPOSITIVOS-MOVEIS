@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataNumerica } from '../utils/formatacao';
 import { rotuloAdmin, rotuloCategoriaAdmin } from '../i18n/catalogosGrupo4';
 import { usePreferencias } from '../contexts/PreferenciasContext';
 
@@ -29,7 +31,7 @@ const TIPOS = [
 ];
 
 export function AdminModeracaoScreen({ route, navigation }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const [conselhos, setConselhos] = useState([]);
@@ -312,7 +314,7 @@ export function AdminModeracaoScreen({ route, navigation }) {
                 </Text>
 
                 <Text style={{ color: cores.texto }}>
-                  {t('grupo4.g120', { data: detalhes.dataAtividade?.split('-').reverse().join('/') ?? '', hora: detalhes.horaInicio?.slice(0, 5) ?? '' })}
+                  {t('grupo4.g120', { data: formatarDataNumerica(detalhes.dataAtividade, idioma), hora: detalhes.horaInicio?.slice(0, 5) ?? '' })}
                 </Text>
 
                 <Text style={{ color: cores.textoSecundario }}>

@@ -1,126 +1,224 @@
-import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
-import { usePreferencias } from '../../contexts/PreferenciasContext';
+// ORGANISM — DetalheLocal
 
-// ORGANISM — DetalheConselho
+import { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { AvatarIcone } from '../atoms/AvatarIcone';
+import { Card } from '../atoms/Card';
+import { Chip } from '../atoms/Chip';
 import { FotoLocal } from '../atoms/FotoLocal';
-import { Etiqueta } from '../atoms/Etiqueta';
-import { Button } from '../atoms/Button';
-import { espacamentos, raios, tipografia } from '../../theme';
+import { MapaLocais } from './MapaLocais';
+
+import { espacamentos, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
-export function DetalheConselho({
-  conselho, aoCurtir, aoEditar, ocupado = false,
+import { usePreferencias } from '../../contexts/PreferenciasContext';
+import { traduzirCategoriaLocal } from '../../i18n/catalogosLocais';
+
+export function DetalheLocal({
+  local,
+  guardado,
+  salvando = false,
+  aoAlternarGuardado,
+  aoVerMapa,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
+  const estilos = useMemo(() => criarEstilos(cores), [cores]);
+  const locaisMapa = useMemo(() => [local], [local]);
+
+  const temEndereco = !!(local.endereco || local.bairro);
+
+  const temInformacoes = !!(
+    local.horario ||
+    local.telefone ||
+    local.siteUrl
+  );
+
+  const temCoordenadas =
+    Number.isFinite(local.latitude) &&
+    Number.isFinite(local.longitude) &&
+    Math.abs(local.latitude) <= 90 &&
+    Math.abs(local.longitude) <= 180;
+
   return (
-    <View style={estilos.container}>
-      <View style={[
-        estilos.cabecalho,
-        { backgroundColor: cores.superficie, borderColor: cores.borda },
-      ]}>
-        <AvatarIcone icone="person-outline" tamanho={46}
-          uri={conselho.fotoAutor} />
+    <View>
 
-        <View style={estilos.autor}>
-          <Text style={[estilos.nome, { color: cores.texto }]}>
-            {conselho.autor}
-          </Text>
+      <FotoLocal
+        imagem={
+          local.imagemUrl
+            ? { uri: local.imagemUrl }
+            : undefined
+        }
+        style={estilos.foto}
+      />
 
-          <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-            {[conselho.pais, conselho.tempo].filter(Boolean).join(' · ')}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={[estilos.titulo, { color: cores.texto }]}>
-        {conselho.texto}
+      <Text style={estilos.nome}>
+        {local.nome}
       </Text>
 
-      <View style={estilos.categoria}>
-        <Etiqueta titulo={rotuloCatalogo3(conselho.categoria, t)} />
-      </View>
-
-      <Text style={[estilos.descricao, { color: cores.texto }]}>
-        {conselho.descricao}
+      <Text style={estilos.subtitulo}>
+        {traduzirCategoriaLocal(local.categoria, idioma)}
       </Text>
 
-      {!!conselho.imagem && (
-        <FotoLocal imagem={{ uri: conselho.imagem }} style={estilos.imagem} />
+      {!!local.descricao && (
+        <Text style={estilos.descricao}>
+          {local.descricao}
+        </Text>
       )}
 
-      {conselho.meuConselho && (
-        <Button titulo={t('grupo3.g085')} variante="secundario"
-          aoPressionar={aoEditar} desabilitado={ocupado} />
+      {temEndereco && (
+        <Card style={estilos.endereco}>
+          <Text style={estilos.tituloSecao}>
+            {t('grupo2.g064')}
+          </Text>
+
+          {!!local.endereco && (
+            <Text style={estilos.rua}>
+              {local.endereco}
+            </Text>
+          )}
+
+          {!!local.bairro && (
+            <Text style={estilos.informacao}>
+              {local.bairro}
+            </Text>
+          )}
+        </Card>
       )}
 
-      <View style={estilos.rodape}>
-        <Pressable onPress={aoCurtir} disabled={ocupado}
-          hitSlop={10} accessibilityRole="button"
-          accessibilityLabel={conselho.curtido ? t('grupo3.g086') : t('grupo3.g087')}
-          accessibilityState={{ selected: conselho.curtido, disabled: ocupado }}
-          style={({ pressed }) => [
-            estilos.interacao,
-            (pressed || ocupado) && estilos.pressionado,
-          ]}>
+      {temInformacoes && (
+        <Card style={estilos.endereco}>
+          <Text style={estilos.tituloSecao}>
+            {t('grupo2.g065')}
+          </Text>
 
-          <Ionicons
-            name={conselho.curtido ? 'heart' : 'heart-outline'}
-            size={23}
-            color={conselho.curtido ? cores.perigo : cores.texto}
+          {!!local.horario && (
+            <Text style={estilos.informacao}>
+              {t('grupo2.g066')} {local.horario}
+            </Text>
+          )}
+
+          {!!local.telefone && (
+            <Text style={estilos.informacao}>
+              {t('grupo2.g067')} {local.telefone}
+            </Text>
+          )}
+
+          {!!local.siteUrl && (
+            <Text style={estilos.informacao}>
+              {t('grupo2.g068')} {local.siteUrl}
+            </Text>
+          )}
+        </Card>
+      )}
+
+      <View style={estilos.mapa}>
+        <Text style={estilos.tituloSecao}>
+          {t('grupo2.g069')}
+        </Text>
+
+        {temCoordenadas ? (
+          <MapaLocais
+            locais={locaisMapa}
+            altura={210}
           />
-
-          <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-            {conselho.curtidas}
+        ) : (
+          <Text style={estilos.informacao}>
+            {t('grupo2.g070')}
           </Text>
-        </Pressable>
-
-        <View style={estilos.interacao}>
-          <Ionicons name="chatbubble-outline" size={20} color={cores.texto} />
-
-          <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-            {conselho.comentarios}{' '}
-            {conselho.comentarios === 1 ? t('grupo3.g088') : t('grupo3.g089')}
-          </Text>
-        </View>
+        )}
       </View>
+
+      <View style={estilos.acoes}>
+        <Chip
+          titulo={t('grupo2.g071')}
+          aoPressionar={aoVerMapa}
+        />
+
+        <Chip
+          titulo={
+            salvando
+              ? t('grupo2.g072')
+              : guardado
+                ? t('grupo2.g073')
+                : t('grupo2.g074')
+          }
+          variante={guardado ? 'selecionado' : 'suave'}
+          aoPressionar={
+            salvando ? undefined : aoAlternarGuardado
+          }
+        />
+      </View>
+
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
-  container: { gap: espacamentos.md },
-  cabecalho: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espacamentos.sm,
-    padding: espacamentos.md,
-    borderWidth: 1,
-    borderRadius: raios.sm,
-  },
-  autor: { flex: 1 },
-  nome: { fontSize: tipografia.subtitulo, fontWeight: '600' },
-  legenda: { fontSize: tipografia.legenda },
-  titulo: { fontSize: 19, fontWeight: '700' },
-  categoria: { alignSelf: 'flex-start' },
-  descricao: { fontSize: tipografia.corpo, lineHeight: 23 },
-  imagem: { width: '100%', height: 220, borderRadius: raios.md },
-  rodape: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: espacamentos.sm,
-  },
-  interacao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: espacamentos.xs,
-    paddingVertical: espacamentos.xs,
-  },
-  pressionado: { opacity: 0.5 },
-});
+function criarEstilos(cores) {
+  return StyleSheet.create({
+    foto: {
+      width: '100%',
+      height: 183,
+      borderRadius: 16,
+    },
+
+    nome: {
+      marginTop: espacamentos.md - 4,
+      fontSize: tipografia.titulo,
+      lineHeight: 34,
+      fontWeight: '600',
+      color: cores.texto,
+    },
+
+    subtitulo: {
+      marginTop: espacamentos.xs,
+      fontSize: tipografia.corpo,
+      fontWeight: '600',
+      color: cores.textoSecundario,
+    },
+
+    descricao: {
+      marginTop: espacamentos.md,
+      fontSize: tipografia.corpo,
+      lineHeight: 23,
+      color: cores.texto,
+    },
+
+    endereco: {
+      marginTop: espacamentos.lg - 4,
+      justifyContent: 'center',
+      gap: espacamentos.xs,
+      borderColor: cores.bordaForte,
+    },
+
+    tituloSecao: {
+      fontSize: tipografia.corpo,
+      fontWeight: '700',
+      color: cores.texto,
+      marginBottom: espacamentos.xs,
+    },
+
+    rua: {
+      fontSize: tipografia.subtitulo,
+      color: cores.texto,
+    },
+
+    informacao: {
+      fontSize: tipografia.corpo,
+      color: cores.textoSecundario,
+    },
+
+    mapa: {
+      marginTop: espacamentos.lg,
+      gap: espacamentos.xs,
+    },
+
+    acoes: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: espacamentos.lg,
+      marginTop: espacamentos.lg,
+    },
+  });
+}

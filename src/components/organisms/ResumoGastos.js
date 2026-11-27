@@ -1,3 +1,4 @@
+/* grupo5.1 */
 import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
@@ -20,7 +21,7 @@ export function ResumoGastos({
   editando, aoEditarOrcamento, aoSalvarOrcamento, aoCancelarOrcamento,
   salvando, erroOrcamento,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
   const { orcamento, gasto, disponivel, distribuicao } = resumo;
 
@@ -39,7 +40,7 @@ export function ResumoGastos({
           <View style={estilos.cabecalho}>
             <View style={estilos.valor}>
               <LinhaValor rotulo={t('grupo2.g096')}
-                valor={definido ? formatarReais(orcamento) : t('grupo2.g097')} />
+                valor={definido ? formatarReais(orcamento, idioma) : t('grupo2.g097')} />
             </View>
 
             <BotaoIcone nome="pencil-outline" tamanho={18}
@@ -49,9 +50,9 @@ export function ResumoGastos({
               }} />
           </View>
 
-          <LinhaValor rotulo={t('grupo2.g099')} valor={formatarReais(gasto)} />
+          <LinhaValor rotulo={t('grupo2.g099')} valor={formatarReais(gasto, idioma)} />
           <LinhaValor rotulo={t('grupo2.g100')}
-            valor={definido ? formatarReais(disponivel) : '—'} />
+            valor={definido ? formatarReais(disponivel, idioma) : '—'} />
 
           {definido && (
             <View style={estilos.barra}>
@@ -76,7 +77,7 @@ export function ResumoGastos({
 
           {ultrapassado && (
             <Text style={[estilos.aviso, { color: cores.perigo }]}>
-              {t('grupo2.g103')} {formatarReais(Math.abs(disponivel))}.
+              {t('grupo2.g103')} {formatarReais(Math.abs(disponivel), idioma)}.
             </Text>
           )}
 

@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataPublicacao } from '../../utils/formatacao';
 import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
@@ -13,7 +15,7 @@ import { useTema } from '../../theme/useTema';
 export function CardConselho({
   conselho, aoCurtir, aoAbrir, desabilitado = false,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   return (
@@ -35,7 +37,7 @@ export function CardConselho({
             </Text>
 
             <Text style={[estilos.legenda, { color: cores.textoSecundario }]}>
-              {[conselho.pais, conselho.tempo].filter(Boolean).join(' · ')}
+              {[conselho.pais, formatarDataPublicacao(conselho.data, idioma)].filter(Boolean).join(' · ')}
             </Text>
           </View>
         </View>

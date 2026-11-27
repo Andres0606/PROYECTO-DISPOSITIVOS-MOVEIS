@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataCompleta } from '../../utils/formatacao';
 import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — DetalheAtividade
@@ -14,7 +16,7 @@ export function DetalheAtividade({
   atividade, ordenacao = 'recentes', salvandoInteresse = false,
   salvandoFavorito = false, aoAlternarInteresse, aoAlternarGuardado, aoEditar,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
   const ocupado = salvandoInteresse || salvandoFavorito;
@@ -56,7 +58,7 @@ export function DetalheAtividade({
       {atividade.vencida && (
         <View style={estilos.estado}><Etiqueta titulo={t('grupo3.g117')} /></View>
       )}
-      <Text style={estilos.informacao}>{atividade.dataCompleta ?? atividade.data}{' · '}{atividade.horario}</Text>
+      <Text style={estilos.informacao}>{formatarDataCompleta(atividade.dataAtividade, idioma)}{' · '}{atividade.horario}</Text>
       <Text style={estilos.informacao}>{atividade.local}</Text>
       <Text style={estilos.interessados}>
         {atividade.interessados}{' '}{atividade.interessados === 1 ? t('grupo3.g118') : t('grupo3.g119')}

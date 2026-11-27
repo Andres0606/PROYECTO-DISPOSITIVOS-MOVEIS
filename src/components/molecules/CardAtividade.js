@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataNumerica } from '../../utils/formatacao';
 import { rotuloCatalogo3 } from '../../i18n/catalogosGrupo3';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 
@@ -11,7 +13,7 @@ import { espacamentos, raios, tipografia } from '../../theme';
 import { useTema } from '../../theme/useTema';
 
 export function CardAtividade({ atividade, aoAbrir, mostrarEstado = false }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
   const estilos = useMemo(() => criarEstilos(cores), [cores]);
 
@@ -36,7 +38,7 @@ export function CardAtividade({ atividade, aoAbrir, mostrarEstado = false }) {
           </Text>
 
           <Text style={estilos.detalhes}>
-            {atividade.data}{' · '}{atividade.horario}
+            {formatarDataNumerica(atividade.dataAtividade, idioma)}{' · '}{atividade.horario}
             {' · '}{atividade.interessados}{' '}{t('grupo3.g140')}
           </Text>
 

@@ -1,3 +1,5 @@
+/* grupo5.1 */
+import { formatarDataNumerica } from '../../utils/formatacao';
 import { rotuloCatalogo } from '../../i18n/catalogosGrupo2';
 import { usePreferencias } from '../../contexts/PreferenciasContext';
 // ORGANISM — HistoricoGastos
@@ -6,7 +8,6 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BarraBusca } from '../molecules/BarraBusca';
 import { CardGasto } from '../molecules/CardGasto';
-import { isoParaBr } from '../../utils/datas';
 
 import {
   ICONES_CATEGORIA_GASTO,
@@ -26,7 +27,7 @@ export function HistoricoGastos({
   aoMudarBusca,
   aoAbrirGasto,
 }) {
-  const { t } = usePreferencias();
+  const { t, idioma } = usePreferencias();
   const { cores } = useTema();
 
   const buscando = busca.trim() !== '';
@@ -58,8 +59,8 @@ export function HistoricoGastos({
             <CardGasto
               key={gasto.id}
               conceito={gasto.conceito}
-              detalhe={`${rotuloCatalogo(gasto.categoria, t)} · ${isoParaBr(gasto.data)}`}
-              valor={formatarReais(gasto.valor)}
+              detalhe={`${rotuloCatalogo(gasto.categoria, t)} · ${formatarDataNumerica(gasto.data, idioma)}`}
+              valor={formatarReais(gasto.valor, idioma)}
               icone={
                 ICONES_CATEGORIA_GASTO[gasto.categoria]
                 ?? ICONE_GASTO_PADRAO
