@@ -21,24 +21,15 @@ import {
   redefinirSenhaApi,
 } from './api';
 
-// ============================================================
 // LOGIN
-// ============================================================
 
-export async function fazerLogin(
-  email,
-  senha
-) {
-  const resultado =
-    await loginApi(
-      email.trim().toLowerCase(),
-      senha
-    );
+export async function fazerLogin(email, senha) {
+  const resultado = await loginApi(
+    email.trim().toLowerCase(),
+    senha
+  );
 
-  const {
-    token,
-    usuario,
-  } = resultado;
+  const { token, usuario } = resultado;
 
   await salvarToken(token);
   await salvarUsuario(usuario);
@@ -49,9 +40,7 @@ export async function fazerLogin(
   };
 }
 
-// ============================================================
 // CADASTRO
-// ============================================================
 
 export async function fazerCadastro({
   nome,
@@ -61,26 +50,21 @@ export async function fazerCadastro({
   email,
   senha,
 }) {
-  const resultado =
-    await cadastroApi({
-      nome: nome.trim(),
+  const resultado = await cadastroApi({
+    nome: nome.trim(),
 
-      paisOrigemId,
+    paisOrigemId,
 
-      universidadeOrigemId,
+    universidadeOrigemId,
 
-      universidadeDestinoId,
+    universidadeDestinoId,
 
-      email:
-        email.trim().toLowerCase(),
+    email: email.trim().toLowerCase(),
 
-      senha,
-    });
+    senha,
+  });
 
-  const {
-    token,
-    usuario,
-  } = resultado;
+  const { token, usuario } = resultado;
 
   await salvarToken(token);
   await salvarUsuario(usuario);
@@ -91,9 +75,7 @@ export async function fazerCadastro({
   };
 }
 
-// ============================================================
 // RECUPERAÇÃO DE SENHA
-// ============================================================
 
 export async function recuperarSenha(email) {
   const resultado = await recuperarSenhaApi(
@@ -103,14 +85,9 @@ export async function recuperarSenha(email) {
   return resultado;
 }
 
-// ============================================================
 // REDEFINIÇÃO DE SENHA
-// ============================================================
 
-export async function redefinirSenha(
-  token,
-  novaSenha
-) {
+export async function redefinirSenha(token, novaSenha) {
   const resultado = await redefinirSenhaApi(
     token.trim(),
     novaSenha
@@ -119,9 +96,7 @@ export async function redefinirSenha(
   return resultado;
 }
 
-// ============================================================
 // VERIFICAÇÃO REAL DA SESSÃO
-// ============================================================
 
 export async function sessaoAtiva() {
   const token = await obterToken();
@@ -150,52 +125,38 @@ export async function sessaoAtiva() {
   }
 }
 
-// ============================================================
 // USUÁRIO DA SESSÃO
-// ============================================================
 
 export async function obterSessao() {
   return obterUsuario();
 }
-// ============================================================
-// ATUALIZAR PERFIL
-// ============================================================
 
-export async function atualizarPerfil(
-  dados
-) {
-  const token =
-    await obterToken();
+// ATUALIZAR PERFIL
+
+export async function atualizarPerfil(dados) {
+  const token = await obterToken();
 
   if (!token) {
-    throw new Error(
-      'Sessão não encontrada.'
-    );
+    throw new Error('Sessão não encontrada.');
   }
 
-  const resultado =
-    await atualizarPerfilApi(
-      token,
-      dados
-    );
-
-  await salvarUsuario(
-    resultado.usuario
+  const resultado = await atualizarPerfilApi(
+    token,
+    dados
   );
+
+  await salvarUsuario(resultado.usuario);
 
   return resultado.usuario;
 }
-// ============================================================
+
 // LOGOUT
-// ============================================================
 
 export async function logout() {
   await limparSessao();
 }
 
-// ============================================================
 // ATUALIZAR FOTO DO PERFIL
-// ============================================================
 
 export async function atualizarFotoPerfil(imagem) {
   const token = await obterToken();
@@ -209,16 +170,15 @@ export async function atualizarFotoPerfil(imagem) {
     imagem
   );
 
-  const dados = await obterUsuarioAutenticadoApi(token);
+  const dados =
+    await obterUsuarioAutenticadoApi(token);
 
   await salvarUsuario(dados.usuario);
 
   return resultado.fotoUrl;
 }
 
-// ============================================================
 // REMOVER FOTO DO PERFIL
-// ============================================================
 
 export async function removerFotoPerfil() {
   const token = await obterToken();
@@ -229,16 +189,15 @@ export async function removerFotoPerfil() {
 
   await removerFotoPerfilApi(token);
 
-  const dados = await obterUsuarioAutenticadoApi(token);
+  const dados =
+    await obterUsuarioAutenticadoApi(token);
 
   await salvarUsuario(dados.usuario);
 
   return null;
 }
 
-// ============================================================
 // CONSULTAR CONFIGURAÇÕES
-// ============================================================
 
 export async function obterConfiguracoes() {
   const token = await obterToken();
@@ -253,9 +212,7 @@ export async function obterConfiguracoes() {
   return resultado.configuracoes;
 }
 
-// ============================================================
 // ATUALIZAR CONFIGURAÇÕES
-// ============================================================
 
 export async function atualizarConfiguracoes(dados) {
   const token = await obterToken();
@@ -276,11 +233,9 @@ export async function atualizarConfiguracoes(dados) {
     await salvarUsuario({
       ...usuario,
 
-      idioma:
-        resultado.configuracoes.idioma,
+      idioma: resultado.configuracoes.idioma,
 
-      tema:
-        resultado.configuracoes.tema,
+      tema: resultado.configuracoes.tema,
     });
   }
 

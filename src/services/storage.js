@@ -10,7 +10,39 @@ const CHAVE_USUARIO = 'interchapeco_usuario';
 const CHAVE_FOTO = 'interchapeco_foto';
 const CHAVE_LOCALIZACAO = 'interchapeco_localizacao';
 
-// TOKEN — dado sensível: SecureStore
+// ARMAZENAMENTO SEGURO
+
+async function salvarDado(chave, valor) {
+  await SecureStore.setItemAsync(chave, valor);
+  await AsyncStorage.removeItem(chave);
+}
+
+async function obterDado(chave) {
+  const valor = await SecureStore.getItemAsync(chave);
+
+  if (valor !== null) {
+    return valor;
+  }
+
+  // Migrar dados das versões anteriores
+
+  const valorAnterior = await AsyncStorage.getItem(chave);
+
+  if (valorAnterior !== null) {
+    await salvarDado(chave, valorAnterior);
+  }
+
+  return valorAnterior;
+}
+
+async function removerDado(chave) {
+  await Promise.all([
+    SecureStore.deleteItemAsync(chave),
+    AsyncStorage.removeItem(chave),
+  ]);
+}
+
+// TOKEN
 
 export async function salvarToken(token) {
   await SecureStore.setItemAsync(CHAVE_TOKEN, token);
@@ -21,84 +53,62 @@ export async function obterToken() {
 }
 
 export async function removerToken() {
-  await SecureStore.deleteItemAsync(CHAVE_TOKEN);
+  await removerDado(CHAVE_TOKEN);
 }
 
-// USUÁRIO — dado local não secreto: AsyncStorage
+// USUÁRIO
 
 export async function salvarUsuario(usuario) {
-  await AsyncStorage.setItem(
+  await salvarDado(
     CHAVE_USUARIO,
     JSON.stringify(usuario)
   );
 }
 
 export async function obterUsuario() {
-  const usuarioSalvo = await AsyncStorage.getItem(
-    CHAVE_USUARIO
-  );
+  const usuario = await obterDado(CHAVE_USUARIO);
 
-  if (!usuarioSalvo) {
-    return null;
-  }
-
-  return JSON.parse(usuarioSalvo);
+  return usuario ? JSON.parse(usuario) : null;
 }
 
 export async function removerUsuario() {
-  await AsyncStorage.removeItem(CHAVE_USUARIO);
+  await removerDado(CHAVE_USUARIO);
 }
 
-// FOTO — persistência local
+// FOTO LOCAL
 
 export async function salvarFotoLocal(uri) {
-  await AsyncStorage.setItem(
-    CHAVE_FOTO,
-    uri
-  );
+  await salvarDado(CHAVE_FOTO, uri);
 }
 
 export async function obterFotoLocal() {
-  return AsyncStorage.getItem(
-    CHAVE_FOTO
-  );
+  return obterDado(CHAVE_FOTO);
 }
 
 export async function removerFotoLocal() {
-  await AsyncStorage.removeItem(
-    CHAVE_FOTO
-  );
+  await removerDado(CHAVE_FOTO);
 }
 
-// LOCALIZAÇÃO — persistência local
+// LOCALIZAÇÃO
 
 export async function salvarLocalizacao(localizacao) {
-  await AsyncStorage.setItem(
+  await salvarDado(
     CHAVE_LOCALIZACAO,
     JSON.stringify(localizacao)
   );
 }
 
 export async function obterLocalizacaoSalva() {
-  const localizacaoSalva =
-    await AsyncStorage.getItem(
-      CHAVE_LOCALIZACAO
-    );
+  const localizacao = await obterDado(CHAVE_LOCALIZACAO);
 
-  if (!localizacaoSalva) {
-    return null;
-  }
-
-  return JSON.parse(localizacaoSalva);
+  return localizacao ? JSON.parse(localizacao) : null;
 }
 
 export async function removerLocalizacao() {
-  await AsyncStorage.removeItem(
-    CHAVE_LOCALIZACAO
-  );
+  await removerDado(CHAVE_LOCALIZACAO);
 }
 
-// PERFIL LOCAL — foto e localização
+// PERFIL LOCAL
 
 export async function limparPerfilLocal() {
   await Promise.all([
@@ -107,7 +117,7 @@ export async function limparPerfilLocal() {
   ]);
 }
 
-// SESSÃO — remove autenticação e dados locais do perfil
+// SESSÃO
 
 export async function limparSessao() {
   await Promise.all([
